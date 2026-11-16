@@ -65,7 +65,7 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
           </span>
           <span className="min-w-0">
             <span className="block text-sm sm:text-base font-bold leading-tight truncate">
-              Doboku Lab
+              土木の学び舎
             </span>
             <span className="hidden sm:block text-[11px] app-text-muted leading-tight truncate">
               土木工学インタラクティブ学習ポータル

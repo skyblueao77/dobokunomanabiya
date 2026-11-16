@@ -50,8 +50,11 @@ export const PortalHome: React.FC<PortalHomeProps> = ({ progress, onOpenUnit }) 
       <section className="app-surface rounded-2xl p-6 sm:p-8 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
-            <h1 id="main-content" tabIndex={-1} className="portal-h1 font-bold tracking-tight">
+            <p className="text-xs font-semibold tracking-wider text-blue-700 dark:text-blue-400">
               土木工学インタラクティブ学習ポータル
+            </p>
+            <h1 id="main-content" tabIndex={-1} className="portal-h1 font-bold tracking-tight">
+              土木の学び舎
             </h1>
             <p className="text-sm sm:text-base app-text-muted leading-relaxed">
               日本の大学・高専の土木系カリキュラム（圧縮正規約の土質力学・構造力学・水理学）に準拠した、ブラウザ完結型の図解・計算シミュレーター集です。URL共有と学習進捗保存に対応し、オフライン環境でも動作します。

@@ -59,12 +59,12 @@ export function App() {
   // SPA document title update on route change (WCAG 2.4.2)
   useEffect(() => {
     if (route === 'home') {
-      document.title = 'Doboku Lab | 土木工学インタラクティブ学習ポータル';
+      document.title = '土木の学び舎｜土木工学インタラクティブ学習ポータル';
     } else {
       const unit = LEARNING_UNITS.find((u) => u.id === route);
       document.title = unit
-        ? `${unit.title} | Doboku Lab`
-        : 'Doboku Lab | 土木工学インタラクティブ学習ポータル';
+        ? `${unit.title}｜土木の学び舎`
+        : '土木の学び舎｜土木工学インタラクティブ学習ポータル';
     }
   }, [route]);
 
@@ -172,7 +172,7 @@ export function App() {
 
       <footer className="border-t border-[var(--border-subtle)] py-5 px-4 sm:px-6 text-xs app-text-muted">
         <div className="mx-auto max-w-7xl flex flex-wrap items-center justify-between gap-2">
-          <span>Doboku Lab — 土木工学インタラクティブ学習ポータル（クライアント完結型・Cloudflare Pages 対応）</span>
+          <span>土木の学び舎 — 土木工学インタラクティブ学習ポータル（クライアント完結型・Cloudflare 対応）</span>
           <span>日本の大学・高専 教科書準拠（土質力学：圧縮正）</span>
         </div>
       </footer>

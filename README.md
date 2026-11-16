@@ -1,6 +1,6 @@
-# Doboku Lab｜土木工学インタラクティブ学習ポータル
+# 土木の学び舎｜土木工学インタラクティブ学習ポータル
 
-日本の土木系大学生・高専生向けのクライアント完結型インタラクティブ学習Webアプリケーションです。
+日本の土木系大学生・高専生向けのクライアント完結型インタラクティブ学習Webアプリケーション「土木の学び舎」です。
 
 ## 収録単元
 - **土質力学**: モールの応力円・モール・クーロンの破壊規準・有効応力（圧縮正規約準拠、実空間微小土要素連動、KaTeX途中式、オリジナル演習3問）
@@ -17,8 +17,7 @@ npm run lint     # oxlint チェック
 npm run build    # TypeScript型チェック + 本番ビルド
 ```
 
-## Cloudflare Pages デプロイ設定
-- **Framework preset**: `Vite`
+## Cloudflare デプロイ設定
 - **Build command**: `npm run build`
-- **Build output directory**: `dist`
+- **Build output directory**: `dist`（[wrangler.jsonc](./wrangler.jsonc) で `./dist` を指定済み）
 - **Node.js version**: `20` 以上（推奨: `22` または `24`）
