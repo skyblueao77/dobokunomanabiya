@@ -1,0 +1,10 @@
+{
+  "name": "Doboku Lab | 土木工学インタラクティブ学習ポータル",
+  "short_name": "Doboku Lab",
+  "description": "日本の土木系大学生・高専生向けのインタラクティブ学習ポータル（土質力学・構造力学・水理学）",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#1d4ed8",
+  "lang": "ja"
+}

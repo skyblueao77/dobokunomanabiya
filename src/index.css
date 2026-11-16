@@ -1,0 +1,311 @@
+@import "tailwindcss";
+@import "katex/dist/katex.min.css";
+
+/* ==========================================================================
+   Modern Web Guidance: Color Scheme, Tokens, Accessibility & Responsive Base
+   ========================================================================== */
+:root {
+  color-scheme: light dark;
+
+  --surface-page-light: #f8fafc;
+  --surface-page-dark: #0b1120;
+  --surface-card-light: #ffffff;
+  --surface-card-dark: #111a2e;
+  --surface-subtle-light: #f1f5f9;
+  --surface-subtle-dark: #19243d;
+
+  --text-primary-light: #0f172a;
+  --text-primary-dark: #f1f5f9;
+  --text-muted-light: #475569;
+  --text-muted-dark: #94a3b8;
+
+  --border-subtle-light: #cbd5e1;
+  --border-subtle-dark: #334155;
+
+  --brand-accent-light: #1d4ed8;
+  --brand-accent-dark: #60a5fa;
+
+  --surface-page: var(--surface-page-light);
+  --surface-card: var(--surface-card-light);
+  --surface-subtle: var(--surface-subtle-light);
+  --text-primary: var(--text-primary-light);
+  --text-muted: var(--text-muted-light);
+  --border-subtle: var(--border-subtle-light);
+  --accent-color: var(--brand-accent-light);
+
+  --target-size: 24px;
+  --scrollbar-track: #e2e8f0;
+  --scrollbar-thumb: #64748b;
+
+  &:has(> head > meta[name="color-scheme"][content="dark"]) {
+    color-scheme: dark;
+  }
+  &:has(> head > meta[name="color-scheme"][content="light"]) {
+    color-scheme: light;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(:has(> head > meta[name="color-scheme"][content="light"])) {
+    --surface-page: var(--surface-page-dark);
+    --surface-card: var(--surface-card-dark);
+    --surface-subtle: var(--surface-subtle-dark);
+    --text-primary: var(--text-primary-dark);
+    --text-muted: var(--text-muted-dark);
+    --border-subtle: var(--border-subtle-dark);
+    --accent-color: var(--brand-accent-dark);
+    --scrollbar-track: #1e293b;
+    --scrollbar-thumb: #64748b;
+  }
+}
+
+@supports (color: light-dark(white, black)) {
+  :root {
+    --surface-page: light-dark(var(--surface-page-light), var(--surface-page-dark));
+    --surface-card: light-dark(var(--surface-card-light), var(--surface-card-dark));
+    --surface-subtle: light-dark(var(--surface-subtle-light), var(--surface-subtle-dark));
+    --text-primary: light-dark(var(--text-primary-light), var(--text-primary-dark));
+    --text-muted: light-dark(var(--text-muted-light), var(--text-muted-dark));
+    --border-subtle: light-dark(var(--border-subtle-light), var(--border-subtle-dark));
+    --accent-color: light-dark(var(--brand-accent-light), var(--brand-accent-dark));
+    --scrollbar-track: light-dark(#e2e8f0, #1e293b);
+    --scrollbar-thumb: light-dark(#64748b, #94a3b8);
+  }
+}
+
+/* Explicit theme override must come last so it overrides both @media and @supports(light-dark) */
+:root:has(> head > meta[name="color-scheme"][content="dark"]) {
+  color-scheme: dark;
+  --surface-page: var(--surface-page-dark);
+  --surface-card: var(--surface-card-dark);
+  --surface-subtle: var(--surface-subtle-dark);
+  --text-primary: var(--text-primary-dark);
+  --text-muted: var(--text-muted-dark);
+  --border-subtle: var(--border-subtle-dark);
+  --accent-color: var(--brand-accent-dark);
+  --scrollbar-track: #1e293b;
+  --scrollbar-thumb: #64748b;
+}
+
+:root:has(> head > meta[name="color-scheme"][content="light"]) {
+  color-scheme: light;
+  --surface-page: var(--surface-page-light);
+  --surface-card: var(--surface-card-light);
+  --surface-subtle: var(--surface-subtle-light);
+  --text-primary: var(--text-primary-light);
+  --text-muted: var(--text-muted-light);
+  --border-subtle: var(--border-subtle-light);
+  --accent-color: var(--brand-accent-light);
+  --scrollbar-track: #e2e8f0;
+  --scrollbar-thumb: #64748b;
+}
+
+@media (pointer: coarse) {
+  :root {
+    --target-size: 44px;
+  }
+}
+
+@layer base {
+  html {
+    accent-color: var(--accent-color);
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    scroll-padding-top: 5rem;
+  }
+
+  body {
+    background-color: var(--surface-page);
+    color: var(--text-primary);
+    font-family: "Inter", "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+    line-height: 1.5;
+    text-align: start;
+    overflow-wrap: anywhere;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p,
+  li {
+    text-wrap: pretty;
+  }
+
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid CanvasText;
+    outline-offset: 3px;
+  }
+
+  :where(button, select, input:not([type="checkbox"], [type="radio"], [type="range"]), [role="button"], nav a) {
+    min-block-size: var(--target-size);
+    min-inline-size: var(--target-size);
+  }
+
+  .font-mono-num {
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Visually hidden utility (accessible skip links & SR context) */
+.visually-hidden:where(:not(:focus-within, :active)) {
+  position: absolute !important;
+  clip-path: inset(50%) !important;
+  overflow: hidden !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  white-space: nowrap !important;
+}
+
+.skip-link:focus-visible {
+  position: fixed;
+  inset-block-start: 0.75rem;
+  inset-inline-start: 0.75rem;
+  z-index: 100;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  background-color: var(--surface-card);
+  color: var(--text-primary);
+  border: 2px solid var(--accent-color);
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+/* Surface & border tokens for React components */
+.app-surface {
+  background-color: var(--surface-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+}
+
+.app-surface-subtle {
+  background-color: var(--surface-subtle);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+}
+
+.app-text-muted {
+  color: var(--text-muted);
+}
+
+/* Native interaction feedback */
+.interactive-btn {
+  transition: box-shadow 150ms ease-out, scale 150ms ease-out;
+}
+.interactive-btn:hover {
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.14);
+}
+.interactive-btn:active {
+  scale: 0.97;
+}
+
+/* Scrollable single-row tablist */
+.tab-scroller {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: inline proximity;
+  scrollbar-width: none;
+  gap: 0.25rem;
+}
+.tab-scroller::-webkit-scrollbar {
+  display: none;
+}
+.tab-item {
+  position: relative;
+  flex: none;
+  scroll-snap-align: start;
+  min-block-size: max(var(--target-size), 2.5rem);
+}
+.tab-item[aria-selected="true"] {
+  color: var(--accent-color);
+  font-weight: 700;
+}
+.tab-item[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  border-block-end: 3px solid var(--accent-color);
+}
+
+/* Current page indicator in navigation (non-color-only shape + contrast) */
+.nav-link-item[aria-current="page"] {
+  color: var(--accent-color);
+  font-weight: 700;
+  position: relative;
+}
+.nav-link-item[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0.5rem;
+  inset-block-end: 0;
+  border-block-end: 3px solid var(--accent-color);
+}
+
+/* Popover styling with polyfill compatibility */
+[popover]:is(:popover-open, .\:popover-open) {
+  display: block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .popover-panel:is(:popover-open, .\:popover-open) {
+    animation: popover-fade-in 150ms ease-out both;
+  }
+  @keyframes popover-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px) scale(0.98);
+    }
+  }
+}
+
+/* Container query for responsive portal unit cards */
+.unit-card-wrapper {
+  container-type: inline-size;
+}
+
+.unit-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .unit-card-body {
+    flex-direction: column;
+  }
+}
+
+@supports (container-type: inline-size) {
+  @container (min-width: 340px) {
+    .unit-card-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+  }
+}
+
+/* Forced Colors Mode support */
+@media (forced-colors: active) {
+  .tab-item[aria-selected="true"]::after,
+  .nav-link-item[aria-current="page"]::after {
+    border-block-end-color: Highlight;
+  }
+  .app-surface,
+  .app-surface-subtle {
+    border-color: ButtonBorder;
+  }
+}
+
+/* Fluid heading scale */
+.portal-h1 {
+  font-size: clamp(1.25rem, 1.05rem + 1vw, 1.75rem);
+  line-height: 1.25;
+}

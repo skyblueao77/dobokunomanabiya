@@ -1,0 +1,223 @@
+import React, { useMemo, useState } from 'react';
+import { ArrowLeft, CheckCircle2, RotateCcw } from 'lucide-react';
+import { calculateOpenChannelFlow, type ChannelInputs } from '../../utils/civilPhysics';
+import { SliderInput } from '../SliderInput';
+import { MathFormula } from '../MathFormula';
+
+const DEFAULT_CHANNEL: ChannelInputs = {
+  bottomWidth: 2.0,
+  depth: 1.0,
+  sideSlope: 1.0,
+  slopeRatio: 0.001,
+  roughness: 0.015,
+};
+
+interface OpenChannelModuleProps {
+  isCompleted: boolean;
+  onToggleUnitComplete: () => void;
+  onBackToPortal: () => void;
+}
+
+export const OpenChannelModule: React.FC<OpenChannelModuleProps> = ({
+  isCompleted,
+  onToggleUnitComplete,
+  onBackToPortal,
+}) => {
+  const [inputs, setInputs] = useState<ChannelInputs>(DEFAULT_CHANNEL);
+  const res = useMemo(() => calculateOpenChannelFlow(inputs), [inputs]);
+
+  const cx = 240;
+  const bottomY = 200;
+  const scale = 32;
+  const bPx = inputs.bottomWidth * scale;
+  const hPx = inputs.depth * scale;
+  const sidePx = inputs.sideSlope * inputs.depth * scale;
+  const wallH = Math.max(hPx + 24, 90);
+  const wallSide = inputs.sideSlope * (wallH / scale) * scale;
+
+  return (
+    <div className="space-y-6">
+      <div className="app-surface rounded-xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="space-y-1">
+          <button
+            type="button"
+            onClick={onBackToPortal}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 dark:text-blue-400 hover:underline cursor-pointer"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+            ポータル一覧に戻る
+          </button>
+          <h1 id="main-content" tabIndex={-1} className="portal-h1 font-bold">
+            水理学｜開水路等流・マニングの公式
+          </h1>
+          <p className="text-xs sm:text-sm app-text-muted">
+            台形・長方形断面の通水断面積 A、潤辺 P、径深 R、平均流速 v、流量 Q、フルード数 Fr をリアルタイム計算します。
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setInputs(DEFAULT_CHANNEL)}
+            className="interactive-btn app-surface inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer"
+          >
+            <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+            初期値
+          </button>
+          <button
+            type="button"
+            aria-pressed={isCompleted}
+            onClick={onToggleUnitComplete}
+            className={`interactive-btn inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold border cursor-pointer ${
+              isCompleted
+                ? 'bg-emerald-600 text-white border-emerald-700'
+                : 'app-surface'
+            }`}
+          >
+            <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+            {isCompleted ? '単元完了済み' : 'この単元を完了にする'}
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <aside className="lg:col-span-4 app-surface rounded-xl p-4 space-y-4">
+          <h2 className="text-sm font-bold border-b border-[var(--border-subtle)] pb-2">
+            水路断面・水理定数
+          </h2>
+          <SliderInput
+            label="底幅"
+            symbol="B"
+            unit="m"
+            value={inputs.bottomWidth}
+            min={0.5}
+            max={6}
+            step={0.1}
+            onChange={(v) => setInputs((p) => ({ ...p, bottomWidth: v }))}
+          />
+          <SliderInput
+            label="水深"
+            symbol="h"
+            unit="m"
+            value={inputs.depth}
+            min={0.2}
+            max={3}
+            step={0.05}
+            onChange={(v) => setInputs((p) => ({ ...p, depth: v }))}
+          />
+          <SliderInput
+            label="法面勾配 (1:m)"
+            symbol="m"
+            unit="-"
+            value={inputs.sideSlope}
+            min={0}
+            max={2.5}
+            step={0.25}
+            onChange={(v) => setInputs((p) => ({ ...p, sideSlope: v }))}
+          />
+          <SliderInput
+            label="水路勾配"
+            symbol="I"
+            unit="-"
+            value={inputs.slopeRatio}
+            min={0.0005}
+            max={0.02}
+            step={0.0005}
+            onChange={(v) => setInputs((p) => ({ ...p, slopeRatio: v }))}
+          />
+          <SliderInput
+            label="粗度係数"
+            symbol="n"
+            unit="-"
+            value={inputs.roughness}
+            min={0.01}
+            max={0.04}
+            step={0.001}
+            onChange={(v) => setInputs((p) => ({ ...p, roughness: v }))}
+          />
+        </aside>
+
+        <div className="lg:col-span-8 space-y-6">
+          <div className="app-surface rounded-xl overflow-hidden">
+            <div className="app-surface-subtle border-x-0 border-t-0 px-4 py-2.5 flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-sm font-semibold">水路横断面図</h2>
+              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30">
+                {res.regime} (Fr = {res.froudeNumber})
+              </span>
+            </div>
+
+            <svg
+              viewBox="0 0 480 240"
+              className="w-full h-auto block select-none"
+              role="img"
+              aria-label="開水路断面の可視化"
+            >
+              {/* 水域 */}
+              <polygon
+                points={`${cx - bPx / 2 - sidePx},${bottomY - hPx} ${cx + bPx / 2 + sidePx},${
+                  bottomY - hPx
+                } ${cx + bPx / 2},${bottomY} ${cx - bPx / 2},${bottomY}`}
+                fill="rgba(59, 130, 246, 0.25)"
+                stroke="#2563eb"
+                strokeWidth="2"
+              />
+              {/* 水路枠 */}
+              <polyline
+                points={`${cx - bPx / 2 - wallSide},${bottomY - wallH} ${cx - bPx / 2},${bottomY} ${
+                  cx + bPx / 2
+                },${bottomY} ${cx + bPx / 2 + wallSide},${bottomY - wallH}`}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+              />
+              <text
+                x={cx}
+                y={bottomY + 20}
+                textAnchor="middle"
+                className="text-xs font-bold fill-current font-mono-num"
+              >
+                底幅 B = {inputs.bottomWidth} m / 水面幅 T = {res.topWidth} m
+              </text>
+              <text
+                x={cx}
+                y={bottomY - hPx / 2 + 4}
+                textAnchor="middle"
+                className="text-xs font-bold fill-blue-700 dark:fill-blue-300 font-mono-num"
+              >
+                h = {inputs.depth} m (A = {res.area} m²)
+              </text>
+            </svg>
+          </div>
+
+          <section className="app-surface rounded-xl p-4 space-y-3">
+            <h2 className="text-sm font-semibold">マニングの公式と流況計算</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+              <div className="app-surface-subtle rounded-lg p-3">
+                <MathFormula
+                  block
+                  math={`R = \\frac{A}{P} = \\frac{${res.area}}{${res.wettedPerimeter}} = ${res.hydraulicRadius}\\text{ m}`}
+                />
+                <MathFormula
+                  block
+                  math={`v = \\frac{1}{n}R^{2/3}I^{1/2} = ${res.velocity}\\text{ m/s}`}
+                />
+              </div>
+              <div className="app-surface-subtle rounded-lg p-3">
+                <MathFormula
+                  block
+                  math={`Q = A \\cdot v = ${res.area} \\times ${res.velocity} = ${res.discharge}\\text{ m}^3/\\text{s}`}
+                />
+                <MathFormula
+                  block
+                  math={`Fr = \\frac{v}{\\sqrt{g(A/T)}} = ${res.froudeNumber}`}
+                />
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default OpenChannelModule;
