@@ -16,11 +16,15 @@ const MohrCircleModule = lazy(() => import('./components/modules/MohrCircleModul
 const RankineEarthModule = lazy(() => import('./components/modules/RankineEarthModule'));
 const BeamDiagramModule = lazy(() => import('./components/modules/BeamDiagramModule'));
 const OpenChannelModule = lazy(() => import('./components/modules/OpenChannelModule'));
+const LegalPage = lazy(() => import('./components/LegalPage'));
 
-type Route = 'home' | UnitId;
+type Route = 'home' | 'legal' | UnitId;
 
 function parseRouteFromHash(): Route {
   const hash = window.location.hash;
+  if (hash === '#/legal' || hash.startsWith('#/legal?')) {
+    return 'legal';
+  }
   if (hash.startsWith('#/unit/')) {
     const rawId = hash.slice('#/unit/'.length).split('?')[0] as UnitId;
     if (LEARNING_UNITS.some((u) => u.id === rawId)) {
@@ -60,6 +64,8 @@ export function App() {
   useEffect(() => {
     if (route === 'home') {
       document.title = '土木の学び舎｜土木工学インタラクティブ学習ポータル';
+    } else if (route === 'legal') {
+      document.title = '利用規約・免責事項・プライバシーポリシー｜土木の学び舎';
     } else {
       const unit = LEARNING_UNITS.find((u) => u.id === route);
       document.title = unit
@@ -72,6 +78,8 @@ export function App() {
     setRoute(nextRoute);
     if (nextRoute === 'home') {
       window.location.hash = '#/';
+    } else if (nextRoute === 'legal') {
+      window.location.hash = '#/legal';
     } else {
       if (!window.location.hash.startsWith(`#/unit/${nextRoute}`)) {
         window.location.hash = `#/unit/${nextRoute}`;
@@ -166,6 +174,7 @@ export function App() {
                 onBackToPortal={() => navigate('home')}
               />
             )}
+            {route === 'legal' && <LegalPage onBackToPortal={() => navigate('home')} />}
           </Suspense>
         </ErrorBoundary>
       </main>
@@ -173,7 +182,16 @@ export function App() {
       <footer className="border-t border-[var(--border-subtle)] py-5 px-4 sm:px-6 text-xs app-text-muted">
         <div className="mx-auto max-w-7xl flex flex-wrap items-center justify-between gap-2">
           <span>土木の学び舎 — 土木工学インタラクティブ学習ポータル（クライアント完結型・Cloudflare 対応）</span>
-          <span>日本の大学・高専 教科書準拠（土質力学：圧縮正）</span>
+          <div className="flex flex-wrap items-center gap-4">
+            <span>日本の大学・高専 教科書準拠（土質力学：圧縮正）</span>
+            <button
+              type="button"
+              onClick={() => navigate('legal')}
+              className="underline hover:text-[var(--text-primary)] cursor-pointer"
+            >
+              利用規約・免責事項・プライバシーポリシー・技術者倫理
+            </button>
+          </div>
         </div>
       </footer>
     </div>
