@@ -1,6 +1,7 @@
 export type SubjectId = 'all' | 'soil' | 'structural' | 'hydraulics';
 
 export type UnitId =
+  | 'geomechanics-continuum'
   | 'mohr-circle'
   | 'rankine-earth-pressure'
   | 'beam-sfd-bmd'
@@ -46,6 +47,17 @@ export const SUBJECTS: SubjectMeta[] = [
 ];
 
 export const LEARNING_UNITS: LearningUnit[] = [
+  {
+    id: 'geomechanics-continuum',
+    subjectId: 'soil',
+    title: '地盤の応力と変形（連続体力学〜弾性地盤）',
+    subtitle:
+      '多次元応力・コーシーの公式・主応力と不変量・モールの応力円と用極法・弾性地盤内の応力（Boussinesq/重ね合わせ）と変形（全6章）',
+    level: '重要単元',
+    estimatedMinutes: 60,
+    tags: ['応力テンソル', 'コーシーの公式', '主応力・不変量', '用極法', 'Boussinesq', '演習12問'],
+    hasPracticeSet: true,
+  },
   {
     id: 'mohr-circle',
     subjectId: 'soil',

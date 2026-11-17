@@ -12,6 +12,9 @@ import { PortalHeader } from './components/PortalHeader';
 import { PortalHome } from './components/PortalHome';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
+const GeomechanicsCourseModule = lazy(
+  () => import('./components/modules/GeomechanicsCourseModule')
+);
 const MohrCircleModule = lazy(() => import('./components/modules/MohrCircleModule'));
 const RankineEarthModule = lazy(() => import('./components/modules/RankineEarthModule'));
 const BeamDiagramModule = lazy(() => import('./components/modules/BeamDiagramModule'));
@@ -125,6 +128,30 @@ export function App() {
     });
   };
 
+  const toggleContinuumExerciseDone = (exerciseId: string) => {
+    setProgress((prev) => {
+      const exists = prev.completedContinuumExerciseIds.includes(exerciseId);
+      const completedContinuumExerciseIds = exists
+        ? prev.completedContinuumExerciseIds.filter((id) => id !== exerciseId)
+        : [...prev.completedContinuumExerciseIds, exerciseId];
+      const updated = { ...prev, completedContinuumExerciseIds };
+      saveStudyProgress(updated);
+      return updated;
+    });
+  };
+
+  const markContinuumExerciseDone = (exerciseId: string) => {
+    setProgress((prev) => {
+      if (prev.completedContinuumExerciseIds.includes(exerciseId)) return prev;
+      const updated = {
+        ...prev,
+        completedContinuumExerciseIds: [...prev.completedContinuumExerciseIds, exerciseId],
+      };
+      saveStudyProgress(updated);
+      return updated;
+    });
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <PortalHeader
@@ -147,6 +174,17 @@ export function App() {
             {route === 'home' && (
               <PortalHome progress={progress} onOpenUnit={(id) => navigate(id)} />
             )}
+            {route === 'geomechanics-continuum' && (
+              <GeomechanicsCourseModule
+                isCompleted={progress.completedUnits.includes('geomechanics-continuum')}
+                onToggleUnitComplete={() => toggleUnitComplete('geomechanics-continuum')}
+                completedExerciseIds={progress.completedContinuumExerciseIds}
+                onToggleExerciseDone={toggleContinuumExerciseDone}
+                onMarkExerciseDone={markContinuumExerciseDone}
+                onBackToPortal={() => navigate('home')}
+                onOpenUnit={(id) => navigate(id)}
+              />
+            )}
             {route === 'mohr-circle' && (
               <MohrCircleModule
                 isCompleted={progress.completedUnits.includes('mohr-circle')}
@@ -154,6 +192,10 @@ export function App() {
                 completedProblemIds={progress.completedProblemIds}
                 onToggleProblemDone={toggleProblemDone}
                 onBackToPortal={() => navigate('home')}
+                onOpenContinuumCourse={() => {
+                  window.location.hash = '#/unit/geomechanics-continuum?ch=4';
+                  navigate('geomechanics-continuum');
+                }}
               />
             )}
             {route === 'rankine-earth-pressure' && (

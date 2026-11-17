@@ -52,6 +52,7 @@ interface MohrCircleModuleProps {
   completedProblemIds: number[];
   onToggleProblemDone: (id: number) => void;
   onBackToPortal: () => void;
+  onOpenContinuumCourse?: () => void;
 }
 
 export const MohrCircleModule: React.FC<MohrCircleModuleProps> = ({
@@ -60,6 +61,7 @@ export const MohrCircleModule: React.FC<MohrCircleModuleProps> = ({
   completedProblemIds,
   onToggleProblemDone,
   onBackToPortal,
+  onOpenContinuumCourse,
 }) => {
   const [inputs, setInputs] = useState<MohrInputs>(() => parseInitialInputs());
 
@@ -106,14 +108,25 @@ export const MohrCircleModule: React.FC<MohrCircleModuleProps> = ({
       {/* 単元ヘッダー・アクションバー */}
       <div className="app-surface rounded-xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-1">
-          <button
-            type="button"
-            onClick={onBackToPortal}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 dark:text-blue-400 hover:underline cursor-pointer"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-            ポータル一覧に戻る
-          </button>
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={onBackToPortal}
+              className="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 dark:text-blue-400 hover:underline cursor-pointer"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+              ポータル一覧に戻る
+            </button>
+            {onOpenContinuumCourse && (
+              <button
+                type="button"
+                onClick={onOpenContinuumCourse}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300 hover:underline cursor-pointer"
+              >
+                一般応力・用極法（応力と変形コース 第4章）へ →
+              </button>
+            )}
+          </div>
           <h1 id="main-content" tabIndex={-1} className="portal-h1 font-bold">
             土質力学｜モールの応力円・破壊規準
           </h1>

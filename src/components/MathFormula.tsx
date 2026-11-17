@@ -27,7 +27,9 @@ export const MathFormula: React.FC<MathFormulaProps> = ({
   return (
     <span
       className={`${
-        block ? 'block my-2 max-w-full overflow-x-auto text-[0.92rem]' : 'inline-block max-w-full overflow-x-auto align-middle'
+        block
+          ? 'block my-2 max-w-full overflow-x-auto overflow-y-hidden text-[0.92rem]'
+          : 'inline align-baseline'
       } ${className}`}
       dangerouslySetInnerHTML={{ __html: html }}
     />

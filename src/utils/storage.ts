@@ -5,12 +5,14 @@ const PROGRESS_KEY = 'dobokunomanabiya-progress-v1';
 export interface StudyProgress {
   completedUnits: UnitId[];
   completedProblemIds: number[];
+  completedContinuumExerciseIds: string[];
   lastVisitedUnit: UnitId | null;
 }
 
 const DEFAULT_PROGRESS: StudyProgress = {
   completedUnits: [],
   completedProblemIds: [],
+  completedContinuumExerciseIds: [],
   lastVisitedUnit: null,
 };
 
@@ -23,6 +25,9 @@ export function loadStudyProgress(): StudyProgress {
       completedUnits: Array.isArray(parsed.completedUnits) ? parsed.completedUnits : [],
       completedProblemIds: Array.isArray(parsed.completedProblemIds)
         ? parsed.completedProblemIds
+        : [],
+      completedContinuumExerciseIds: Array.isArray(parsed.completedContinuumExerciseIds)
+        ? parsed.completedContinuumExerciseIds
         : [],
       lastVisitedUnit: parsed.lastVisitedUnit ?? null,
     };

@@ -35,7 +35,9 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
     ...LEARNING_UNITS.map((u) => ({
       id: u.id,
       label:
-        u.id === 'mohr-circle'
+        u.id === 'geomechanics-continuum'
+          ? '応力と変形'
+          : u.id === 'mohr-circle'
           ? 'モールの応力円'
           : u.id === 'rankine-earth-pressure'
           ? 'ランキン土圧'
