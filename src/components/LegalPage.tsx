@@ -85,6 +85,15 @@ export default function LegalPage({ onBackToPortal }: LegalPageProps) {
         </div>
 
         <div className="space-y-3 text-sm leading-relaxed">
+          <div className="app-notice-banner rounded-lg p-4 space-y-1.5">
+            <p className="font-bold app-notice-accent">
+              開発中（WIP）のお知らせ：本サイトには多くの間違いが存在します
+            </p>
+            <p>
+              本サイトは現在開発中の試作・学習支援サイトであり、掲載されている解説文、数式、計算ロジック、数値結果、グラフ・図解および演習問題の解答には<strong>多くの誤りや未検証の記述</strong>が含まれています。必ず大学・高専の教科書や公的基準と照合のうえ、補助的な参考資料としてのみご利用ください。
+            </p>
+          </div>
+
           <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 space-y-1.5">
             <p className="font-bold text-amber-700 dark:text-amber-300">
               重要：教育・学習目的限定（実務設計・施工への使用禁止）
@@ -99,6 +108,10 @@ export default function LegalPage({ onBackToPortal }: LegalPageProps) {
           </div>
 
           <ul className="list-disc pl-5 space-y-2 app-text-muted">
+            <li>
+              <strong className="text-[var(--text-primary)]">開発途上の品質と誤りの存在：</strong>
+              本サイトは継続的な開発・検証の途上にあり、物理式・境界条件・符号規約・表示文言・数値計算の実装に多数の誤りが残存している可能性があります。内容の正確性・完全性・最新性は一切保証されません。
+            </li>
             <li>
               <strong className="text-[var(--text-primary)]">モデルの単純化と計算精度：</strong>
               本サイトのシミュレーションは教育上の分かりやすさを優先し、一様地盤・理想弾塑性体・定常流などの単純化された仮定に基づいています。また、数値計算上の丸め誤差やプログラム上の不具合等により、厳密解や実際の物理現象と異なる結果が生じる場合があります。

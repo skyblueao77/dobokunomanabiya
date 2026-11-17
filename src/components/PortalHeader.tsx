@@ -66,11 +66,16 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
             <Compass className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
           </span>
           <span className="min-w-0">
-            <span className="block text-sm sm:text-base font-bold leading-tight truncate">
-              土木の学び舎
+            <span className="flex items-center gap-1.5 min-w-0">
+              <span className="text-sm sm:text-base font-bold leading-tight truncate">
+                土木の学び舎
+              </span>
+              <span className="app-notice-badge shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold leading-none">
+                開発中
+              </span>
             </span>
             <span className="hidden sm:block text-[11px] app-text-muted leading-tight truncate">
-              土木工学インタラクティブ学習ポータル
+              土木工学インタラクティブ学習ポータル（制作途上・誤りを含む可能性あり）
             </span>
           </span>
         </a>

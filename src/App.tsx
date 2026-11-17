@@ -11,6 +11,7 @@ import {
 import { PortalHeader } from './components/PortalHeader';
 import { PortalHome } from './components/PortalHome';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { WipNoticeBanner } from './components/WipNoticeBanner';
 
 const GeomechanicsCourseModule = lazy(
   () => import('./components/modules/GeomechanicsCourseModule')
@@ -162,6 +163,10 @@ export function App() {
       />
 
       <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 py-6">
+        <WipNoticeBanner
+          showDisclaimerLink={route !== 'legal'}
+          onOpenDisclaimer={() => navigate('legal')}
+        />
         <ErrorBoundary onReset={() => navigate('home')}>
           <Suspense
             fallback={
@@ -226,7 +231,9 @@ export function App() {
 
       <footer className="border-t border-[var(--border-subtle)] py-5 px-4 sm:px-6 text-xs app-text-muted">
         <div className="mx-auto max-w-7xl flex flex-wrap items-center justify-between gap-2">
-          <span>土木の学び舎 — 土木工学インタラクティブ学習ポータル（クライアント完結型・Cloudflare 対応）</span>
+          <span>
+            土木の学び舎 — 土木工学インタラクティブ学習ポータル（現在開発中・多くの誤りを含む可能性あり）
+          </span>
           <div className="flex flex-wrap items-center gap-4">
             <span>日本の大学・高専 教科書準拠（土質力学：圧縮正）</span>
             <button
