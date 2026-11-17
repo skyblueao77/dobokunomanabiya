@@ -1,10 +1,33 @@
 {
+  "id": "/",
   "name": "土木の学び舎｜土木工学インタラクティブ学習ポータル",
   "short_name": "土木の学び舎",
   "description": "日本の土木系大学生・高専生向けのインタラクティブ学習ポータル「土木の学び舎」（土質力学・構造力学・水理学）",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#f8fafc",
   "theme_color": "#1d4ed8",
-  "lang": "ja"
+  "lang": "ja",
+  "categories": ["education", "utilities"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }

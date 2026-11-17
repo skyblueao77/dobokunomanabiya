@@ -132,6 +132,11 @@ export const PortalHome: React.FC<PortalHomeProps> = ({ progress, onOpenUnit }) 
           </div>
         </div>
 
+        <p role="status" aria-live="polite" className="text-xs app-text-muted">
+          表示中の単元：<span className="font-mono-num font-semibold">{filteredUnits.length}</span> 件
+          {query.trim() ? `（「${query.trim()}」で絞り込み中）` : ''}
+        </p>
+
         {/* 単元カードグリッド */}
         {filteredUnits.length === 0 ? (
           <div className="app-surface rounded-xl p-8 text-center text-sm app-text-muted">
