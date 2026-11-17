@@ -1,4 +1,6 @@
-import { ArrowLeft, BookOpen, Lock, Scale, ShieldAlert } from 'lucide-react';
+import { Accessibility, ArrowLeft, BookOpen, ExternalLink, Lock, Scale, ShieldAlert } from 'lucide-react';
+
+const CURRENT_YEAR = new Date().getFullYear();
 
 interface LegalPageProps {
   onBackToPortal: () => void;
@@ -44,29 +46,39 @@ export default function LegalPage({ onBackToPortal }: LegalPageProps) {
             onClick={() => scrollToSection('privacy')}
             className="interactive-btn rounded-md border border-[var(--border-subtle)] px-2.5 py-1 cursor-pointer"
           >
-            プライバシーポリシー
+            プライバシー・外部送信
           </button>
           <button
             type="button"
             onClick={() => scrollToSection('ethics')}
             className="interactive-btn rounded-md border border-[var(--border-subtle)] px-2.5 py-1 cursor-pointer"
           >
-            技術者倫理・学術的誠実性
+            技術者倫理
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToSection('accessibility')}
+            className="interactive-btn rounded-md border border-[var(--border-subtle)] px-2.5 py-1 cursor-pointer"
+          >
+            アクセシビリティ方針
           </button>
         </nav>
       </div>
 
       <header className="app-surface rounded-xl p-6 space-y-2">
-        <h1 className="text-xl sm:text-2xl font-bold">
-          利用規約・免責事項・プライバシーポリシー・技術者倫理
+        <h1 id="main-content" tabIndex={-1} className="text-xl sm:text-2xl font-bold">
+          利用規約・免責事項・プライバシーポリシー・アクセシビリティ方針
         </h1>
         <p className="text-sm app-text-muted">
-          「土木の学び舎」（以下「本サイト」といいます）をご利用いただくにあたり、法的・倫理的な観点から以下の事項をご確認ください。本サイトを利用した時点で、これらの内容に同意したものとみなします。
+          「土木の学び舎」（以下「本サイト」といいます）をご利用いただくにあたり、法的・倫理的・アクセシビリティの観点から以下の事項をご確認ください。本サイトを利用した時点で、これらの内容に同意したものとみなします。
+        </p>
+        <p className="text-xs app-text-muted font-mono-num">
+          制定日：2026年11月16日 ／ 最終改定日：2026年11月16日
         </p>
       </header>
 
       {/* 1. 免責事項 */}
-      <section id="disclaimer" className="app-surface rounded-xl p-6 space-y-4 scroll-mt-6">
+      <section id="disclaimer" className="app-surface rounded-xl p-6 space-y-4 scroll-mt-24">
         <div className="flex items-center gap-2.5 border-b border-[var(--border-subtle)] pb-3">
           <ShieldAlert className="h-5 w-5 text-amber-600 shrink-0" aria-hidden="true" />
           <h2 className="text-lg font-bold">1. 免責事項（実務設計への使用禁止）</h2>
@@ -104,7 +116,7 @@ export default function LegalPage({ onBackToPortal }: LegalPageProps) {
       </section>
 
       {/* 2. 利用規約 */}
-      <section id="terms" className="app-surface rounded-xl p-6 space-y-4 scroll-mt-6">
+      <section id="terms" className="app-surface rounded-xl p-6 space-y-4 scroll-mt-24">
         <div className="flex items-center gap-2.5 border-b border-[var(--border-subtle)] pb-3">
           <Scale className="h-5 w-5 text-blue-600 dark:text-blue-400 shrink-0" aria-hidden="true" />
           <h2 className="text-lg font-bold">2. 利用規約</h2>
@@ -130,11 +142,11 @@ export default function LegalPage({ onBackToPortal }: LegalPageProps) {
         </ul>
       </section>
 
-      {/* 3. プライバシーポリシー */}
-      <section id="privacy" className="app-surface rounded-xl p-6 space-y-4 scroll-mt-6">
+      {/* 3. プライバシーポリシー・外部送信 */}
+      <section id="privacy" className="app-surface rounded-xl p-6 space-y-4 scroll-mt-24">
         <div className="flex items-center gap-2.5 border-b border-[var(--border-subtle)] pb-3">
           <Lock className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0" aria-hidden="true" />
-          <h2 className="text-lg font-bold">3. プライバシーポリシー</h2>
+          <h2 className="text-lg font-bold">3. プライバシーポリシーおよび外部送信について</h2>
         </div>
 
         <ul className="list-disc pl-5 space-y-2 text-sm leading-relaxed app-text-muted">
@@ -144,21 +156,35 @@ export default function LegalPage({ onBackToPortal }: LegalPageProps) {
           </li>
           <li>
             <strong className="text-[var(--text-primary)]">ブラウザ保存領域（localStorage）の利用：</strong>
-            本サイトでは、学習の進捗状況（完了した単元・問題）および画面表示テーマ設定（ライト／ダークモード）を保持するために、お使いのブラウザの <code className="px-1 py-0.5 rounded bg-[var(--surface-subtle)] text-xs">localStorage</code> を使用しています。これらのデータはお客様の端末内にのみ保存され、外部サーバーへ送信されることはありません。ブラウザの設定からいつでも削除可能です。
+            本サイトでは、学習の進捗状況（完了した単元・演習問題：キー <code className="px-1 py-0.5 rounded bg-[var(--surface-subtle)] text-xs">dobokunomanabiya-progress-v1</code> 等）および画面表示テーマ設定（ライト／ダークモード：キー <code className="px-1 py-0.5 rounded bg-[var(--surface-subtle)] text-xs">color-scheme</code>）を保持するために、お使いのブラウザの <code className="px-1 py-0.5 rounded bg-[var(--surface-subtle)] text-xs">localStorage</code> を使用しています。これらのデータはお客様の端末内にのみ保存され、外部サーバーへ送信されることはありません。ブラウザの設定からサイトデータを消去することでいつでも削除可能です。
+          </li>
+          <li>
+            <strong className="text-[var(--text-primary)]">外部サービスへの通信（Google Fonts）：</strong>
+            本サイトでは、数式・日本語の視認性向上のため Google LLC が提供する「Google Fonts」（<code className="px-1 py-0.5 rounded bg-[var(--surface-subtle)] text-xs">fonts.googleapis.com</code> / <code className="px-1 py-0.5 rounded bg-[var(--surface-subtle)] text-xs">fonts.gstatic.com</code>）を利用しています。初回アクセス時等にフォントファイルを取得するため、利用者の IP アドレスやブラウザ情報（User-Agent）が米国 Google LLC のサーバーへ送信されます。送信された情報の取り扱いは{' '}
+            <a
+              href="https://policies.google.com/privacy?hl=ja"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline inline-flex items-center gap-0.5 text-[var(--text-primary)] hover:text-blue-700 dark:hover:text-blue-400"
+            >
+              Google プライバシーポリシー
+              <ExternalLink className="h-3 w-3" aria-hidden="true" />
+            </a>{' '}
+            に従います。
           </li>
           <li>
             <strong className="text-[var(--text-primary)]">Cookie・広告トラッキング：</strong>
-            本サイトは広告配信や行動追跡を目的としたサードパーティ Cookie を使用していません。
+            本サイトは広告配信や行動追跡を目的としたサードパーティ Cookie やアクセス解析タグを使用していません。
           </li>
           <li>
-            <strong className="text-[var(--text-primary)]">ホスティング基盤におけるログ：</strong>
+            <strong className="text-[var(--text-primary)]">ホスティング基盤における通信ログ：</strong>
             本サイトの配信には Cloudflare 等の静的ホスティング基盤を利用しており、インフラ提供者のセキュリティおよび安定運用のため、アクセス元の IP アドレス等の標準的な通信ログが処理される場合があります。
           </li>
         </ul>
       </section>
 
       {/* 4. 技術者倫理・学術的誠実性 */}
-      <section id="ethics" className="app-surface rounded-xl p-6 space-y-4 scroll-mt-6">
+      <section id="ethics" className="app-surface rounded-xl p-6 space-y-4 scroll-mt-24">
         <div className="flex items-center gap-2.5 border-b border-[var(--border-subtle)] pb-3">
           <BookOpen className="h-5 w-5 text-indigo-600 dark:text-indigo-400 shrink-0" aria-hidden="true" />
           <h2 className="text-lg font-bold">4. 技術者倫理と学術的誠実性</h2>
@@ -177,24 +203,58 @@ export default function LegalPage({ onBackToPortal }: LegalPageProps) {
               <strong className="text-[var(--text-primary)]">学術的誠実性（Academic Integrity）：</strong>
               本サイトの計算機能や演習解説は、自らの理解を深めるための補助教材として提供されています。学校の課題や試験において、理解を伴わないまま結果を転記する等の不正行為には使用しないでください。
             </li>
+          </ul>
+        </div>
+      </section>
+
+      {/* 5. ウェブアクセシビリティ方針 */}
+      <section id="accessibility" className="app-surface rounded-xl p-6 space-y-4 scroll-mt-24">
+        <div className="flex items-center gap-2.5 border-b border-[var(--border-subtle)] pb-3">
+          <Accessibility className="h-5 w-5 text-blue-700 dark:text-blue-400 shrink-0" aria-hidden="true" />
+          <h2 className="text-lg font-bold">5. ウェブアクセシビリティ方針（合理的配慮）</h2>
+        </div>
+
+        <div className="space-y-3 text-sm leading-relaxed app-text-muted">
+          <p>
+            「土木の学び舎」は、改正障害者差別解消法の趣旨および日本産業規格（JIS X 8341-3:2016）ならびに国際規格 WCAG 2.2（ISO/IEC 40500:2025）の考え方を踏まえ、年齢や障害の有無、利用環境にかかわらず誰もが土木工学を学べるウェブサイトの実現を目指しています。
+          </p>
+          <ul className="list-disc pl-5 space-y-2">
             <li>
-              <strong className="text-[var(--text-primary)]">アクセシビリティへの配慮：</strong>
-              年齢、障害の有無、利用環境にかかわらず誰もが学びやすいよう、キーボード操作や配色コントラスト等のアクセシビリティ向上に努めています。
+              <strong className="text-[var(--text-primary)]">対象範囲と目標とする達成基準：</strong>
+              本サイト全体（ポータル一覧、各単元シミュレーター、法務・方針ページ）において、WCAG 2.2 レベル AA（および JIS X 8341-3:2016 適合レベル AA）への準拠を目標として設計・改善を行っています。
+            </li>
+            <li>
+              <strong className="text-[var(--text-primary)]">主な取り組み：</strong>
+              キーボード操作（スキップリンク、フォーカス可視化、スティッキーヘッダーによるフォーカス遮蔽の防止）、スクリーンリーダー向けの見出し階層・ランドマーク・ライブリージョン通知、ライト／ダークモードおよび強制カラーモード（Forced Colors）対応、タッチ操作に配慮したターゲットサイズ確保を実施しています。
+            </li>
+            <li>
+              <strong className="text-[var(--text-primary)]">今後の課題と合理的配慮のご相談：</strong>
+              インタラクティブな SVG 図解やリアルタイム数式表示（KaTeX）の一部において、支援技術での詳細な読み上げに制約が残る場合があります。利用上の障壁や代替手段・合理的配慮に関するご要望は、下記の GitHub Issues よりお知らせください。
             </li>
           </ul>
         </div>
       </section>
 
-      {/* 5. お問い合わせ・著作権表記 */}
+      {/* 6. お問い合わせ・著作権表記 */}
       <section className="app-surface rounded-xl p-6 space-y-2 text-sm app-text-muted">
         <h2 className="text-base font-bold text-[var(--text-primary)]">
-          5. お問い合わせ・著作権表記
+          6. お問い合わせ・著作権表記
         </h2>
         <p>
-          本サイトの内容に関するご質問、不具合の報告、改善のご提案などは、プロジェクトの公式 GitHub リポジトリの Issues 等を通じてお寄せください。
+          本サイトの内容・プライバシー・アクセシビリティに関するご質問、不具合の報告、改善のご提案などは、公式 GitHub リポジトリの{' '}
+          <a
+            href="https://github.com/skyblueao77/doboku-lab/issues"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline inline-flex items-center gap-0.5 text-[var(--text-primary)] hover:text-blue-700 dark:hover:text-blue-400"
+          >
+            GitHub Issues
+            <ExternalLink className="h-3 w-3" aria-hidden="true" />
+          </a>{' '}
+          よりお寄せください。
         </p>
         <p className="pt-1 text-xs">
-          © {new Date().getFullYear()} 土木の学び舎 (doboku-lab). All rights reserved.
+          © {CURRENT_YEAR} 土木の学び舎 (doboku-lab). All rights reserved.
         </p>
       </section>
     </div>

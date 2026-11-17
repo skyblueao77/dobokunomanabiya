@@ -91,6 +91,9 @@ export function App() {
       });
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.requestAnimationFrame(() => {
+      document.getElementById('main-content')?.focus({ preventScroll: true });
+    });
   };
 
   const handleChangeTheme = (pref: ThemePreference) => {

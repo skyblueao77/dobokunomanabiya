@@ -1,0 +1,116 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: Lint, Test & Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter (oxlint)
+        run: npm run lint
+
+      - name: Run unit tests (vitest)
+        run: npm test
+
+      - name: Type-check & build production bundle
+        run: npm run build
+
+      - name: Verify production artifacts & CSP safety
+        run: |
+          set -euo pipefail
+          for f in \
+            dist/index.html \
+            dist/_headers \
+            dist/manifest.webmanifest \
+            dist/sw.js \
+            dist/registerSW.js \
+            dist/robots.txt \
+            dist/sitemap.xml \
+            dist/theme-init.js \
+            dist/favicon.svg \
+            dist/icon-192.png \
+            dist/icon-512.png; do
+            test -f "$f" || { echo "Missing required artifact: $f"; exit 1; }
+          done
+
+          # Ensure every <script> tag either has a src attribute or is type="application/ld+json"
+          node -e '
+            const fs = require("node:fs");
+            const html = fs.readFileSync("dist/index.html", "utf8");
+            const scripts = [...html.matchAll(/<script\b([^>]*)>/gi)].map((m) => m[1]);
+            for (const attrs of scripts) {
+              const hasSrc = /\bsrc\s*=/.test(attrs);
+              const isJsonLd = /type\s*=\s*["\x27]application\/ld\+json["\x27]/i.test(attrs);
+              if (!hasSrc && !isJsonLd) {
+                console.error("Inline executable <script> violates strict CSP:", attrs);
+                process.exit(1);
+              }
+            }
+            console.log("Verified", scripts.length, "<script> tags in dist/index.html");
+          '
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-bundle
+          path: dist/
+          retention-days: 7
+
+  deploy:
+    name: Deploy to Cloudflare Workers
+    needs: ci
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-bundle
+          path: dist/
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Deploy with Wrangler (if Cloudflare secrets are configured)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::notice::CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID is not configured; skipping Wrangler deploy step."
+            exit 0
+          fi
+          npx --yes wrangler@4 deploy
