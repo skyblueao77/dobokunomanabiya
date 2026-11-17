@@ -25,6 +25,15 @@
   --brand-accent-light: #1d4ed8;
   --brand-accent-dark: #60a5fa;
 
+  --notice-bg-light: #fffbeb;
+  --notice-bg-dark: #271a06;
+  --notice-border-light: #b45309;
+  --notice-border-dark: #f59e0b;
+  --notice-text-light: #451a03;
+  --notice-text-dark: #fef3c7;
+  --notice-accent-light: #92400e;
+  --notice-accent-dark: #fcd34d;
+
   --surface-page: var(--surface-page-light);
   --surface-card: var(--surface-card-light);
   --surface-subtle: var(--surface-subtle-light);
@@ -32,6 +41,10 @@
   --text-muted: var(--text-muted-light);
   --border-subtle: var(--border-subtle-light);
   --accent-color: var(--brand-accent-light);
+  --notice-bg: var(--notice-bg-light);
+  --notice-border: var(--notice-border-light);
+  --notice-text: var(--notice-text-light);
+  --notice-accent: var(--notice-accent-light);
 
   --target-size: 24px;
   --scrollbar-track: #e2e8f0;
@@ -54,6 +67,10 @@
     --text-muted: var(--text-muted-dark);
     --border-subtle: var(--border-subtle-dark);
     --accent-color: var(--brand-accent-dark);
+    --notice-bg: var(--notice-bg-dark);
+    --notice-border: var(--notice-border-dark);
+    --notice-text: var(--notice-text-dark);
+    --notice-accent: var(--notice-accent-dark);
     --scrollbar-track: #1e293b;
     --scrollbar-thumb: #64748b;
   }
@@ -68,6 +85,10 @@
     --text-muted: light-dark(var(--text-muted-light), var(--text-muted-dark));
     --border-subtle: light-dark(var(--border-subtle-light), var(--border-subtle-dark));
     --accent-color: light-dark(var(--brand-accent-light), var(--brand-accent-dark));
+    --notice-bg: light-dark(var(--notice-bg-light), var(--notice-bg-dark));
+    --notice-border: light-dark(var(--notice-border-light), var(--notice-border-dark));
+    --notice-text: light-dark(var(--notice-text-light), var(--notice-text-dark));
+    --notice-accent: light-dark(var(--notice-accent-light), var(--notice-accent-dark));
     --scrollbar-track: light-dark(#e2e8f0, #1e293b);
     --scrollbar-thumb: light-dark(#64748b, #94a3b8);
   }
@@ -83,6 +104,10 @@
   --text-muted: var(--text-muted-dark);
   --border-subtle: var(--border-subtle-dark);
   --accent-color: var(--brand-accent-dark);
+  --notice-bg: var(--notice-bg-dark);
+  --notice-border: var(--notice-border-dark);
+  --notice-text: var(--notice-text-dark);
+  --notice-accent: var(--notice-accent-dark);
   --scrollbar-track: #1e293b;
   --scrollbar-thumb: #64748b;
 }
@@ -96,6 +121,10 @@
   --text-muted: var(--text-muted-light);
   --border-subtle: var(--border-subtle-light);
   --accent-color: var(--brand-accent-light);
+  --notice-bg: var(--notice-bg-light);
+  --notice-border: var(--notice-border-light);
+  --notice-text: var(--notice-text-light);
+  --notice-accent: var(--notice-accent-light);
   --scrollbar-track: #e2e8f0;
   --scrollbar-thumb: #64748b;
 }
@@ -292,6 +321,24 @@
   }
 }
 
+/* WIP / accuracy notice tokens */
+.app-notice-banner {
+  background-color: var(--notice-bg);
+  color: var(--notice-text);
+  border: 1px solid var(--notice-border);
+  border-inline-start-width: 4px;
+}
+
+.app-notice-badge {
+  background-color: var(--notice-bg);
+  color: var(--notice-accent);
+  border: 1px solid var(--notice-border);
+}
+
+.app-notice-accent {
+  color: var(--notice-accent);
+}
+
 /* Forced Colors Mode support */
 @media (forced-colors: active) {
   .tab-item[aria-selected="true"]::after,
@@ -301,6 +348,15 @@
   .app-surface,
   .app-surface-subtle {
     border-color: ButtonBorder;
+  }
+  .app-notice-banner,
+  .app-notice-badge {
+    background-color: Canvas;
+    color: CanvasText;
+    border-color: Highlight;
+  }
+  .app-notice-accent {
+    color: Highlight;
   }
 }
 
