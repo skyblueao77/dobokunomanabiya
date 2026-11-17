@@ -73,7 +73,7 @@ export default function LegalPage({ onBackToPortal }: LegalPageProps) {
           「土木の学び舎」（以下「本サイト」といいます）をご利用いただくにあたり、法的・倫理的・アクセシビリティの観点から以下の事項をご確認ください。本サイトを利用した時点で、これらの内容に同意したものとみなします。
         </p>
         <p className="text-xs app-text-muted font-mono-num">
-          制定日：2026年11月16日 ／ 最終改定日：2026年11月16日
+          制定日：2026年11月16日 ／ 最終改定日：2026年11月17日
         </p>
       </header>
 
@@ -118,7 +118,7 @@ export default function LegalPage({ onBackToPortal }: LegalPageProps) {
             </li>
             <li>
               <strong className="text-[var(--text-primary)]">損害賠償の免責：</strong>
-              本サイトの利用、または利用できなかったことにより生じた直接的・間接的ないかなる損害についても、運営者は一切の責任を負いません。
+              本サイトの利用、または利用できなかったことにより生じた直接的・間接的ないかなる損害についても、運営者の故意または重過失による場合を除き、運営者は一切の責任を負いません。
             </li>
             <li>
               <strong className="text-[var(--text-primary)]">外部リンク：</strong>
@@ -151,6 +151,10 @@ export default function LegalPage({ onBackToPortal }: LegalPageProps) {
           <li>
             <strong className="text-[var(--text-primary)]">内容の変更・終了：</strong>
             運営者は、事前の予告なく本サイトの内容を変更、一時中断、または終了する場合があります。
+          </li>
+          <li>
+            <strong className="text-[var(--text-primary)]">準拠法・管轄：</strong>
+            本規約の解釈にあたっては日本法を準拠法とし、本サイトに関して紛争が生じた場合には、運営者の所在地を管轄する裁判所を第一審の専属的合意管轄裁判所とします。
           </li>
         </ul>
       </section>
