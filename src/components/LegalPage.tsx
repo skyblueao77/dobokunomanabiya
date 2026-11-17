@@ -235,26 +235,13 @@ export default function LegalPage({ onBackToPortal }: LegalPageProps) {
         </div>
       </section>
 
-      {/* 6. お問い合わせ・著作権表記 */}
+      {/* 6. 著作権表記 */}
       <section className="app-surface rounded-xl p-6 space-y-2 text-sm app-text-muted">
         <h2 className="text-base font-bold text-[var(--text-primary)]">
-          6. お問い合わせ・著作権表記
+          6. 著作権表記
         </h2>
-        <p>
-          本サイトの内容・プライバシー・アクセシビリティに関するご質問、不具合の報告、改善のご提案などは、公式 GitHub リポジトリの{' '}
-          <a
-            href="https://github.com/skyblueao77/doboku-lab/issues"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline inline-flex items-center gap-0.5 text-[var(--text-primary)] hover:text-blue-700 dark:hover:text-blue-400"
-          >
-            GitHub Issues
-            <ExternalLink className="h-3 w-3" aria-hidden="true" />
-          </a>{' '}
-          よりお寄せください。
-        </p>
         <p className="pt-1 text-xs">
-          © {CURRENT_YEAR} 土木の学び舎 (doboku-lab). All rights reserved.
+          © {CURRENT_YEAR} 土木の学び舎. All rights reserved.
         </p>
       </section>
     </div>

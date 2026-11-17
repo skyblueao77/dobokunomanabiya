@@ -1,7 +1,6 @@
 import { type UnitId } from '../data/curriculum';
 
 const PROGRESS_KEY = 'dobokunomanabiya-progress-v1';
-const LEGACY_PROGRESS_KEY = 'doboku-lab-progress-v1';
 
 export interface StudyProgress {
   completedUnits: UnitId[];
@@ -17,9 +16,7 @@ const DEFAULT_PROGRESS: StudyProgress = {
 
 export function loadStudyProgress(): StudyProgress {
   try {
-    const raw =
-      window.localStorage.getItem(PROGRESS_KEY) ??
-      window.localStorage.getItem(LEGACY_PROGRESS_KEY);
+    const raw = window.localStorage.getItem(PROGRESS_KEY);
     if (!raw) return DEFAULT_PROGRESS;
     const parsed = JSON.parse(raw) as Partial<StudyProgress>;
     return {
