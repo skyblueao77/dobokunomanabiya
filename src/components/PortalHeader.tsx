@@ -4,7 +4,7 @@ import { LEARNING_UNITS, type UnitId } from '../data/curriculum';
 import { type ThemePreference } from '../utils/storage';
 
 interface PortalHeaderProps {
-  activeRoute: 'home' | UnitId;
+  activeRoute: 'home' | 'legal' | UnitId;
   onNavigate: (route: 'home' | UnitId) => void;
   themePref: ThemePreference;
   onChangeTheme: (pref: ThemePreference) => void;
