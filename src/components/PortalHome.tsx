@@ -166,7 +166,7 @@ export const PortalHome: React.FC<PortalHomeProps> = ({
                       </span>
 
                       <div className="flex items-center gap-2">
-                        <span className="app-surface-subtle rounded-md px-2 py-0.5 text-[11px] font-medium">
+                        <span className="app-surface-subtle rounded-md px-2 py-0.5 text-xs font-medium">
                           {unit.level}
                         </span>
                         {isDone && (

@@ -200,9 +200,9 @@ export const Ch4MohrPole: React.FC<Ch4Props> = ({
       {/* 2. 想像 */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <aside className="lg:col-span-4 app-surface rounded-xl p-4 space-y-4 shadow-sm">
-          <h3 className="text-sm font-bold border-b border-[var(--border-subtle)] pb-2">
+          <h2 className="text-sm font-bold border-b border-[var(--border-subtle)] pb-2">
             2. 想像：用極法インタラクティブ作図
-          </h3>
+          </h2>
 
           <SliderInput label="水平面の垂直応力" symbol="σ_z" unit="kPa" value={sigmaZ} min={0} max={350} step={5} onChange={setSigmaZ} />
           <SliderInput label="鉛直面の垂直応力" symbol="σ_x" unit="kPa" value={sigmaX} min={0} max={350} step={5} onChange={setSigmaX} />
@@ -211,7 +211,7 @@ export const Ch4MohrPole: React.FC<Ch4Props> = ({
 
           <div className="border-t border-[var(--border-subtle)] pt-3 space-y-2">
             <div className="text-xs font-bold">作図ステップを順に表示</div>
-            <div className="flex flex-wrap gap-1.5 text-[11px]">
+            <div className="flex flex-wrap gap-1.5 text-xs">
               {(
                 [
                   { id: 'all', label: 'すべて表示' },
@@ -270,15 +270,15 @@ export const Ch4MohrPole: React.FC<Ch4Props> = ({
                 実空間の2D要素（角度 θ={theta}°）
               </div>
               <div className="p-3 flex-1 flex flex-col items-center justify-center">
-                <svg viewBox="0 0 210 200" className="w-full max-w-[200px] h-auto select-none" role="img" aria-label="実空間の土要素と対象面角度">
+                <svg viewBox="-10 0 230 200" className="w-full max-w-[220px] h-auto select-none" role="img" aria-label="実空間の土要素と対象面角度">
                   <rect x="55" y="55" width="100" height="90" fill="currentColor" fillOpacity="0.06" stroke="currentColor" strokeOpacity="0.7" strokeWidth="1.8" />
-                  <text x="105" y="34" textAnchor="middle" className="text-[11px] font-bold fill-[var(--diagram-blue)] font-mono-num">
+                  <text x="105" y="34" textAnchor="middle" className="text-xs font-bold fill-[var(--diagram-blue)] font-mono-num">
                     σ_z={sigmaZ}
                   </text>
                   <line x1="105" y1="38" x2="105" y2="53" stroke="var(--diagram-blue)" strokeWidth="2.2" />
                   <line x1="105" y1="162" x2="105" y2="147" stroke="var(--diagram-blue)" strokeWidth="2.2" />
 
-                  <text x="24" y="96" textAnchor="middle" className="text-[11px] font-bold fill-[var(--diagram-indigo)] font-mono-num">
+                  <text x="4" y="88" textAnchor="start" className="text-xs font-bold fill-[var(--diagram-indigo)] font-mono-num">
                     σ_x={sigmaX}
                   </text>
                   <line x1="36" y1="100" x2="53" y2="100" stroke="var(--diagram-indigo)" strokeWidth="2.2" />
@@ -292,7 +292,7 @@ export const Ch4MohrPole: React.FC<Ch4Props> = ({
                   <g transform={`rotate(${-res.thetaP1} 105 100)`}>
                     <line x1="60" y1="100" x2="150" y2="100" stroke="var(--diagram-amber)" strokeWidth="1.5" strokeDasharray="4 3" />
                   </g>
-                  <text x="105" y="186" textAnchor="middle" className="text-[10px] font-mono-num fill-[var(--diagram-teal)] font-bold">
+                  <text x="105" y="186" textAnchor="middle" className="text-xs font-mono-num fill-[var(--diagram-teal)] font-bold">
                     実線: θ={theta}° / 破線: σ₁面 {round2(res.thetaP1)}°
                   </text>
                 </svg>
@@ -317,8 +317,8 @@ export const Ch4MohrPole: React.FC<Ch4Props> = ({
                 {originX >= padL && originX <= w - padR && (
                   <line x1={originX} y1={padT} x2={originX} y2={h - padB} stroke="currentColor" strokeOpacity="0.68" strokeWidth="1.4" />
                 )}
-                <text x={w - padR} y={originY + 18} textAnchor="end" className="text-[11px] font-semibold fill-current">σ (kPa)</text>
-                <text x={Math.max(padL + 6, originX + 8)} y={padT + 14} className="text-[11px] font-semibold fill-current">τ (CCW正)</text>
+                <text x={w - padR} y={originY + 18} textAnchor="end" className="text-xs font-semibold fill-current">σ (kPa)</text>
+                <text x={Math.max(padL + 6, originX + 8)} y={padT + 14} className="text-xs font-semibold fill-current">τ (CCW正)</text>
 
                 <g clipPath="url(#c4-clip)">
                   {/* 3Dモール円プレビュー */}
@@ -357,7 +357,7 @@ export const Ch4MohrPole: React.FC<Ch4Props> = ({
                       />
                       <line x1={pX} y1={pY} x2={qX} y2={qY} stroke="var(--diagram-teal)" strokeWidth="2.4" />
                       <circle cx={qX} cy={qY} r="5.5" fill="var(--diagram-teal)" stroke="var(--diagram-halo)" strokeWidth="1.5" />
-                      <text x={qX + 8} y={qY - 8} className="text-[11px] font-bold fill-[var(--diagram-teal)] font-mono-num">
+                      <text x={qX + 8} y={qY - 8} className="text-xs font-bold fill-[var(--diagram-teal)] font-mono-num">
                         Q({round2(res.sigmaTheta)}, {round2(res.tauTheta)})
                       </text>
                     </>
@@ -373,22 +373,22 @@ export const Ch4MohrPole: React.FC<Ch4Props> = ({
 
                   {/* 点 H, V, σ1, σ3, P */}
                   <circle cx={hX} cy={hY} r="4.5" fill="var(--diagram-blue)" />
-                  <text x={hX + 7} y={hY - 6} className="text-[11px] font-bold fill-[var(--diagram-blue)]">
+                  <text x={hX + 7} y={hY - 6} className="text-xs font-bold fill-[var(--diagram-blue)]">
                     H(σ_z,τ_H)
                   </text>
 
                   <circle cx={vX} cy={vY} r="4.5" fill="var(--diagram-indigo)" />
-                  <text x={vX - 8} y={vY + 14} textAnchor="end" className="text-[11px] font-bold fill-[var(--diagram-indigo)]">
+                  <text x={vX - 8} y={vY + 14} textAnchor="end" className="text-xs font-bold fill-[var(--diagram-indigo)]">
                     V(σ_x,-τ_H)
                   </text>
 
                   <circle cx={s1X} cy={originY} r="4" fill="var(--diagram-red)" />
-                  <text x={s1X} y={originY + 16} textAnchor="middle" className="text-[11px] font-bold fill-[var(--diagram-red)]">
+                  <text x={s1X} y={originY + 16} textAnchor="middle" className="text-xs font-bold fill-[var(--diagram-red)]">
                     σ₁={round2(res.sigma1)}
                   </text>
 
                   <circle cx={s3X} cy={originY} r="4" fill="var(--diagram-blue)" />
-                  <text x={s3X} y={originY + 16} textAnchor="middle" className="text-[11px] font-bold fill-[var(--diagram-blue)]">
+                  <text x={s3X} y={originY + 16} textAnchor="middle" className="text-xs font-bold fill-[var(--diagram-blue)]">
                     σ₃={round2(res.sigma3)}
                   </text>
 

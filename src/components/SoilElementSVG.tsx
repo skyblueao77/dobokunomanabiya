@@ -89,7 +89,7 @@ export const SoilElementSVG: React.FC<SoilElementSVGProps> = ({ inputs, result }
             x="130"
             y="16"
             textAnchor="middle"
-            className="text-[11px] font-bold fill-[var(--diagram-blue)] font-mono-num"
+            className="text-xs font-bold fill-[var(--diagram-blue)] font-mono-num"
           >
             {s1Label} kPa
           </text>
@@ -116,7 +116,7 @@ export const SoilElementSVG: React.FC<SoilElementSVGProps> = ({ inputs, result }
             x="18"
             y="98"
             textAnchor="start"
-            className="text-[11px] font-bold fill-[var(--diagram-blue)] font-mono-num"
+            className="text-xs font-bold fill-[var(--diagram-blue)] font-mono-num"
           >
             {s3Label}
           </text>
@@ -167,7 +167,7 @@ export const SoilElementSVG: React.FC<SoilElementSVGProps> = ({ inputs, result }
           <text
             x="166"
             y="102"
-            className="text-[11px] font-bold fill-[var(--diagram-teal)] font-mono-num"
+            className="text-xs font-bold fill-[var(--diagram-teal)] font-mono-num"
           >
             θ={inputs.theta}°
           </text>

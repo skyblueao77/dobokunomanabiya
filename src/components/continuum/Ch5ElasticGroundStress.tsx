@@ -223,28 +223,33 @@ export const Ch5ElasticGroundStress: React.FC<Ch5Props> = ({
 
       {/* 2. 想像 */}
       <section className="space-y-4">
-        {/* サブモード切替バー */}
-        <div className="app-surface rounded-xl p-2 flex flex-wrap gap-2">
-          {(
-            [
-              { id: 'equilibrium', label: 'A. 力のつり合い条件と自重応力' },
-              { id: 'boussinesq', label: 'B. Boussinesq 集中荷重と圧力球根' },
-              { id: 'superposition', label: 'C. 解の重ね合わせ積分（線荷重 → 帯荷重）' },
-            ] as const
-          ).map((m) => (
-            <button
-              key={m.id}
-              type="button"
-              onClick={() => setSubMode(m.id)}
-              className={`px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold cursor-pointer transition-colors ${
-                subMode === m.id
-                  ? 'bg-blue-700 text-white'
-                  : 'app-surface-subtle hover:opacity-90'
-              }`}
-            >
-              {m.label}
-            </button>
-          ))}
+        <div className="app-surface rounded-xl p-2 sm:p-2.5 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-sm font-bold px-2">
+            2. 想像：弾性地盤内の応力シミュレーター
+          </h2>
+          {/* サブモード切替バー */}
+          <div className="flex flex-wrap gap-2">
+            {(
+              [
+                { id: 'equilibrium', label: 'A. 力のつり合い条件と自重応力' },
+                { id: 'boussinesq', label: 'B. Boussinesq 集中荷重と圧力球根' },
+                { id: 'superposition', label: 'C. 解の重ね合わせ積分（線荷重 → 帯荷重）' },
+              ] as const
+            ).map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => setSubMode(m.id)}
+                className={`px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold cursor-pointer transition-colors ${
+                  subMode === m.id
+                    ? 'bg-blue-700 text-white'
+                    : 'app-surface-subtle hover:opacity-90'
+                }`}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {subMode === 'equilibrium' && (
@@ -263,24 +268,24 @@ export const Ch5ElasticGroundStress: React.FC<Ch5Props> = ({
             <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* 微分つり合い要素SVG */}
               <div className="app-surface rounded-xl p-4 space-y-2 shadow-sm">
-                <h4 className="text-xs font-bold">微小要素の応力勾配と自重のつり合い</h4>
-                <svg viewBox="0 0 280 230" className="w-full h-auto select-none" role="img" aria-label="微分形の力のつり合い条件を示す微小土要素">
+                <h3 className="text-xs font-bold">微小要素の応力勾配と自重のつり合い</h3>
+                <svg viewBox="-12 0 304 230" className="w-full h-auto select-none" role="img" aria-label="微分形の力のつり合い条件を示す微小土要素">
                   <rect x="85" y="65" width="110" height="90" fill="var(--diagram-blue)" fillOpacity="0.08" stroke="currentColor" strokeWidth="1.8" />
-                  <text x="140" y="34" textAnchor="middle" className="text-[11px] font-bold fill-[var(--diagram-blue)]">
+                  <text x="140" y="34" textAnchor="middle" className="text-xs font-bold fill-[var(--diagram-blue)]">
                     σ_z (上端)
                   </text>
                   <line x1="140" y1="40" x2="140" y2="62" stroke="var(--diagram-blue)" strokeWidth="2.2" />
                   <line x1="140" y1="184" x2="140" y2="158" stroke="var(--diagram-blue)" strokeWidth="2.2" />
-                  <text x="140" y="200" textAnchor="middle" className="text-[11px] font-bold fill-[var(--diagram-blue)]">
+                  <text x="140" y="200" textAnchor="middle" className="text-xs font-bold fill-[var(--diagram-blue)]">
                     σ_z + (∂σ_z/∂z)dz
                   </text>
                   <text x="140" y="114" textAnchor="middle" className="text-xs font-bold fill-[var(--diagram-amber)]">
                     自重 γ·dx·dz ↓
                   </text>
-                  <text x="38" y="112" textAnchor="middle" className="text-[10px] font-semibold fill-[var(--diagram-teal)]">
+                  <text x="38" y="112" textAnchor="middle" className="text-xs font-semibold fill-[var(--diagram-teal)]">
                     τ_xz
                   </text>
-                  <text x="238" y="112" textAnchor="middle" className="text-[10px] font-semibold fill-[var(--diagram-teal)]">
+                  <text x="238" y="112" textAnchor="middle" className="text-xs font-semibold fill-[var(--diagram-teal)]">
                     τ_xz+(∂τ/∂x)dx
                   </text>
                 </svg>
@@ -291,13 +296,13 @@ export const Ch5ElasticGroundStress: React.FC<Ch5Props> = ({
 
               {/* 深度分布プロット */}
               <div className="app-surface rounded-xl p-4 space-y-2 shadow-sm">
-                <h4 className="text-xs font-bold">深度別 全応力・水圧・有効応力プロファイル</h4>
-                <svg viewBox="0 0 280 230" className="w-full h-auto select-none" role="img" aria-label="深さ方向の全応力・間隙水圧・有効応力分布図">
+                <h3 className="text-xs font-bold">深度別 全応力・水圧・有効応力プロファイル</h3>
+                <svg viewBox="-12 0 292 230" className="w-full h-auto select-none" role="img" aria-label="深さ方向の全応力・間隙水圧・有効応力分布図">
                   {/* 座標軸 */}
                   <line x1="40" y1="25" x2="260" y2="25" stroke="currentColor" strokeOpacity="0.6" strokeWidth="1.5" />
                   <line x1="40" y1="25" x2="40" y2="210" stroke="currentColor" strokeOpacity="0.6" strokeWidth="1.5" />
-                  <text x="256" y="18" textAnchor="end" className="text-[10px] fill-current">応力 (kPa)</text>
-                  <text x="12" y="208" className="text-[10px] fill-current">z=10m</text>
+                  <text x="256" y="18" textAnchor="end" className="text-xs fill-current">応力 (kPa)</text>
+                  <text x="36" y="208" textAnchor="end" className="text-xs fill-current">z=10m</text>
 
                   {/* 地下水位線 */}
                   <line
@@ -309,7 +314,7 @@ export const Ch5ElasticGroundStress: React.FC<Ch5Props> = ({
                     strokeDasharray="4 3"
                     strokeWidth="1.3"
                   />
-                  <text x="256" y={21 + (waterZ / 10) * 180} textAnchor="end" className="text-[10px] fill-[var(--diagram-sky)]">
+                  <text x="256" y={21 + (waterZ / 10) * 180} textAnchor="end" className="text-xs fill-[var(--diagram-sky)]">
                     地下水位 z_w={waterZ}m
                   </text>
 
@@ -516,8 +521,8 @@ export const Ch5ElasticGroundStress: React.FC<Ch5Props> = ({
                   {/* 下段：深さ z の横断面分布 Δσ_z(x, z) */}
                   <line x1="40" y1="245" x2="500" y2="245" stroke="currentColor" strokeOpacity="0.5" />
                   <line x1="270" y1="80" x2="270" y2="250" stroke="currentColor" strokeOpacity="0.25" strokeDasharray="3 3" />
-                  <text x="500" y="262" textAnchor="end" className="text-[10px] fill-current">水平距離 x (m)</text>
-                  <text x="46" y="92" className="text-[10px] fill-current">Δσ_z (kPa)</text>
+                  <text x="500" y="262" textAnchor="end" className="text-xs fill-current">水平距離 x (m)</text>
+                  <text x="46" y="92" className="text-xs fill-current">Δσ_z (kPa)</text>
 
                   {/* 厳密帯荷重曲線 (実線青) */}
                   <polyline

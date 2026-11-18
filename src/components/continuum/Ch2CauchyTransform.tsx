@@ -179,7 +179,7 @@ export const Ch2CauchyTransform: React.FC<Ch2Props> = ({
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <aside className="lg:col-span-5 app-surface rounded-xl p-4 space-y-4 shadow-sm">
           <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-2 gap-2 flex-wrap">
-            <h3 className="text-sm font-bold">2. 想像：断面法線・座標回転シミュレーター</h3>
+            <h2 className="text-sm font-bold">2. 想像：断面法線・座標回転シミュレーター</h2>
             <div className="inline-flex rounded-lg border border-[var(--border-control)] overflow-hidden text-xs">
               <button
                 type="button"
@@ -252,8 +252,8 @@ export const Ch2CauchyTransform: React.FC<Ch2Props> = ({
                 {/* 元座標軸 x, y */}
                 <line x1="35" y1={cy} x2="325" y2={cy} stroke="currentColor" strokeOpacity="0.35" strokeDasharray="4 4" />
                 <line x1={cx} y1="260" x2={cx} y2="20" stroke="currentColor" strokeOpacity="0.35" strokeDasharray="4 4" />
-                <text x="328" y={cy + 4} className="text-[11px] fill-[var(--text-muted)]">x</text>
-                <text x={cx + 5} y="24" className="text-[11px] fill-[var(--text-muted)]">y</text>
+                <text x="328" y={cy + 4} className="text-xs fill-[var(--text-muted)]">x</text>
+                <text x={cx + 5} y="24" className="text-xs fill-[var(--text-muted)]">y</text>
 
                 {/* 回転後座標軸 x' (n方向), y' (m方向) */}
                 <line
@@ -265,7 +265,7 @@ export const Ch2CauchyTransform: React.FC<Ch2Props> = ({
                   strokeOpacity="0.45"
                   strokeDasharray="3 3"
                 />
-                <text x={cx + nx * 114} y={cy + ny * 114} className="text-[11px] font-bold fill-[var(--diagram-blue)]">
+                <text x={cx + nx * 114} y={cy + ny * 114} className="text-xs font-bold fill-[var(--diagram-blue)]">
                   x'
                 </text>
 
@@ -289,7 +289,7 @@ export const Ch2CauchyTransform: React.FC<Ch2Props> = ({
                   strokeWidth="2"
                   markerEnd="url(#c2-n)"
                 />
-                <text x={cx + nx * 46} y={cy + ny * 46} className="text-[11px] font-bold fill-[var(--text-muted)]">
+                <text x={cx + nx * 46} y={cy + ny * 46} className="text-xs font-bold fill-[var(--text-muted)]">
                   n
                 </text>
 
@@ -305,7 +305,7 @@ export const Ch2CauchyTransform: React.FC<Ch2Props> = ({
                       strokeWidth="2.5"
                       markerEnd="url(#c2-t)"
                     />
-                    <text x={cx + txSvg + 6} y={cy + tySvg} className="text-[11px] font-bold fill-[var(--diagram-violet)]">
+                    <text x={cx + txSvg + 6} y={cy + tySvg} className="text-xs font-bold fill-[var(--diagram-violet)]">
                       t
                     </text>
                   </>

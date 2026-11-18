@@ -227,9 +227,9 @@ export const Ch6ElasticDeformation: React.FC<Ch6Props> = ({
       {/* 2. 想像 */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <aside className="lg:col-span-5 app-surface rounded-xl p-4 space-y-4 shadow-sm">
-          <h3 className="text-sm font-bold border-b border-[var(--border-subtle)] pb-2">
+          <h2 className="text-sm font-bold border-b border-[var(--border-subtle)] pb-2">
             2. 想像：構成則・境界拘束・弾性沈下シミュレーター
-          </h3>
+          </h2>
 
           <div className="space-y-1.5">
             <div className="text-xs font-semibold">境界拘束モード</div>
@@ -310,10 +310,10 @@ export const Ch6ElasticDeformation: React.FC<Ch6Props> = ({
                     stroke="var(--diagram-blue)"
                     strokeWidth="2.4"
                   />
-                  <text x="140" y="205" textAnchor="middle" className="text-[11px] font-mono-num fill-current">
+                  <text x="140" y="205" textAnchor="middle" className="text-xs font-mono-num fill-current">
                     ε_z={round4(def.epsZ * 100)}% / ε_x={round4(def.epsX * 100)}%
                   </text>
-                  <text x="140" y="220" textAnchor="middle" className="text-[11px] font-mono-num fill-[var(--diagram-teal)] font-bold">
+                  <text x="140" y="220" textAnchor="middle" className="text-xs font-mono-num fill-[var(--diagram-teal)] font-bold">
                     体積ひずみ ε_v={round4(def.epsVol * 100)}%・γ_xz={round4(def.gammaXZ * 100)}%
                   </text>
                 </svg>
@@ -321,9 +321,9 @@ export const Ch6ElasticDeformation: React.FC<Ch6Props> = ({
             </div>
 
             <div className="md:col-span-7 app-surface rounded-xl p-4 shadow-sm space-y-3">
-              <h4 className="text-xs font-bold border-b border-[var(--border-subtle)] pb-1.5">
+              <h3 className="text-xs font-bold border-b border-[var(--border-subtle)] pb-1.5">
                 弾性定数変換 &amp; 体積／せん断ひずみの分離結果
-              </h4>
+              </h3>
               <div className="grid grid-cols-2 gap-2 text-xs font-mono-num">
                 <div className="app-surface-subtle rounded p-2">
                   <span className="app-text-muted font-sans">せん断弾性係数 G:</span><br />
@@ -361,9 +361,9 @@ export const Ch6ElasticDeformation: React.FC<Ch6Props> = ({
           {/* Boussinesq表面沈下曲線 & 層別弾性沈下 */}
           <div className="app-surface rounded-xl p-4 shadow-sm space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h4 className="text-sm font-bold">
+              <h3 className="text-sm font-bold">
                 地表面載荷による弾性変位・即時沈下
-              </h4>
+              </h3>
               <span className="text-xs font-mono-num font-bold text-blue-700 dark:text-blue-300">
                 帯荷重下の層別合計沈下 S_e = {settlement.totalSettlementMm} mm
               </span>
@@ -377,8 +377,8 @@ export const Ch6ElasticDeformation: React.FC<Ch6Props> = ({
                 <svg viewBox="0 0 260 150" className="w-full h-auto select-none" role="img" aria-label="Boussinesq 集中荷重による地表面沈下曲線">
                   <line x1="30" y1="24" x2="245" y2="24" stroke="currentColor" strokeOpacity="0.6" strokeWidth="1.5" />
                   <line x1="30" y1="24" x2="30" y2="135" stroke="currentColor" strokeOpacity="0.6" strokeWidth="1.5" />
-                  <text x="245" y="16" textAnchor="end" className="text-[10px] fill-current">距離 r (0〜6m)</text>
-                  <text x="34" y="136" className="text-[10px] fill-current">沈下 w (mm)</text>
+                  <text x="245" y="16" textAnchor="end" className="text-xs fill-current">距離 r (0〜6m)</text>
+                  <text x="34" y="136" className="text-xs fill-current">沈下 w (mm)</text>
                   <polyline
                     fill="none"
                     stroke="var(--diagram-blue)"
