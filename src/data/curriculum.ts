@@ -27,12 +27,6 @@ export interface LearningUnit {
 
 export const SUBJECTS: SubjectMeta[] = [
   {
-    id: 'soil',
-    name: '土質力学',
-    englishName: 'Soil Mechanics',
-    description: '応力状態・破壊規準・土圧・有効応力など地盤工学の基盤単元',
-  },
-  {
     id: 'structural',
     name: '構造力学',
     englishName: 'Structural Mechanics',
@@ -43,6 +37,12 @@ export const SUBJECTS: SubjectMeta[] = [
     name: '水理学',
     englishName: 'Hydraulics',
     description: '開水路等流・マニングの公式・フルード数による流況判定',
+  },
+  {
+    id: 'soil',
+    name: '土質力学',
+    englishName: 'Soil Mechanics',
+    description: '応力状態・破壊規準・土圧・有効応力など地盤工学の基盤単元',
   },
 ];
 
@@ -102,4 +102,8 @@ export const LEARNING_UNITS: LearningUnit[] = [
 
 export function getSubjectMeta(id: Exclude<SubjectId, 'all'>): SubjectMeta {
   return SUBJECTS.find((s) => s.id === id) ?? SUBJECTS[0];
+}
+
+export function getUnitsBySubject(id: Exclude<SubjectId, 'all'>): LearningUnit[] {
+  return LEARNING_UNITS.filter((u) => u.subjectId === id);
 }
