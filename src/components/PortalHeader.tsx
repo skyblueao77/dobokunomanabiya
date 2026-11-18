@@ -520,8 +520,8 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
                     key={id}
                     className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium cursor-pointer border ${
                       themePref === id
-                        ? 'border-blue-600 bg-blue-600/10'
-                        : 'border-[var(--border-subtle)]'
+                        ? 'border-blue-600 dark:border-blue-400 bg-blue-600/10'
+                        : 'border-[var(--border-control)]'
                     }`}
                   >
                     <input

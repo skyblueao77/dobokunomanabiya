@@ -202,8 +202,8 @@ export const Ch6ElasticDeformation: React.FC<Ch6Props> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
           <div className="app-surface-subtle rounded-lg p-3 flex items-center gap-3">
             <svg viewBox="0 0 110 70" className="w-24 shrink-0 h-auto" aria-hidden="true">
-              <polygon points="10,12 50,16 48,54 12,52" fill="#10b981" fillOpacity="0.2" stroke="#059669" strokeWidth="1.6" />
-              <polygon points="50,16 95,12 93,52 48,54" fill="#10b981" fillOpacity="0.2" stroke="#059669" strokeWidth="1.6" />
+              <polygon points="10,12 50,16 48,54 12,52" fill="var(--diagram-teal-fill)" stroke="var(--diagram-emerald)" strokeWidth="1.6" />
+              <polygon points="50,16 95,12 93,52 48,54" fill="var(--diagram-teal-fill)" stroke="var(--diagram-emerald)" strokeWidth="1.6" />
             </svg>
             <div className="text-xs">
               <div className="font-bold text-emerald-700 dark:text-emerald-300">適合条件を満たす変形場</div>
@@ -213,8 +213,8 @@ export const Ch6ElasticDeformation: React.FC<Ch6Props> = ({
 
           <div className="app-surface-subtle rounded-lg p-3 flex items-center gap-3">
             <svg viewBox="0 0 110 70" className="w-24 shrink-0 h-auto" aria-hidden="true">
-              <polygon points="10,12 45,14 42,52 12,50" fill="#ef4444" fillOpacity="0.2" stroke="#dc2626" strokeWidth="1.6" />
-              <polygon points="56,16 96,12 94,54 48,46" fill="#ef4444" fillOpacity="0.2" stroke="#dc2626" strokeWidth="1.6" />
+              <polygon points="10,12 45,14 42,52 12,50" fill="var(--diagram-red-fill)" stroke="var(--diagram-red)" strokeWidth="1.6" />
+              <polygon points="56,16 96,12 94,54 48,46" fill="var(--diagram-red-fill)" stroke="var(--diagram-red)" strokeWidth="1.6" />
             </svg>
             <div className="text-xs">
               <div className="font-bold text-red-700 dark:text-red-300">非適合な勝手なひずみ分布</div>
@@ -248,7 +248,7 @@ export const Ch6ElasticDeformation: React.FC<Ch6Props> = ({
                   className={`px-2 py-1.5 rounded-lg border font-semibold cursor-pointer ${
                     mode === m.id
                       ? 'bg-blue-700 text-white border-blue-700'
-                      : 'app-surface-subtle border-[var(--border-subtle)]'
+                      : 'app-surface-subtle border-[var(--border-control)]'
                   }`}
                 >
                   {m.label}
@@ -306,15 +306,14 @@ export const Ch6ElasticDeformation: React.FC<Ch6Props> = ({
                   {/* 変形後 (平行四辺形) */}
                   <polygon
                     points={polyPts}
-                    fill="#2563eb"
-                    fillOpacity="0.16"
-                    stroke="#2563eb"
+                    fill="var(--diagram-blue-fill)"
+                    stroke="var(--diagram-blue)"
                     strokeWidth="2.4"
                   />
                   <text x="140" y="205" textAnchor="middle" className="text-[11px] font-mono-num fill-current">
                     ε_z={round4(def.epsZ * 100)}% / ε_x={round4(def.epsX * 100)}%
                   </text>
-                  <text x="140" y="220" textAnchor="middle" className="text-[11px] font-mono-num fill-teal-700 dark:fill-teal-300 font-bold">
+                  <text x="140" y="220" textAnchor="middle" className="text-[11px] font-mono-num fill-[var(--diagram-teal)] font-bold">
                     体積ひずみ ε_v={round4(def.epsVol * 100)}%・γ_xz={round4(def.gammaXZ * 100)}%
                   </text>
                 </svg>
@@ -382,7 +381,7 @@ export const Ch6ElasticDeformation: React.FC<Ch6Props> = ({
                   <text x="34" y="136" className="text-[10px] fill-current">沈下 w (mm)</text>
                   <polyline
                     fill="none"
-                    stroke="#2563eb"
+                    stroke="var(--diagram-blue)"
                     strokeWidth="2.4"
                     points={surfaceProfile
                       .map((pt) => {

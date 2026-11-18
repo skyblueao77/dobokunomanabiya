@@ -70,9 +70,9 @@ export const CopyShareButton: React.FC<CopyShareButtonProps> = ({
         className="interactive-btn app-surface inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer"
       >
         {status === 'copied' ? (
-          <Check className="h-3.5 w-3.5 text-emerald-600" aria-hidden="true" />
+          <Check className="h-3.5 w-3.5 text-emerald-700 dark:text-emerald-400" aria-hidden="true" />
         ) : status === 'failed' ? (
-          <AlertCircle className="h-3.5 w-3.5 text-red-600" aria-hidden="true" />
+          <AlertCircle className="h-3.5 w-3.5 text-red-600 dark:text-red-400" aria-hidden="true" />
         ) : (
           <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
         )}
