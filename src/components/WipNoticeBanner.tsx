@@ -22,7 +22,7 @@ export const WipNoticeBanner: React.FC<WipNoticeBannerProps> = ({
         />
         <div className="space-y-1 flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="app-notice-badge inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-bold tracking-wide">
+            <span className="app-notice-badge inline-flex items-center rounded-md px-2 py-0.5 text-xs font-bold tracking-wide">
               開発中（WIP）
             </span>
             <strong className="font-bold">

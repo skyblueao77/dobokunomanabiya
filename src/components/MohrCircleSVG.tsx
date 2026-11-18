@@ -152,7 +152,7 @@ export const MohrCircleSVG: React.FC<MohrCircleSVGProps> = ({ inputs, result }) 
         )}
 
         {/* 目盛りラベル */}
-        <g className="text-[11px] fill-[var(--text-muted)] font-mono-num">
+        <g className="text-xs fill-[var(--text-muted)] font-mono-num">
           {sigmaTicks.map((s) => (
             <text key={`tx-${s}`} x={toX(s)} y={originY + 16} textAnchor="middle">
               {s}
@@ -307,7 +307,7 @@ export const MohrCircleSVG: React.FC<MohrCircleSVGProps> = ({ inputs, result }) 
               x={activeCx + (arcRadius + 14) * Math.cos(twoThetaRad / 2)}
               y={originY - (arcRadius + 14) * Math.sin(twoThetaRad / 2) + 4}
               textAnchor="middle"
-              className="text-[11px] font-bold fill-[var(--diagram-teal)]"
+              className="text-xs font-bold fill-[var(--diagram-teal)]"
             >
               2θ={2 * inputs.theta}°
             </text>

@@ -214,7 +214,7 @@ export const RankineEarthModule: React.FC<RankineEarthModuleProps> = ({
                   <text
                     x="265"
                     y={wallTopY + z0Px + 4}
-                    className="text-[11px] font-semibold fill-[var(--diagram-red)] font-mono-num"
+                    className="text-xs font-semibold fill-[var(--diagram-red)] font-mono-num"
                   >
                     引張亀裂 z₀ = {res.tensionCrackDepth} m
                   </text>

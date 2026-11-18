@@ -150,9 +150,9 @@ export const Ch3PrincipalInvariants: React.FC<Ch3Props> = ({
       {/* 2. 想像 */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <aside className="lg:col-span-5 app-surface rounded-xl p-4 space-y-4 shadow-sm">
-          <h3 className="text-sm font-bold border-b border-[var(--border-subtle)] pb-2">
+          <h2 className="text-sm font-bold border-b border-[var(--border-subtle)] pb-2">
             2. 想像：応力成分と「座標回転不変性」実験
-          </h3>
+          </h2>
 
           <div className="space-y-2.5">
             <SliderInput label="σ_x" symbol="σ_x" unit="kPa" value={tensor.sxx} min={-100} max={300} step={5} onChange={(v) => update('sxx', v)} />

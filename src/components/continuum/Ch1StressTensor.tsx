@@ -180,7 +180,7 @@ export const Ch1StressTensor: React.FC<Ch1Props> = ({
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <aside className="lg:col-span-5 app-surface rounded-xl p-4 space-y-4 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border-subtle)] pb-2">
-            <h3 className="text-sm font-bold">2. 想像：3次元応力テンソル操作</h3>
+            <h2 className="text-sm font-bold">2. 想像：3次元応力テンソル操作</h2>
             <div className="inline-flex rounded-lg border border-[var(--border-control)] overflow-hidden text-xs">
               <button
                 type="button"
@@ -232,7 +232,7 @@ export const Ch1StressTensor: React.FC<Ch1Props> = ({
                 onClick={() =>
                   setTensor(convention === 'compression' ? p.v : flipTensorSign(p.v))
                 }
-                className="interactive-btn app-surface-subtle rounded-md px-2.5 py-1 text-[11px] font-semibold cursor-pointer"
+                className="interactive-btn app-surface-subtle rounded-md px-2.5 py-1 text-xs font-semibold cursor-pointer"
               >
                 {p.label}
               </button>
@@ -334,7 +334,7 @@ export const Ch1StressTensor: React.FC<Ch1Props> = ({
                 </defs>
 
                 {/* 座標軸ミニガイド */}
-                <g className="text-[10px] font-bold fill-[var(--text-muted)]">
+                <g className="text-xs font-bold fill-[var(--text-muted)]">
                   <line x1="36" y1="225" x2="66" y2="242" stroke="var(--text-muted)" strokeWidth="1.5" />
                   <text x="70" y="246">x</text>
                   <line x1="36" y1="225" x2="10" y2="240" stroke="var(--text-muted)" strokeWidth="1.5" />
@@ -361,7 +361,7 @@ export const Ch1StressTensor: React.FC<Ch1Props> = ({
                     markerEnd={`url(#${zIsComp ? 'c1-arr-blue' : 'c1-arr-red'})`}
                   />
                 )}
-                <text x={topC[0] + 6} y={topC[1] - zLen - 4} className="text-[11px] font-bold fill-current font-mono-num">
+                <text x={topC[0] + 6} y={topC[1] - zLen - 4} className="text-xs font-bold fill-current font-mono-num">
                   σ_z={round2(tensor.szz)}
                 </text>
 
@@ -377,7 +377,7 @@ export const Ch1StressTensor: React.FC<Ch1Props> = ({
                     markerEnd={`url(#${xIsComp ? 'c1-arr-blue' : 'c1-arr-red'})`}
                   />
                 )}
-                <text x={frontRightC[0] + xLen * 0.866 + 6} y={frontRightC[1] + xLen * 0.5 + 4} className="text-[11px] font-bold fill-current font-mono-num">
+                <text x={frontRightC[0] + xLen * 0.866 + 6} y={frontRightC[1] + xLen * 0.5 + 4} className="text-xs font-bold fill-current font-mono-num">
                   σ_x={round2(tensor.sxx)}
                 </text>
 
@@ -393,7 +393,7 @@ export const Ch1StressTensor: React.FC<Ch1Props> = ({
                     markerEnd={`url(#${yIsComp ? 'c1-arr-blue' : 'c1-arr-red'})`}
                   />
                 )}
-                <text x={frontLeftC[0] - yLen * 0.866 - 6} y={frontLeftC[1] + yLen * 0.5 + 12} textAnchor="end" className="text-[11px] font-bold fill-current font-mono-num">
+                <text x={frontLeftC[0] - yLen * 0.866 - 6} y={frontLeftC[1] + yLen * 0.5 + 12} textAnchor="end" className="text-xs font-bold fill-current font-mono-num">
                   σ_y={round2(tensor.syy)}
                 </text>
 

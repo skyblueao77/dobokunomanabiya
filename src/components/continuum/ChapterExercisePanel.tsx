@@ -128,9 +128,9 @@ export const ChapterExercisePanel: React.FC<ChapterExercisePanelProps> = ({
     <section className="app-surface rounded-xl shadow-sm overflow-hidden">
       <div className="app-surface-subtle border-x-0 border-t-0 px-4 py-3 flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h3 className="text-base font-bold">
+          <h2 className="text-base font-bold">
             3. 演習問題（{chapterTitle}）
-          </h3>
+          </h2>
           <p className="text-xs app-text-muted mt-0.5">
             自分で計算・考察して解答を判定できます。条件をシミュレーターへ読み込んで視覚的に検算もできます。
           </p>
@@ -194,7 +194,7 @@ export const ChapterExercisePanel: React.FC<ChapterExercisePanelProps> = ({
                 </div>
               </div>
 
-              <h4 className="text-sm font-bold">{ex.title}</h4>
+              <h3 className="text-sm font-bold">{ex.title}</h3>
               <p className="text-sm app-text-muted leading-relaxed">{ex.statement}</p>
               {ex.mathContext && (
                 <div className="app-surface-subtle rounded-lg px-3 py-2 overflow-x-auto">

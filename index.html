@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <!-- Opt into native OS text scaling while preserving relative rem/em units -->
+    <meta name="text-scale" content="scale" />
     <!-- MANDATORY: Declare support for both light and dark themes -->
     <meta name="color-scheme" content="light dark" />
     <script src="/theme-init.js"></script>
@@ -12,7 +14,8 @@
       content="「土木の学び舎」は日本の大学・高専の土木系学生向けインタラクティブ学習ポータルです。土質力学（モールの応力円・ランキン土圧）、構造力学（SFD・BMD）、水理学（マニング公式）を図解と数式で直感的に学べます。"
     />
     <meta name="robots" content="index, follow" />
-    <meta name="theme-color" content="#1d4ed8" />
+    <meta name="theme-color" content="#1d4ed8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b1120" media="(prefers-color-scheme: dark)" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="ja_JP" />
     <meta property="og:site_name" content="土木の学び舎" />
