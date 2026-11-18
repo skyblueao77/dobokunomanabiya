@@ -1,5 +1,11 @@
 import { Suspense, lazy, useEffect, useState } from 'react';
-import { LEARNING_UNITS, type UnitId } from './data/curriculum';
+import {
+  LEARNING_UNITS,
+  SUBJECTS,
+  getSubjectMeta,
+  type SubjectId,
+  type UnitId,
+} from './data/curriculum';
 import {
   applyThemePreference,
   getThemePreference,
@@ -24,28 +30,44 @@ const LegalPage = lazy(() => import('./components/LegalPage'));
 
 type Route = 'home' | 'legal' | UnitId;
 
-function parseRouteFromHash(): Route {
+interface ParsedHash {
+  route: Route;
+  subject: SubjectId;
+}
+
+function parseRouteFromHash(): ParsedHash {
   const hash = window.location.hash;
   if (hash === '#/legal' || hash.startsWith('#/legal?')) {
-    return 'legal';
+    return { route: 'legal', subject: 'all' };
+  }
+  if (hash.startsWith('#/subject/')) {
+    const rawSubject = hash.slice('#/subject/'.length).split('?')[0] as Exclude<SubjectId, 'all'>;
+    if (SUBJECTS.some((s) => s.id === rawSubject)) {
+      return { route: 'home', subject: rawSubject };
+    }
   }
   if (hash.startsWith('#/unit/')) {
     const rawId = hash.slice('#/unit/'.length).split('?')[0] as UnitId;
-    if (LEARNING_UNITS.some((u) => u.id === rawId)) {
-      return rawId;
+    const matched = LEARNING_UNITS.find((u) => u.id === rawId);
+    if (matched) {
+      return { route: rawId, subject: matched.subjectId };
     }
   }
-  return 'home';
+  return { route: 'home', subject: 'all' };
 }
 
 export function App() {
-  const [route, setRoute] = useState<Route>(() => parseRouteFromHash());
+  const initialParsed = parseRouteFromHash();
+  const [route, setRoute] = useState<Route>(initialParsed.route);
+  const [selectedSubject, setSelectedSubject] = useState<SubjectId>(initialParsed.subject);
   const [progress, setProgress] = useState<StudyProgress>(() => loadStudyProgress());
   const [themePref, setThemePref] = useState<ThemePreference>(() => getThemePreference());
 
   useEffect(() => {
     const onHashChange = () => {
-      setRoute(parseRouteFromHash());
+      const parsed = parseRouteFromHash();
+      setRoute(parsed.route);
+      setSelectedSubject(parsed.subject);
     };
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
@@ -67,7 +89,12 @@ export function App() {
   // SPA document title update on route change (WCAG 2.4.2)
   useEffect(() => {
     if (route === 'home') {
-      document.title = '土木の学び舎｜土木工学インタラクティブ学習ポータル';
+      if (selectedSubject !== 'all') {
+        const subjectMeta = getSubjectMeta(selectedSubject);
+        document.title = `${subjectMeta.name}｜土木の学び舎`;
+      } else {
+        document.title = '土木の学び舎｜土木工学インタラクティブ学習ポータル';
+      }
     } else if (route === 'legal') {
       document.title = '利用規約・免責事項・プライバシーポリシー｜土木の学び舎';
     } else {
@@ -76,15 +103,22 @@ export function App() {
         ? `${unit.title}｜土木の学び舎`
         : '土木の学び舎｜土木工学インタラクティブ学習ポータル';
     }
-  }, [route]);
+  }, [route, selectedSubject]);
 
-  const navigate = (nextRoute: Route) => {
+  const navigate = (nextRoute: Route, subjectOverride?: SubjectId) => {
     setRoute(nextRoute);
     if (nextRoute === 'home') {
-      window.location.hash = '#/';
+      const nextSubject = subjectOverride ?? 'all';
+      setSelectedSubject(nextSubject);
+      window.location.hash = nextSubject === 'all' ? '#/' : `#/subject/${nextSubject}`;
     } else if (nextRoute === 'legal') {
+      setSelectedSubject('all');
       window.location.hash = '#/legal';
     } else {
+      const matched = LEARNING_UNITS.find((u) => u.id === nextRoute);
+      if (matched) {
+        setSelectedSubject(matched.subjectId);
+      }
       if (!window.location.hash.startsWith(`#/unit/${nextRoute}`)) {
         window.location.hash = `#/unit/${nextRoute}`;
       }
@@ -98,6 +132,14 @@ export function App() {
     window.requestAnimationFrame(() => {
       document.getElementById('main-content')?.focus({ preventScroll: true });
     });
+  };
+
+  const handleSelectSubjectOnHome = (subject: SubjectId) => {
+    setSelectedSubject(subject);
+    const nextHash = subject === 'all' ? '#/' : `#/subject/${subject}`;
+    if (window.location.hash !== nextHash) {
+      window.history.replaceState(null, '', nextHash);
+    }
   };
 
   const handleChangeTheme = (pref: ThemePreference) => {
@@ -157,6 +199,7 @@ export function App() {
     <div className="min-h-screen flex flex-col">
       <PortalHeader
         activeRoute={route}
+        activeSubject={selectedSubject}
         onNavigate={navigate}
         themePref={themePref}
         onChangeTheme={handleChangeTheme}
@@ -177,7 +220,12 @@ export function App() {
             }
           >
             {route === 'home' && (
-              <PortalHome progress={progress} onOpenUnit={(id) => navigate(id)} />
+              <PortalHome
+                progress={progress}
+                selectedSubject={selectedSubject}
+                onSelectSubject={handleSelectSubjectOnHome}
+                onOpenUnit={(id) => navigate(id)}
+              />
             )}
             {route === 'geomechanics-continuum' && (
               <GeomechanicsCourseModule

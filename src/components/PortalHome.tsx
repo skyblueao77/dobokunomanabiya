@@ -11,11 +11,17 @@ import { type StudyProgress } from '../utils/storage';
 
 interface PortalHomeProps {
   progress: StudyProgress;
+  selectedSubject: SubjectId;
+  onSelectSubject: (subject: SubjectId) => void;
   onOpenUnit: (unitId: UnitId) => void;
 }
 
-export const PortalHome: React.FC<PortalHomeProps> = ({ progress, onOpenUnit }) => {
-  const [selectedSubject, setSelectedSubject] = useState<SubjectId>('all');
+export const PortalHome: React.FC<PortalHomeProps> = ({
+  progress,
+  selectedSubject,
+  onSelectSubject,
+  onOpenUnit,
+}) => {
   const [query, setQuery] = useState('');
 
   const filteredUnits = useMemo(() => {
@@ -104,7 +110,7 @@ export const PortalHome: React.FC<PortalHomeProps> = ({ progress, onOpenUnit }) 
                   type="button"
                   role="tab"
                   aria-selected={isSelected}
-                  onClick={() => setSelectedSubject(tab.id)}
+                  onClick={() => onSelectSubject(tab.id)}
                   className="tab-item px-4 py-2 text-xs sm:text-sm whitespace-nowrap cursor-pointer hover:bg-[var(--surface-subtle)] rounded-t-lg transition-colors"
                 >
                   {tab.label}

@@ -1,127 +1,497 @@
-import React, { useId } from 'react';
-import { Compass, Menu, Monitor, Moon, Sun, SlidersHorizontal } from 'lucide-react';
-import { LEARNING_UNITS, type UnitId } from '../data/curriculum';
+import React, { useEffect, useId, useLayoutEffect, useRef } from 'react';
+import { ChevronDown, Compass, Menu, Monitor, Moon, SlidersHorizontal, Sun } from 'lucide-react';
+import {
+  SUBJECTS,
+  getUnitsBySubject,
+  type SubjectId,
+  type UnitId,
+} from '../data/curriculum';
 import { type ThemePreference } from '../utils/storage';
+
+type NavSubjectId = Exclude<SubjectId, 'all'>;
 
 interface PortalHeaderProps {
   activeRoute: 'home' | 'legal' | UnitId;
-  onNavigate: (route: 'home' | UnitId) => void;
+  activeSubject: SubjectId;
+  onNavigate: (route: 'home' | UnitId, subjectOverride?: SubjectId) => void;
   themePref: ThemePreference;
   onChangeTheme: (pref: ThemePreference) => void;
 }
 
+function isPopoverOpen(el: HTMLElement | null): boolean {
+  if (!el) return false;
+  try {
+    return el.matches(':popover-open') || el.classList.contains(':popover-open');
+  } catch {
+    return el.classList.contains(':popover-open');
+  }
+}
+
+function showPopoverSafe(el: HTMLElement | null, source?: HTMLElement | null): void {
+  if (!el) return;
+  const popEl = el as HTMLElement & {
+    showPopover?: (options?: { source?: HTMLElement }) => void;
+  };
+  if (!popEl.showPopover) return;
+  try {
+    if (source) {
+      popEl.showPopover({ source });
+    } else {
+      popEl.showPopover();
+    }
+  } catch {
+    try {
+      popEl.showPopover();
+    } catch {
+      // Ignore if already open or unsupported
+    }
+  }
+}
+
+function hidePopoverSafe(el: HTMLElement | null): void {
+  if (!el) return;
+  const popEl = el as HTMLElement & { hidePopover?: () => void };
+  if (!popEl.hidePopover) return;
+  try {
+    popEl.hidePopover();
+  } catch {
+    // Ignore if not open
+  }
+}
+
+function positionPopoverFallback(
+  popoverEl: HTMLElement,
+  triggerEl: HTMLElement,
+  alignEnd = false
+): void {
+  if (typeof CSS !== 'undefined' && CSS.supports?.('position-area', 'block-end')) {
+    return;
+  }
+  const triggerRect = triggerEl.getBoundingClientRect();
+  const popRect = popoverEl.getBoundingClientRect();
+  const margin = 8;
+  let top = triggerRect.bottom + margin;
+  if (top + popRect.height > window.innerHeight - margin) {
+    top = Math.max(margin, triggerRect.top - popRect.height - margin);
+  }
+  const rawLeft = alignEnd ? triggerRect.right - popRect.width : triggerRect.left;
+  const left = Math.max(
+    margin,
+    Math.min(rawLeft, window.innerWidth - popRect.width - margin)
+  );
+  popoverEl.style.top = `${top}px`;
+  popoverEl.style.left = `${left}px`;
+}
+
 export const PortalHeader: React.FC<PortalHeaderProps> = ({
   activeRoute,
+  activeSubject,
   onNavigate,
   themePref,
   onChangeTheme,
 }) => {
-  const menuId = useId();
-  const settingsId = useId();
+  const baseId = useId();
+  const menuId = `${baseId}-site-menu`;
+  const settingsId = `${baseId}-settings`;
 
-  const closePopover = (id: string) => {
-    const el = document.getElementById(id) as (HTMLElement & { hidePopover?: () => void }) | null;
-    if (el?.hidePopover) {
-      try {
-        el.hidePopover();
-      } catch {
-        // Ignore if not open
+  const headerRef = useRef<HTMLElement | null>(null);
+  const innerRef = useRef<HTMLDivElement | null>(null);
+  const menuRef = useRef<HTMLUListElement | null>(null);
+  const settingsBtnRef = useRef<HTMLButtonElement | null>(null);
+  const settingsPopRef = useRef<HTMLDivElement | null>(null);
+
+  const triggerRefs = useRef<Record<NavSubjectId, HTMLButtonElement | null>>({
+    structural: null,
+    hydraulics: null,
+    soil: null,
+  });
+  const submenuRefs = useRef<Record<NavSubjectId, HTMLUListElement | null>>({
+    structural: null,
+    hydraulics: null,
+    soil: null,
+  });
+
+  const isWideRef = useRef(false);
+  const lastCollapsedWidthRef = useRef(0);
+  const hoverPreviewRef = useRef<Set<NavSubjectId>>(new Set());
+
+  const closeAllNavigationPopovers = () => {
+    hoverPreviewRef.current.clear();
+    if (isWideRef.current) {
+      for (const s of SUBJECTS) {
+        hidePopoverSafe(submenuRefs.current[s.id]);
       }
+    } else {
+      hidePopoverSafe(menuRef.current);
     }
   };
 
-  const navItems: { id: 'home' | UnitId; label: string }[] = [
-    { id: 'home', label: 'ポータル一覧' },
-    ...LEARNING_UNITS.map((u) => ({
-      id: u.id,
-      label:
-        u.id === 'geomechanics-continuum'
-          ? '応力と変形'
-          : u.id === 'mohr-circle'
-          ? 'モールの応力円'
-          : u.id === 'rankine-earth-pressure'
-          ? 'ランキン土圧'
-          : u.id === 'beam-sfd-bmd'
-          ? '梁 SFD/BMD'
-          : '開水路等流',
-    })),
-  ];
+  useLayoutEffect(() => {
+    const header = headerRef.current;
+    const inner = innerRef.current;
+    const menu = menuRef.current;
+    if (!header || !inner || !menu) return;
+
+    let rafId = 0;
+
+    const syncLayout = (forceRemeasure = false) => {
+      const currentWidth = header.getBoundingClientRect().width;
+      const currentlyWide = header.classList.contains('is-wide');
+
+      if (!forceRemeasure && !currentlyWide && currentWidth <= lastCollapsedWidthRef.current) {
+        return;
+      }
+
+      const wasMenuOpen = !currentlyWide && isPopoverOpen(menu);
+
+      header.classList.add('is-measuring', 'is-wide');
+      menu.removeAttribute('popover');
+
+      const wide = inner.scrollWidth <= inner.clientWidth;
+      header.classList.toggle('is-wide', wide);
+
+      if (!wide) {
+        lastCollapsedWidthRef.current = currentWidth;
+      } else {
+        lastCollapsedWidthRef.current = 0;
+      }
+
+      window.cancelAnimationFrame(rafId);
+      rafId = window.requestAnimationFrame(() => {
+        header.classList.remove('is-measuring');
+      });
+
+      const modeChanged = isWideRef.current !== wide || forceRemeasure;
+      isWideRef.current = wide;
+
+      if (wide) {
+        menu.removeAttribute('popover');
+        for (const subject of SUBJECTS) {
+          const sub = submenuRefs.current[subject.id];
+          const trig = triggerRefs.current[subject.id];
+          if (!sub || !trig) continue;
+          sub.setAttribute('popover', 'auto');
+          sub.hidden = false;
+          trig.setAttribute('aria-expanded', isPopoverOpen(sub) ? 'true' : 'false');
+        }
+      } else {
+        menu.setAttribute('popover', 'auto');
+        if (wasMenuOpen) {
+          showPopoverSafe(menu);
+        }
+        for (const subject of SUBJECTS) {
+          const sub = submenuRefs.current[subject.id];
+          const trig = triggerRefs.current[subject.id];
+          if (!sub || !trig) continue;
+          sub.removeAttribute('popover');
+          if (modeChanged) {
+            sub.hidden = true;
+            trig.setAttribute('aria-expanded', 'false');
+          }
+        }
+      }
+    };
+
+    syncLayout(true);
+
+    const observer = new ResizeObserver((entries) => {
+      const menuResized = entries.some((entry) => entry.target === menu);
+      syncLayout(menuResized);
+    });
+    observer.observe(header);
+    observer.observe(menu);
+
+    return () => {
+      observer.disconnect();
+      window.cancelAnimationFrame(rafId);
+    };
+  }, []);
+
+  useEffect(() => {
+    const cleanups: (() => void)[] = [];
+
+    for (const subject of SUBJECTS) {
+      const sub = submenuRefs.current[subject.id];
+      const trig = triggerRefs.current[subject.id];
+      if (!sub || !trig) continue;
+
+      const onToggle = (e: Event) => {
+        const toggleEvent = e as Event & { newState?: string };
+        const open = toggleEvent.newState === 'open';
+        if (isWideRef.current) {
+          trig.setAttribute('aria-expanded', open ? 'true' : 'false');
+          if (open) {
+            positionPopoverFallback(sub, trig, false);
+          } else {
+            sub.style.top = '';
+            sub.style.left = '';
+            hoverPreviewRef.current.delete(subject.id);
+          }
+        }
+      };
+
+      sub.addEventListener('toggle', onToggle);
+      cleanups.push(() => sub.removeEventListener('toggle', onToggle));
+    }
+
+    const settingsPop = settingsPopRef.current;
+    const settingsBtn = settingsBtnRef.current;
+    if (settingsPop && settingsBtn) {
+      const onSettingsToggle = (e: Event) => {
+        const toggleEvent = e as Event & { newState?: string };
+        const open = toggleEvent.newState === 'open';
+        if (open) {
+          positionPopoverFallback(settingsPop, settingsBtn, true);
+        } else {
+          settingsPop.style.top = '';
+          settingsPop.style.left = '';
+        }
+      };
+      settingsPop.addEventListener('toggle', onSettingsToggle);
+      cleanups.push(() => settingsPop.removeEventListener('toggle', onSettingsToggle));
+    }
+
+    return () => {
+      for (const fn of cleanups) fn();
+    };
+  }, []);
+
+  const handleSubjectPointerEnter = (
+    subjectId: NavSubjectId,
+    e: React.PointerEvent<HTMLLIElement>
+  ) => {
+    if (!isWideRef.current) return;
+    if (e.pointerType === 'touch') return;
+    if (!window.matchMedia?.('(hover: hover)').matches) return;
+
+    const sub = submenuRefs.current[subjectId];
+    const trig = triggerRefs.current[subjectId];
+    if (!sub || !trig || isPopoverOpen(sub)) return;
+
+    hoverPreviewRef.current.add(subjectId);
+    showPopoverSafe(sub, trig);
+  };
+
+  const handleSubjectPointerLeave = (subjectId: NavSubjectId) => {
+    if (!isWideRef.current) return;
+    if (!hoverPreviewRef.current.has(subjectId)) return;
+
+    hoverPreviewRef.current.delete(subjectId);
+    hidePopoverSafe(submenuRefs.current[subjectId]);
+  };
+
+  const handleSubjectBlur = (
+    subjectId: NavSubjectId,
+    e: React.FocusEvent<HTMLLIElement>
+  ) => {
+    if (!isWideRef.current) return;
+    const nextFocus = e.relatedTarget;
+    if (nextFocus instanceof Node && e.currentTarget.contains(nextFocus)) {
+      return;
+    }
+    hoverPreviewRef.current.delete(subjectId);
+    const sub = submenuRefs.current[subjectId];
+    if (isPopoverOpen(sub)) {
+      hidePopoverSafe(sub);
+    }
+  };
+
+  const handleTriggerClick = (
+    subjectId: NavSubjectId,
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    const sub = submenuRefs.current[subjectId];
+    const trig = triggerRefs.current[subjectId];
+    if (!sub || !trig) return;
+
+    if (isWideRef.current) {
+      if (hoverPreviewRef.current.has(subjectId)) {
+        hoverPreviewRef.current.delete(subjectId);
+        e.preventDefault();
+      }
+      return;
+    }
+
+    e.preventDefault();
+    const willOpen = sub.hidden;
+    sub.hidden = !willOpen;
+    trig.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+  };
+
+  const isPortalAllCurrent = activeRoute === 'home' && activeSubject === 'all';
 
   return (
-    <header className="sticky top-0 z-30 border-b border-[var(--border-subtle)] bg-[var(--surface-card)]/95 text-[var(--text-primary)] backdrop-blur">
+    <header
+      ref={headerRef}
+      className="site-header sticky top-0 z-30 border-b border-[var(--border-subtle)] bg-[var(--surface-card)]/95 text-[var(--text-primary)] backdrop-blur"
+    >
       <a href="#main-content" className="skip-link visually-hidden">
         メインコンテンツへスキップ
       </a>
 
-      <div className="mx-auto max-w-7xl px-3 sm:px-6 py-2.5 flex items-center justify-between gap-2">
+      <div
+        ref={innerRef}
+        className="header-inner mx-auto max-w-7xl px-3 sm:px-6 py-2 flex items-center justify-between gap-3"
+      >
         <a
           href="#/"
           onClick={(e) => {
             e.preventDefault();
-            onNavigate('home');
+            onNavigate('home', 'all');
+            closeAllNavigationPopovers();
           }}
-          className="flex items-center gap-2 min-w-0 rounded-lg px-1 py-1"
+          className="site-logo flex items-center gap-2 rounded-lg px-1 py-1 shrink-0"
         >
-          <span className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg bg-blue-700 text-white shadow-sm">
-            <Compass className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-700 text-white shadow-sm">
+            <Compass className="h-4 w-4" aria-hidden="true" />
           </span>
-          <span className="min-w-0">
-            <span className="flex items-center gap-1.5 min-w-0">
-              <span className="text-sm sm:text-base font-bold leading-tight truncate">
-                土木の学び舎
-              </span>
-              <span className="app-notice-badge shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold leading-none">
-                開発中
-              </span>
+          <span className="flex items-center gap-1.5">
+            <span className="text-sm sm:text-base font-bold leading-tight whitespace-nowrap">
+              土木の学び舎
             </span>
-            <span className="hidden sm:block text-[11px] app-text-muted leading-tight truncate">
-              土木工学インタラクティブ学習ポータル（制作途上・誤りを含む可能性あり）
+            <span className="app-notice-badge shrink-0 rounded px-1.5 py-0.5 text-xs font-bold leading-none">
+              開発中
             </span>
           </span>
         </a>
 
-        {/* デスクトップ向けインラインナビゲーション */}
-        <nav aria-label="主要ナビゲーション" className="hidden lg:flex items-center gap-1">
-          <ul className="flex items-center gap-1 flex-wrap">
-            {navItems.map((item) => {
-              const isCurrent = activeRoute === item.id;
+        <nav className="site-nav" aria-label="主要ナビゲーション">
+          <button
+            type="button"
+            popoverTarget={menuId}
+            popoverTargetAction="toggle"
+            aria-controls={menuId}
+            className="menu-button interactive-btn app-surface inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer"
+          >
+            <Menu className="h-4 w-4" aria-hidden="true" />
+            <span>メニュー</span>
+          </button>
+
+          <ul
+            ref={menuRef}
+            id={menuId}
+            className="site-menu app-surface rounded-xl p-2 shadow-xl"
+          >
+            <li>
+              <a
+                href="#/"
+                aria-current={isPortalAllCurrent ? 'page' : undefined}
+                onClick={(e) => {
+                  e.preventDefault();
+                  onNavigate('home', 'all');
+                  closeAllNavigationPopovers();
+                }}
+                className="nav-link-item inline-flex items-center rounded-md px-3 py-2 text-xs sm:text-sm font-medium hover:bg-[var(--surface-subtle)] transition-colors"
+              >
+                ポータル一覧
+              </a>
+            </li>
+
+            {SUBJECTS.map((subject) => {
+              const units = getUnitsBySubject(subject.id);
+              const subId = `${baseId}-sub-${subject.id}`;
+              const isSubjectActive = activeSubject === subject.id;
+
               return (
-                <li key={item.id}>
-                  <a
-                    href={item.id === 'home' ? '#/' : `#/unit/${item.id}`}
-                    aria-current={isCurrent ? 'page' : undefined}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      onNavigate(item.id);
+                <li
+                  key={subject.id}
+                  className="nav-dropdown"
+                  onPointerEnter={(e) => handleSubjectPointerEnter(subject.id, e)}
+                  onPointerLeave={() => handleSubjectPointerLeave(subject.id)}
+                  onBlur={(e) => handleSubjectBlur(subject.id, e)}
+                >
+                  <button
+                    ref={(el) => {
+                      triggerRefs.current[subject.id] = el;
                     }}
-                    className="nav-link-item inline-flex items-center px-3 py-2 text-xs font-medium rounded-md hover:bg-[var(--surface-subtle)] transition-[background-color]"
+                    type="button"
+                    aria-expanded="false"
+                    aria-controls={subId}
+                    popoverTarget={subId}
+                    data-active-subject={isSubjectActive ? 'true' : undefined}
+                    onClick={(e) => handleTriggerClick(subject.id, e)}
+                    className="dropdown-trigger nav-link-item inline-flex items-center justify-between gap-1 rounded-md px-3 py-2 text-xs sm:text-sm font-semibold hover:bg-[var(--surface-subtle)] transition-colors cursor-pointer"
                   >
-                    {item.label}
-                  </a>
+                    <span>{subject.name}</span>
+                    <ChevronDown
+                      className="chevron-icon h-3.5 w-3.5 shrink-0 transition-transform duration-150"
+                      aria-hidden="true"
+                    />
+                  </button>
+
+                  <ul
+                    ref={(el) => {
+                      submenuRefs.current[subject.id] = el;
+                    }}
+                    id={subId}
+                    className="dropdown-list app-surface rounded-xl p-1.5 shadow-xl"
+                  >
+                    {units.map((unit) => {
+                      const isUnitCurrent = activeRoute === unit.id;
+                      return (
+                        <li key={unit.id}>
+                          <a
+                            href={`#/unit/${unit.id}`}
+                            aria-current={isUnitCurrent ? 'page' : undefined}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              onNavigate(unit.id);
+                              closeAllNavigationPopovers();
+                            }}
+                            className="dropdown-link flex flex-col gap-0.5 rounded-lg px-3 py-2 text-xs sm:text-sm hover:bg-[var(--surface-subtle)] transition-colors"
+                          >
+                            <span className="font-semibold leading-snug">{unit.title}</span>
+                            <span className="text-xs app-text-muted">
+                              {unit.level} ・ 目安 {unit.estimatedMinutes}分
+                            </span>
+                          </a>
+                        </li>
+                      );
+                    })}
+                    <li className="dropdown-divider-item border-t border-[var(--border-subtle)] mt-1 pt-1">
+                      <a
+                        href={`#/subject/${subject.id}`}
+                        aria-current={
+                          activeRoute === 'home' && activeSubject === subject.id
+                            ? 'page'
+                            : undefined
+                        }
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onNavigate('home', subject.id);
+                          closeAllNavigationPopovers();
+                        }}
+                        className="dropdown-link flex items-center justify-between rounded-lg px-3 py-2 text-xs font-semibold text-[var(--accent-color)] hover:bg-[var(--surface-subtle)] transition-colors"
+                      >
+                        <span>{subject.name}の一覧を見る（{units.length}単元）</span>
+                      </a>
+                    </li>
+                  </ul>
                 </li>
               );
             })}
           </ul>
         </nav>
 
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          {/* 表示設定（3状態テーマ切替は設定ポップオーバー内に配置） */}
+        <div className="header-actions flex items-center gap-1.5 sm:gap-2 shrink-0">
           <button
+            ref={settingsBtnRef}
             type="button"
             popoverTarget={settingsId}
             popoverTargetAction="toggle"
             aria-controls={settingsId}
             aria-label="表示設定を開く"
-            className="interactive-btn app-surface inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold cursor-pointer"
+            className="settings-button interactive-btn app-surface inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold cursor-pointer"
           >
             <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
             <span className="hidden sm:inline">表示設定</span>
           </button>
 
           <div
+            ref={settingsPopRef}
             id={settingsId}
             popover="auto"
-            className="popover-panel app-surface rounded-xl p-4 shadow-xl w-72 max-w-[calc(100dvw-2rem)] m-auto"
+            className="popover-panel settings-popover app-surface rounded-xl p-4 shadow-xl w-72 max-w-[calc(100dvw-2rem)]"
           >
             <div className="space-y-3">
               <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-2">
@@ -169,59 +539,6 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
               </fieldset>
             </div>
           </div>
-
-          {/* モバイル・タブレット向けポップオーバーメニュー */}
-          <button
-            type="button"
-            popoverTarget={menuId}
-            popoverTargetAction="toggle"
-            aria-controls={menuId}
-            className="lg:hidden interactive-btn app-surface inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold cursor-pointer"
-          >
-            <Menu className="h-4 w-4" aria-hidden="true" />
-            <span>メニュー</span>
-          </button>
-
-          <nav
-            id={menuId}
-            aria-label="モバイル単元メニュー"
-            popover="auto"
-            className="popover-panel app-surface rounded-xl p-3 shadow-xl w-72 max-w-[calc(100dvw-2rem)] m-auto"
-          >
-            <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-2 mb-2">
-              <span className="text-sm font-bold">単元ナビゲーション</span>
-              <button
-                type="button"
-                popoverTarget={menuId}
-                popoverTargetAction="hide"
-                className="text-xs app-text-muted px-2 py-1 cursor-pointer"
-              >
-                閉じる
-              </button>
-            </div>
-            <ul className="space-y-1">
-              {navItems.map((item) => {
-                const isCurrent = activeRoute === item.id;
-                return (
-                  <li key={item.id}>
-                    <a
-                      href={item.id === 'home' ? '#/' : `#/unit/${item.id}`}
-                      aria-current={isCurrent ? 'page' : undefined}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        onNavigate(item.id);
-                        closePopover(menuId);
-                      }}
-                      className="nav-link-item flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-[var(--surface-subtle)]"
-                    >
-                      <span>{item.label}</span>
-                      {isCurrent && <span className="text-xs">表示中</span>}
-                    </a>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
         </div>
       </div>
     </header>
