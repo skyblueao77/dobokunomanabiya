@@ -70,7 +70,7 @@ export const OpenChannelModule: React.FC<OpenChannelModuleProps> = ({
             onClick={onToggleUnitComplete}
             className={`interactive-btn inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold border cursor-pointer ${
               isCompleted
-                ? 'bg-emerald-600 text-white border-emerald-700'
+                ? 'bg-emerald-700 text-white border-emerald-800 dark:border-emerald-500'
                 : 'app-surface'
             }`}
           >
@@ -157,8 +157,8 @@ export const OpenChannelModule: React.FC<OpenChannelModuleProps> = ({
                 points={`${cx - bPx / 2 - sidePx},${bottomY - hPx} ${cx + bPx / 2 + sidePx},${
                   bottomY - hPx
                 } ${cx + bPx / 2},${bottomY} ${cx - bPx / 2},${bottomY}`}
-                fill="rgba(59, 130, 246, 0.25)"
-                stroke="#2563eb"
+                fill="var(--diagram-blue-fill)"
+                stroke="var(--diagram-blue)"
                 strokeWidth="2"
               />
               {/* 水路枠 */}
@@ -182,7 +182,7 @@ export const OpenChannelModule: React.FC<OpenChannelModuleProps> = ({
                 x={cx}
                 y={bottomY - hPx / 2 + 4}
                 textAnchor="middle"
-                className="text-xs font-bold fill-blue-700 dark:fill-blue-300 font-mono-num"
+                className="text-xs font-bold fill-[var(--diagram-blue)] font-mono-num"
               >
                 h = {inputs.depth} m (A = {res.area} m²)
               </text>

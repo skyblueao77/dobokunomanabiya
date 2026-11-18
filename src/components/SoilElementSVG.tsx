@@ -40,7 +40,7 @@ export const SoilElementSVG: React.FC<SoilElementSVGProps> = ({ inputs, result }
               markerHeight="6"
               orient="auto-start-reverse"
             >
-              <path d="M 0 1 L 10 5 L 0 9 z" fill="#3b82f6" />
+              <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--diagram-blue)" />
             </marker>
             <marker
               id="arrow-teal"
@@ -51,7 +51,7 @@ export const SoilElementSVG: React.FC<SoilElementSVGProps> = ({ inputs, result }
               markerHeight="6"
               orient="auto-start-reverse"
             >
-              <path d="M 0 1 L 10 5 L 0 9 z" fill="#14b8a6" />
+              <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--diagram-teal)" />
             </marker>
           </defs>
 
@@ -63,7 +63,7 @@ export const SoilElementSVG: React.FC<SoilElementSVGProps> = ({ inputs, result }
             fill="currentColor"
             fillOpacity="0.06"
             stroke="currentColor"
-            strokeOpacity="0.7"
+            strokeOpacity="0.78"
             strokeWidth="2"
           />
 
@@ -72,7 +72,7 @@ export const SoilElementSVG: React.FC<SoilElementSVGProps> = ({ inputs, result }
             y1="24"
             x2="130"
             y2="54"
-            stroke="#3b82f6"
+            stroke="var(--diagram-blue)"
             strokeWidth="2.5"
             markerEnd="url(#arrow-blue)"
           />
@@ -81,7 +81,7 @@ export const SoilElementSVG: React.FC<SoilElementSVGProps> = ({ inputs, result }
             y1="196"
             x2="130"
             y2="166"
-            stroke="#3b82f6"
+            stroke="var(--diagram-blue)"
             strokeWidth="2.5"
             markerEnd="url(#arrow-blue)"
           />
@@ -89,7 +89,7 @@ export const SoilElementSVG: React.FC<SoilElementSVGProps> = ({ inputs, result }
             x="130"
             y="16"
             textAnchor="middle"
-            className="text-[11px] font-bold fill-blue-600 dark:fill-blue-400 font-mono-num"
+            className="text-[11px] font-bold fill-[var(--diagram-blue)] font-mono-num"
           >
             {s1Label} kPa
           </text>
@@ -99,7 +99,7 @@ export const SoilElementSVG: React.FC<SoilElementSVGProps> = ({ inputs, result }
             y1="110"
             x2="74"
             y2="110"
-            stroke="#3b82f6"
+            stroke="var(--diagram-blue)"
             strokeWidth="2.5"
             markerEnd="url(#arrow-blue)"
           />
@@ -108,7 +108,7 @@ export const SoilElementSVG: React.FC<SoilElementSVGProps> = ({ inputs, result }
             y1="110"
             x2="186"
             y2="110"
-            stroke="#3b82f6"
+            stroke="var(--diagram-blue)"
             strokeWidth="2.5"
             markerEnd="url(#arrow-blue)"
           />
@@ -116,7 +116,7 @@ export const SoilElementSVG: React.FC<SoilElementSVGProps> = ({ inputs, result }
             x="18"
             y="98"
             textAnchor="start"
-            className="text-[11px] font-bold fill-blue-600 dark:fill-blue-400 font-mono-num"
+            className="text-[11px] font-bold fill-[var(--diagram-blue)] font-mono-num"
           >
             {s3Label}
           </text>
@@ -127,19 +127,19 @@ export const SoilElementSVG: React.FC<SoilElementSVGProps> = ({ inputs, result }
             x2="180"
             y2="110"
             stroke="currentColor"
-            strokeOpacity="0.35"
+            strokeOpacity="0.45"
             strokeWidth="1"
             strokeDasharray="3 3"
           />
 
           <g transform={`rotate(${-inputs.theta} 130 110)`}>
-            <line x1="82" y1="110" x2="178" y2="110" stroke="#14b8a6" strokeWidth="2.5" />
+            <line x1="82" y1="110" x2="178" y2="110" stroke="var(--diagram-teal)" strokeWidth="2.5" />
             <line
               x1="110"
               y1="103"
               x2="150"
               y2="103"
-              stroke="#14b8a6"
+              stroke="var(--diagram-teal)"
               strokeWidth="2"
               markerEnd="url(#arrow-teal)"
             />
@@ -148,7 +148,7 @@ export const SoilElementSVG: React.FC<SoilElementSVGProps> = ({ inputs, result }
               y1="78"
               x2="130"
               y2="106"
-              stroke="#14b8a6"
+              stroke="var(--diagram-teal)"
               strokeWidth="2"
               markerEnd="url(#arrow-teal)"
             />
@@ -160,14 +160,14 @@ export const SoilElementSVG: React.FC<SoilElementSVGProps> = ({ inputs, result }
                 130 + 32 * Math.cos((inputs.theta * Math.PI) / 180)
               } ${110 - 32 * Math.sin((inputs.theta * Math.PI) / 180)}`}
               fill="none"
-              stroke="#14b8a6"
+              stroke="var(--diagram-teal)"
               strokeWidth="1.5"
             />
           )}
           <text
             x="166"
             y="102"
-            className="text-[11px] font-bold fill-teal-600 dark:fill-teal-300 font-mono-num"
+            className="text-[11px] font-bold fill-[var(--diagram-teal)] font-mono-num"
           >
             θ={inputs.theta}°
           </text>

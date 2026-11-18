@@ -58,7 +58,7 @@ export const SliderInput: React.FC<SliderInputProps> = ({
         step={step}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-2 rounded-lg cursor-pointer"
+        className="w-full h-2 rounded-lg cursor-pointer accent-[var(--accent-color)]"
       />
     </div>
   );

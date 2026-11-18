@@ -228,7 +228,7 @@ export const Ch4MohrPole: React.FC<Ch4Props> = ({
                   className={`px-2 py-1 rounded border font-semibold cursor-pointer ${
                     poleStep === st.id
                       ? 'bg-blue-700 text-white border-blue-700'
-                      : 'app-surface-subtle border-[var(--border-subtle)]'
+                      : 'app-surface-subtle border-[var(--border-control)]'
                   }`}
                 >
                   {st.label}
@@ -244,7 +244,7 @@ export const Ch4MohrPole: React.FC<Ch4Props> = ({
                 type="checkbox"
                 checked={show3DPreview}
                 onChange={(e) => setShow3DPreview(e.target.checked)}
-                className="h-4 w-4"
+                className="h-4 w-4 accent-[var(--accent-color)]"
               />
             </label>
             {show3DPreview && (
@@ -272,27 +272,27 @@ export const Ch4MohrPole: React.FC<Ch4Props> = ({
               <div className="p-3 flex-1 flex flex-col items-center justify-center">
                 <svg viewBox="0 0 210 200" className="w-full max-w-[200px] h-auto select-none" role="img" aria-label="実空間の土要素と対象面角度">
                   <rect x="55" y="55" width="100" height="90" fill="currentColor" fillOpacity="0.06" stroke="currentColor" strokeOpacity="0.7" strokeWidth="1.8" />
-                  <text x="105" y="34" textAnchor="middle" className="text-[11px] font-bold fill-blue-600 dark:fill-blue-300 font-mono-num">
+                  <text x="105" y="34" textAnchor="middle" className="text-[11px] font-bold fill-[var(--diagram-blue)] font-mono-num">
                     σ_z={sigmaZ}
                   </text>
-                  <line x1="105" y1="38" x2="105" y2="53" stroke="#2563eb" strokeWidth="2.2" />
-                  <line x1="105" y1="162" x2="105" y2="147" stroke="#2563eb" strokeWidth="2.2" />
+                  <line x1="105" y1="38" x2="105" y2="53" stroke="var(--diagram-blue)" strokeWidth="2.2" />
+                  <line x1="105" y1="162" x2="105" y2="147" stroke="var(--diagram-blue)" strokeWidth="2.2" />
 
-                  <text x="24" y="96" textAnchor="middle" className="text-[11px] font-bold fill-indigo-600 dark:fill-indigo-300 font-mono-num">
+                  <text x="24" y="96" textAnchor="middle" className="text-[11px] font-bold fill-[var(--diagram-indigo)] font-mono-num">
                     σ_x={sigmaX}
                   </text>
-                  <line x1="36" y1="100" x2="53" y2="100" stroke="#4f46e5" strokeWidth="2.2" />
-                  <line x1="174" y1="100" x2="157" y2="100" stroke="#4f46e5" strokeWidth="2.2" />
+                  <line x1="36" y1="100" x2="53" y2="100" stroke="var(--diagram-indigo)" strokeWidth="2.2" />
+                  <line x1="174" y1="100" x2="157" y2="100" stroke="var(--diagram-indigo)" strokeWidth="2.2" />
 
                   {/* 対象切断面 (水平から θ CCW = SVG -θ) */}
                   <g transform={`rotate(${-theta} 105 100)`}>
-                    <line x1="50" y1="100" x2="160" y2="100" stroke="#0d9488" strokeWidth="2.6" />
+                    <line x1="50" y1="100" x2="160" y2="100" stroke="var(--diagram-teal)" strokeWidth="2.6" />
                   </g>
                   {/* 主応力面 破線 */}
                   <g transform={`rotate(${-res.thetaP1} 105 100)`}>
-                    <line x1="60" y1="100" x2="150" y2="100" stroke="#d97706" strokeWidth="1.5" strokeDasharray="4 3" />
+                    <line x1="60" y1="100" x2="150" y2="100" stroke="var(--diagram-amber)" strokeWidth="1.5" strokeDasharray="4 3" />
                   </g>
-                  <text x="105" y="186" textAnchor="middle" className="text-[10px] font-mono-num fill-teal-700 dark:fill-teal-300 font-bold">
+                  <text x="105" y="186" textAnchor="middle" className="text-[10px] font-mono-num fill-[var(--diagram-teal)] font-bold">
                     実線: θ={theta}° / 破線: σ₁面 {round2(res.thetaP1)}°
                   </text>
                 </svg>
@@ -313,9 +313,9 @@ export const Ch4MohrPole: React.FC<Ch4Props> = ({
                 </defs>
 
                 {/* 座標軸 */}
-                <line x1={padL} y1={originY} x2={w - padR} y2={originY} stroke="currentColor" strokeOpacity="0.45" strokeWidth="1.4" />
+                <line x1={padL} y1={originY} x2={w - padR} y2={originY} stroke="currentColor" strokeOpacity="0.68" strokeWidth="1.4" />
                 {originX >= padL && originX <= w - padR && (
-                  <line x1={originX} y1={padT} x2={originX} y2={h - padB} stroke="currentColor" strokeOpacity="0.45" strokeWidth="1.4" />
+                  <line x1={originX} y1={padT} x2={originX} y2={h - padB} stroke="currentColor" strokeOpacity="0.68" strokeWidth="1.4" />
                 )}
                 <text x={w - padR} y={originY + 18} textAnchor="end" className="text-[11px] font-semibold fill-current">σ (kPa)</text>
                 <text x={Math.max(padL + 6, originX + 8)} y={padT + 14} className="text-[11px] font-semibold fill-current">τ (CCW正)</text>
@@ -323,23 +323,23 @@ export const Ch4MohrPole: React.FC<Ch4Props> = ({
                 <g clipPath="url(#c4-clip)">
                   {/* 3Dモール円プレビュー */}
                   {show3DPreview && (
-                    <g opacity="0.55">
-                      <circle cx={toX((res.sigma1 + sigma2Val) / 2)} cy={originY} r={Math.max(1, ((res.sigma1 - sigma2Val) / 2) * scale)} fill="rgba(99,102,241,0.12)" stroke="#6366f1" strokeWidth="1.6" strokeDasharray="4 3" />
-                      <circle cx={toX((sigma2Val + res.sigma3) / 2)} cy={originY} r={Math.max(1, ((sigma2Val - res.sigma3) / 2) * scale)} fill="rgba(99,102,241,0.12)" stroke="#6366f1" strokeWidth="1.6" strokeDasharray="4 3" />
+                    <g opacity="0.85">
+                      <circle cx={toX((res.sigma1 + sigma2Val) / 2)} cy={originY} r={Math.max(1, ((res.sigma1 - sigma2Val) / 2) * scale)} fill="var(--diagram-blue-fill)" stroke="var(--diagram-indigo)" strokeWidth="1.6" strokeDasharray="4 3" />
+                      <circle cx={toX((sigma2Val + res.sigma3) / 2)} cy={originY} r={Math.max(1, ((sigma2Val - res.sigma3) / 2) * scale)} fill="var(--diagram-blue-fill)" stroke="var(--diagram-indigo)" strokeWidth="1.6" strokeDasharray="4 3" />
                     </g>
                   )}
 
                   {/* メインの2Dモール円 */}
-                  <circle cx={cX} cy={originY} r={rPx} fill="rgba(37,99,235,0.08)" stroke="#2563eb" strokeWidth="2.4" />
+                  <circle cx={cX} cy={originY} r={rPx} fill="var(--diagram-blue-fill)" stroke="var(--diagram-blue)" strokeWidth="2.4" />
 
                   {/* Step1: H と V を結ぶ直径 */}
-                  <line x1={hX} y1={hY} x2={vX} y2={vY} stroke="#94a3b8" strokeWidth="1.2" strokeDasharray="4 3" />
+                  <line x1={hX} y1={hY} x2={vX} y2={vY} stroke="var(--diagram-muted)" strokeWidth="1.3" strokeDasharray="4 3" />
 
                   {/* Step2: 極 P を見つける水平線(H→P)と鉛直線(V→P) */}
                   {(poleStep === 'all' || poleStep === 'pole' || poleStep === 'ray' || poleStep === 'principal') && (
                     <>
-                      <line x1={hX} y1={hY} x2={pX} y2={pY} stroke="#d97706" strokeWidth="1.8" strokeDasharray="5 3" />
-                      <line x1={vX} y1={vY} x2={pX} y2={pY} stroke="#d97706" strokeWidth="1.4" strokeDasharray="3 3" />
+                      <line x1={hX} y1={hY} x2={pX} y2={pY} stroke="var(--diagram-amber)" strokeWidth="1.8" strokeDasharray="5 3" />
+                      <line x1={vX} y1={vY} x2={pX} y2={pY} stroke="var(--diagram-amber)" strokeWidth="1.4" strokeDasharray="3 3" />
                     </>
                   )}
 
@@ -351,13 +351,13 @@ export const Ch4MohrPole: React.FC<Ch4Props> = ({
                         y1={pY - rayDy * 20}
                         x2={pX + rayDx * rayLen}
                         y2={pY + rayDy * rayLen}
-                        stroke="#0d9488"
+                        stroke="var(--diagram-teal)"
                         strokeWidth="1.8"
-                        opacity="0.45"
+                        opacity="0.65"
                       />
-                      <line x1={pX} y1={pY} x2={qX} y2={qY} stroke="#0d9488" strokeWidth="2.4" />
-                      <circle cx={qX} cy={qY} r="5.5" fill="#0d9488" stroke="#fff" strokeWidth="1.5" />
-                      <text x={qX + 8} y={qY - 8} className="text-[11px] font-bold fill-teal-700 dark:fill-teal-300 font-mono-num">
+                      <line x1={pX} y1={pY} x2={qX} y2={qY} stroke="var(--diagram-teal)" strokeWidth="2.4" />
+                      <circle cx={qX} cy={qY} r="5.5" fill="var(--diagram-teal)" stroke="var(--diagram-halo)" strokeWidth="1.5" />
+                      <text x={qX + 8} y={qY - 8} className="text-[11px] font-bold fill-[var(--diagram-teal)] font-mono-num">
                         Q({round2(res.sigmaTheta)}, {round2(res.tauTheta)})
                       </text>
                     </>
@@ -366,36 +366,36 @@ export const Ch4MohrPole: React.FC<Ch4Props> = ({
                   {/* 主応力面ガイド */}
                   {(poleStep === 'all' || poleStep === 'principal') && (
                     <>
-                      <line x1={pX} y1={pY} x2={s1X} y2={originY} stroke="#dc2626" strokeWidth="1.5" strokeDasharray="4 3" />
-                      <line x1={pX} y1={pY} x2={s3X} y2={originY} stroke="#6366f1" strokeWidth="1.3" strokeDasharray="4 3" />
+                      <line x1={pX} y1={pY} x2={s1X} y2={originY} stroke="var(--diagram-red)" strokeWidth="1.5" strokeDasharray="4 3" />
+                      <line x1={pX} y1={pY} x2={s3X} y2={originY} stroke="var(--diagram-indigo)" strokeWidth="1.3" strokeDasharray="4 3" />
                     </>
                   )}
 
                   {/* 点 H, V, σ1, σ3, P */}
-                  <circle cx={hX} cy={hY} r="4.5" fill="#2563eb" />
-                  <text x={hX + 7} y={hY - 6} className="text-[11px] font-bold fill-blue-700 dark:fill-blue-300">
+                  <circle cx={hX} cy={hY} r="4.5" fill="var(--diagram-blue)" />
+                  <text x={hX + 7} y={hY - 6} className="text-[11px] font-bold fill-[var(--diagram-blue)]">
                     H(σ_z,τ_H)
                   </text>
 
-                  <circle cx={vX} cy={vY} r="4.5" fill="#4f46e5" />
-                  <text x={vX - 8} y={vY + 14} textAnchor="end" className="text-[11px] font-bold fill-indigo-700 dark:fill-indigo-300">
+                  <circle cx={vX} cy={vY} r="4.5" fill="var(--diagram-indigo)" />
+                  <text x={vX - 8} y={vY + 14} textAnchor="end" className="text-[11px] font-bold fill-[var(--diagram-indigo)]">
                     V(σ_x,-τ_H)
                   </text>
 
-                  <circle cx={s1X} cy={originY} r="4" fill="#dc2626" />
-                  <text x={s1X} y={originY + 16} textAnchor="middle" className="text-[11px] font-bold fill-red-600 dark:fill-red-300">
+                  <circle cx={s1X} cy={originY} r="4" fill="var(--diagram-red)" />
+                  <text x={s1X} y={originY + 16} textAnchor="middle" className="text-[11px] font-bold fill-[var(--diagram-red)]">
                     σ₁={round2(res.sigma1)}
                   </text>
 
-                  <circle cx={s3X} cy={originY} r="4" fill="#2563eb" />
-                  <text x={s3X} y={originY + 16} textAnchor="middle" className="text-[11px] font-bold fill-blue-600 dark:fill-blue-300">
+                  <circle cx={s3X} cy={originY} r="4" fill="var(--diagram-blue)" />
+                  <text x={s3X} y={originY + 16} textAnchor="middle" className="text-[11px] font-bold fill-[var(--diagram-blue)]">
                     σ₃={round2(res.sigma3)}
                   </text>
 
                   {(poleStep !== 'hv') && (
                     <>
-                      <circle cx={pX} cy={pY} r="6" fill="#d97706" stroke="#fff" strokeWidth="1.8" />
-                      <text x={pX - 8} y={pY - 8} textAnchor="end" className="text-xs font-extrabold fill-amber-700 dark:fill-amber-300">
+                      <circle cx={pX} cy={pY} r="6" fill="var(--diagram-amber)" stroke="var(--diagram-halo)" strokeWidth="1.8" />
+                      <text x={pX - 8} y={pY - 8} textAnchor="end" className="text-xs font-extrabold fill-[var(--diagram-amber)]">
                         極 P
                       </text>
                     </>

@@ -1,6 +1,18 @@
 @import "tailwindcss";
 @import "katex/dist/katex.min.css";
 
+/* Synchronize Tailwind v4 dark:* utilities with manual meta[name="color-scheme"] override and OS preference */
+@custom-variant dark {
+  &:where(:root:has(> head > meta[name="color-scheme"][content="dark"]) *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not(:has(> head > meta[name="color-scheme"][content="light"])) *) {
+      @slot;
+    }
+  }
+}
+
 /* ==========================================================================
    Modern Web Guidance: Color Scheme, Tokens, Accessibility & Responsive Base
    ========================================================================== */
@@ -21,6 +33,8 @@
 
   --border-subtle-light: #cbd5e1;
   --border-subtle-dark: #334155;
+  --border-control-light: #64748b;
+  --border-control-dark: #94a3b8;
 
   --brand-accent-light: #1d4ed8;
   --brand-accent-dark: #60a5fa;
@@ -34,17 +48,60 @@
   --notice-accent-light: #92400e;
   --notice-accent-dark: #fcd34d;
 
+  /* Theme-aware SVG & chart tokens (WCAG AA >= 4.5:1 text, >= 3:1 graphics) */
+  --diagram-blue-light: #1d4ed8;
+  --diagram-blue-dark: #60a5fa;
+  --diagram-blue-fill-light: rgb(37 99 235 / 0.14);
+  --diagram-blue-fill-dark: rgb(96 165 250 / 0.22);
+  --diagram-indigo-light: #4338ca;
+  --diagram-indigo-dark: #a5b4fc;
+  --diagram-teal-light: #0f766e;
+  --diagram-teal-dark: #5eead4;
+  --diagram-teal-fill-light: rgb(13 148 136 / 0.16);
+  --diagram-teal-fill-dark: rgb(94 234 212 / 0.22);
+  --diagram-amber-light: #b45309;
+  --diagram-amber-dark: #fbbf24;
+  --diagram-red-light: #dc2626;
+  --diagram-red-dark: #f87171;
+  --diagram-red-fill-light: rgb(220 38 38 / 0.12);
+  --diagram-red-fill-dark: rgb(248 113 113 / 0.20);
+  --diagram-emerald-light: #047857;
+  --diagram-emerald-dark: #34d399;
+  --diagram-violet-light: #6d28d9;
+  --diagram-violet-dark: #c4b5fd;
+  --diagram-sky-light: #0369a1;
+  --diagram-sky-dark: #38bdf8;
+  --diagram-muted-light: #475569;
+  --diagram-muted-dark: #94a3b8;
+  --diagram-halo-light: #ffffff;
+  --diagram-halo-dark: #111a2e;
+
   --surface-page: var(--surface-page-light);
   --surface-card: var(--surface-card-light);
   --surface-subtle: var(--surface-subtle-light);
   --text-primary: var(--text-primary-light);
   --text-muted: var(--text-muted-light);
   --border-subtle: var(--border-subtle-light);
+  --border-control: var(--border-control-light);
   --accent-color: var(--brand-accent-light);
   --notice-bg: var(--notice-bg-light);
   --notice-border: var(--notice-border-light);
   --notice-text: var(--notice-text-light);
   --notice-accent: var(--notice-accent-light);
+
+  --diagram-blue: var(--diagram-blue-light);
+  --diagram-blue-fill: var(--diagram-blue-fill-light);
+  --diagram-indigo: var(--diagram-indigo-light);
+  --diagram-teal: var(--diagram-teal-light);
+  --diagram-teal-fill: var(--diagram-teal-fill-light);
+  --diagram-amber: var(--diagram-amber-light);
+  --diagram-red: var(--diagram-red-light);
+  --diagram-red-fill: var(--diagram-red-fill-light);
+  --diagram-emerald: var(--diagram-emerald-light);
+  --diagram-violet: var(--diagram-violet-light);
+  --diagram-sky: var(--diagram-sky-light);
+  --diagram-muted: var(--diagram-muted-light);
+  --diagram-halo: var(--diagram-halo-light);
 
   --target-size: 24px;
   --scrollbar-track: #e2e8f0;
@@ -66,13 +123,27 @@
     --text-primary: var(--text-primary-dark);
     --text-muted: var(--text-muted-dark);
     --border-subtle: var(--border-subtle-dark);
+    --border-control: var(--border-control-dark);
     --accent-color: var(--brand-accent-dark);
     --notice-bg: var(--notice-bg-dark);
     --notice-border: var(--notice-border-dark);
     --notice-text: var(--notice-text-dark);
     --notice-accent: var(--notice-accent-dark);
+    --diagram-blue: var(--diagram-blue-dark);
+    --diagram-blue-fill: var(--diagram-blue-fill-dark);
+    --diagram-indigo: var(--diagram-indigo-dark);
+    --diagram-teal: var(--diagram-teal-dark);
+    --diagram-teal-fill: var(--diagram-teal-fill-dark);
+    --diagram-amber: var(--diagram-amber-dark);
+    --diagram-red: var(--diagram-red-dark);
+    --diagram-red-fill: var(--diagram-red-fill-dark);
+    --diagram-emerald: var(--diagram-emerald-dark);
+    --diagram-violet: var(--diagram-violet-dark);
+    --diagram-sky: var(--diagram-sky-dark);
+    --diagram-muted: var(--diagram-muted-dark);
+    --diagram-halo: var(--diagram-halo-dark);
     --scrollbar-track: #1e293b;
-    --scrollbar-thumb: #64748b;
+    --scrollbar-thumb: #94a3b8;
   }
 }
 
@@ -84,11 +155,25 @@
     --text-primary: light-dark(var(--text-primary-light), var(--text-primary-dark));
     --text-muted: light-dark(var(--text-muted-light), var(--text-muted-dark));
     --border-subtle: light-dark(var(--border-subtle-light), var(--border-subtle-dark));
+    --border-control: light-dark(var(--border-control-light), var(--border-control-dark));
     --accent-color: light-dark(var(--brand-accent-light), var(--brand-accent-dark));
     --notice-bg: light-dark(var(--notice-bg-light), var(--notice-bg-dark));
     --notice-border: light-dark(var(--notice-border-light), var(--notice-border-dark));
     --notice-text: light-dark(var(--notice-text-light), var(--notice-text-dark));
     --notice-accent: light-dark(var(--notice-accent-light), var(--notice-accent-dark));
+    --diagram-blue: light-dark(var(--diagram-blue-light), var(--diagram-blue-dark));
+    --diagram-blue-fill: light-dark(var(--diagram-blue-fill-light), var(--diagram-blue-fill-dark));
+    --diagram-indigo: light-dark(var(--diagram-indigo-light), var(--diagram-indigo-dark));
+    --diagram-teal: light-dark(var(--diagram-teal-light), var(--diagram-teal-dark));
+    --diagram-teal-fill: light-dark(var(--diagram-teal-fill-light), var(--diagram-teal-fill-dark));
+    --diagram-amber: light-dark(var(--diagram-amber-light), var(--diagram-amber-dark));
+    --diagram-red: light-dark(var(--diagram-red-light), var(--diagram-red-dark));
+    --diagram-red-fill: light-dark(var(--diagram-red-fill-light), var(--diagram-red-fill-dark));
+    --diagram-emerald: light-dark(var(--diagram-emerald-light), var(--diagram-emerald-dark));
+    --diagram-violet: light-dark(var(--diagram-violet-light), var(--diagram-violet-dark));
+    --diagram-sky: light-dark(var(--diagram-sky-light), var(--diagram-sky-dark));
+    --diagram-muted: light-dark(var(--diagram-muted-light), var(--diagram-muted-dark));
+    --diagram-halo: light-dark(var(--diagram-halo-light), var(--diagram-halo-dark));
     --scrollbar-track: light-dark(#e2e8f0, #1e293b);
     --scrollbar-thumb: light-dark(#64748b, #94a3b8);
   }
@@ -103,13 +188,27 @@
   --text-primary: var(--text-primary-dark);
   --text-muted: var(--text-muted-dark);
   --border-subtle: var(--border-subtle-dark);
+  --border-control: var(--border-control-dark);
   --accent-color: var(--brand-accent-dark);
   --notice-bg: var(--notice-bg-dark);
   --notice-border: var(--notice-border-dark);
   --notice-text: var(--notice-text-dark);
   --notice-accent: var(--notice-accent-dark);
+  --diagram-blue: var(--diagram-blue-dark);
+  --diagram-blue-fill: var(--diagram-blue-fill-dark);
+  --diagram-indigo: var(--diagram-indigo-dark);
+  --diagram-teal: var(--diagram-teal-dark);
+  --diagram-teal-fill: var(--diagram-teal-fill-dark);
+  --diagram-amber: var(--diagram-amber-dark);
+  --diagram-red: var(--diagram-red-dark);
+  --diagram-red-fill: var(--diagram-red-fill-dark);
+  --diagram-emerald: var(--diagram-emerald-dark);
+  --diagram-violet: var(--diagram-violet-dark);
+  --diagram-sky: var(--diagram-sky-dark);
+  --diagram-muted: var(--diagram-muted-dark);
+  --diagram-halo: var(--diagram-halo-dark);
   --scrollbar-track: #1e293b;
-  --scrollbar-thumb: #64748b;
+  --scrollbar-thumb: #94a3b8;
 }
 
 :root:has(> head > meta[name="color-scheme"][content="light"]) {
@@ -120,11 +219,25 @@
   --text-primary: var(--text-primary-light);
   --text-muted: var(--text-muted-light);
   --border-subtle: var(--border-subtle-light);
+  --border-control: var(--border-control-light);
   --accent-color: var(--brand-accent-light);
   --notice-bg: var(--notice-bg-light);
   --notice-border: var(--notice-border-light);
   --notice-text: var(--notice-text-light);
   --notice-accent: var(--notice-accent-light);
+  --diagram-blue: var(--diagram-blue-light);
+  --diagram-blue-fill: var(--diagram-blue-fill-light);
+  --diagram-indigo: var(--diagram-indigo-light);
+  --diagram-teal: var(--diagram-teal-light);
+  --diagram-teal-fill: var(--diagram-teal-fill-light);
+  --diagram-amber: var(--diagram-amber-light);
+  --diagram-red: var(--diagram-red-light);
+  --diagram-red-fill: var(--diagram-red-fill-light);
+  --diagram-emerald: var(--diagram-emerald-light);
+  --diagram-violet: var(--diagram-violet-light);
+  --diagram-sky: var(--diagram-sky-light);
+  --diagram-muted: var(--diagram-muted-light);
+  --diagram-halo: var(--diagram-halo-light);
   --scrollbar-track: #e2e8f0;
   --scrollbar-thumb: #64748b;
 }
@@ -163,6 +276,11 @@
     text-wrap: pretty;
   }
 
+  ::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
+  }
+
   :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
     outline: 2px solid CanvasText;
     outline-offset: 3px;
@@ -171,6 +289,28 @@
   :where(button, select, input:not([type="checkbox"], [type="radio"], [type="range"]), [role="button"], nav a) {
     min-block-size: var(--target-size);
     min-inline-size: var(--target-size);
+  }
+
+  progress {
+    appearance: none;
+    background-color: var(--surface-subtle);
+    border: 1px solid var(--border-control);
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+
+  progress::-webkit-progress-bar {
+    background-color: var(--surface-subtle);
+  }
+
+  progress::-webkit-progress-value {
+    background-color: var(--accent-color);
+    border-radius: 9999px;
+  }
+
+  progress::-moz-progress-bar {
+    background-color: var(--accent-color);
+    border-radius: 9999px;
   }
 
   .font-mono-num {
@@ -217,6 +357,12 @@
   background-color: var(--surface-subtle);
   color: var(--text-primary);
   border: 1px solid var(--border-subtle);
+}
+
+/* Form inputs & interactive controls require >= 3:1 boundary contrast (WCAG 1.4.11) */
+:where(input:not([type="checkbox"], [type="radio"], [type="range"]), select, textarea).app-surface,
+:where(button.app-surface, button.app-surface-subtle, .app-control-border) {
+  border-color: var(--border-control);
 }
 
 .app-text-muted {
@@ -547,6 +693,9 @@
   .app-surface,
   .app-surface-subtle {
     border-color: ButtonBorder;
+  }
+  progress {
+    appearance: auto;
   }
   .app-notice-banner,
   .app-notice-badge {

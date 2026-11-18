@@ -271,8 +271,8 @@ export const ChapterExercisePanel: React.FC<ChapterExercisePanelProps> = ({
                             key={ch.id}
                             className={`flex items-start gap-2 rounded-lg border px-3 py-2 text-xs sm:text-sm cursor-pointer transition-colors ${
                               checked
-                                ? 'border-blue-600 bg-blue-600/10 font-semibold'
-                                : 'border-[var(--border-subtle)] hover:bg-[var(--surface-subtle)]'
+                                ? 'border-blue-600 dark:border-blue-400 bg-blue-600/10 font-semibold'
+                                : 'border-[var(--border-control)] hover:bg-[var(--surface-subtle)]'
                             }`}
                           >
                             <input

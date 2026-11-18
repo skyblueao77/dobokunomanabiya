@@ -178,7 +178,7 @@ export const GeomechanicsCourseModule: React.FC<GeomechanicsCourseModuleProps> =
             aria-pressed={isCompleted}
             onClick={onToggleUnitComplete}
             className={`interactive-btn inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold border cursor-pointer ${
-              isCompleted ? 'bg-emerald-600 text-white border-emerald-700' : 'app-surface'
+              isCompleted ? 'bg-emerald-700 text-white border-emerald-800 dark:border-emerald-500' : 'app-surface'
             }`}
           >
             <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
@@ -217,7 +217,7 @@ export const GeomechanicsCourseModule: React.FC<GeomechanicsCourseModuleProps> =
                 <span>{ch.shortTitle}</span>
                 {chSolved === 2 && (
                   <CheckCircle2
-                    className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0"
+                    className="h-3.5 w-3.5 text-emerald-700 dark:text-emerald-400 shrink-0"
                     aria-label="章演習完了"
                   />
                 )}
@@ -312,7 +312,7 @@ export const GeomechanicsCourseModule: React.FC<GeomechanicsCourseModuleProps> =
                       <button
                         type="button"
                         onClick={onToggleUnitComplete}
-                        className="interactive-btn inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 text-white px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer"
+                        className="interactive-btn inline-flex items-center gap-1.5 rounded-lg bg-emerald-700 text-white px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer"
                       >
                         <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
                         {isCompleted ? '単元完了済み' : 'コース完了として記録する'}

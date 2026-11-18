@@ -87,7 +87,7 @@ export const BeamDiagramModule: React.FC<BeamDiagramModuleProps> = ({
             onClick={onToggleUnitComplete}
             className={`interactive-btn inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold border cursor-pointer ${
               isCompleted
-                ? 'bg-emerald-600 text-white border-emerald-700'
+                ? 'bg-emerald-700 text-white border-emerald-800 dark:border-emerald-500'
                 : 'app-surface'
             }`}
           >
@@ -188,14 +188,14 @@ export const BeamDiagramModule: React.FC<BeamDiagramModuleProps> = ({
                     y1="20"
                     x2={toX(inputs.loadPos)}
                     y2="56"
-                    stroke="#dc2626"
+                    stroke="var(--diagram-red)"
                     strokeWidth="2.5"
                   />
                   <text
                     x={toX(inputs.loadPos)}
                     y="15"
                     textAnchor="middle"
-                    className="text-xs font-bold fill-red-600 dark:fill-red-400 font-mono-num"
+                    className="text-xs font-bold fill-[var(--diagram-red)] font-mono-num"
                   >
                     P = {inputs.pointLoad} kN
                   </text>
@@ -209,16 +209,16 @@ export const BeamDiagramModule: React.FC<BeamDiagramModuleProps> = ({
                 x2={xEnd}
                 y2={sfdZeroY}
                 stroke="currentColor"
-                strokeOpacity="0.4"
+                strokeOpacity="0.6"
                 strokeWidth="1"
               />
               <polygon
                 points={sfdPoints}
-                fill="rgba(13, 148, 136, 0.18)"
-                stroke="#0d9488"
+                fill="var(--diagram-teal-fill)"
+                stroke="var(--diagram-teal)"
                 strokeWidth="2"
               />
-              <text x="12" y={sfdZeroY + 4} className="text-xs font-bold fill-teal-600 dark:fill-teal-300">
+              <text x="12" y={sfdZeroY + 4} className="text-xs font-bold fill-[var(--diagram-teal)]">
                 SFD
               </text>
 
@@ -229,16 +229,16 @@ export const BeamDiagramModule: React.FC<BeamDiagramModuleProps> = ({
                 x2={xEnd}
                 y2={bmdZeroY}
                 stroke="currentColor"
-                strokeOpacity="0.4"
+                strokeOpacity="0.6"
                 strokeWidth="1"
               />
               <polygon
                 points={bmdPoints}
-                fill="rgba(37, 99, 235, 0.18)"
-                stroke="#2563eb"
+                fill="var(--diagram-blue-fill)"
+                stroke="var(--diagram-blue)"
                 strokeWidth="2"
               />
-              <text x="12" y={bmdZeroY + 4} className="text-xs font-bold fill-blue-600 dark:fill-blue-300">
+              <text x="12" y={bmdZeroY + 4} className="text-xs font-bold fill-[var(--diagram-blue)]">
                 BMD
               </text>
             </svg>

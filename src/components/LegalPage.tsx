@@ -20,7 +20,7 @@ export default function LegalPage({ onBackToPortal }: LegalPageProps) {
         <button
           type="button"
           onClick={onBackToPortal}
-          className="interactive-btn inline-flex items-center gap-2 rounded-lg border border-[var(--border-subtle)] px-3 py-1.5 text-sm font-medium cursor-pointer"
+          className="interactive-btn inline-flex items-center gap-2 rounded-lg border border-[var(--border-control)] px-3 py-1.5 text-sm font-medium cursor-pointer"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           ポータルへ戻る
@@ -30,35 +30,35 @@ export default function LegalPage({ onBackToPortal }: LegalPageProps) {
           <button
             type="button"
             onClick={() => scrollToSection('disclaimer')}
-            className="interactive-btn rounded-md border border-[var(--border-subtle)] px-2.5 py-1 cursor-pointer"
+            className="interactive-btn rounded-md border border-[var(--border-control)] px-2.5 py-1 cursor-pointer"
           >
             免責事項
           </button>
           <button
             type="button"
             onClick={() => scrollToSection('terms')}
-            className="interactive-btn rounded-md border border-[var(--border-subtle)] px-2.5 py-1 cursor-pointer"
+            className="interactive-btn rounded-md border border-[var(--border-control)] px-2.5 py-1 cursor-pointer"
           >
             利用規約
           </button>
           <button
             type="button"
             onClick={() => scrollToSection('privacy')}
-            className="interactive-btn rounded-md border border-[var(--border-subtle)] px-2.5 py-1 cursor-pointer"
+            className="interactive-btn rounded-md border border-[var(--border-control)] px-2.5 py-1 cursor-pointer"
           >
             プライバシー・外部送信
           </button>
           <button
             type="button"
             onClick={() => scrollToSection('ethics')}
-            className="interactive-btn rounded-md border border-[var(--border-subtle)] px-2.5 py-1 cursor-pointer"
+            className="interactive-btn rounded-md border border-[var(--border-control)] px-2.5 py-1 cursor-pointer"
           >
             技術者倫理
           </button>
           <button
             type="button"
             onClick={() => scrollToSection('accessibility')}
-            className="interactive-btn rounded-md border border-[var(--border-subtle)] px-2.5 py-1 cursor-pointer"
+            className="interactive-btn rounded-md border border-[var(--border-control)] px-2.5 py-1 cursor-pointer"
           >
             アクセシビリティ方針
           </button>
@@ -80,7 +80,7 @@ export default function LegalPage({ onBackToPortal }: LegalPageProps) {
       {/* 1. 免責事項 */}
       <section id="disclaimer" className="app-surface rounded-xl p-6 space-y-4 scroll-mt-24">
         <div className="flex items-center gap-2.5 border-b border-[var(--border-subtle)] pb-3">
-          <ShieldAlert className="h-5 w-5 text-amber-600 shrink-0" aria-hidden="true" />
+          <ShieldAlert className="h-5 w-5 text-amber-700 dark:text-amber-400 shrink-0" aria-hidden="true" />
           <h2 className="text-lg font-bold">1. 免責事項（実務設計への使用禁止）</h2>
         </div>
 
@@ -162,7 +162,7 @@ export default function LegalPage({ onBackToPortal }: LegalPageProps) {
       {/* 3. プライバシーポリシー・外部送信 */}
       <section id="privacy" className="app-surface rounded-xl p-6 space-y-4 scroll-mt-24">
         <div className="flex items-center gap-2.5 border-b border-[var(--border-subtle)] pb-3">
-          <Lock className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0" aria-hidden="true" />
+          <Lock className="h-5 w-5 text-emerald-700 dark:text-emerald-400 shrink-0" aria-hidden="true" />
           <h2 className="text-lg font-bold">3. プライバシーポリシーおよび外部送信について</h2>
         </div>
 

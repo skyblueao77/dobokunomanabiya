@@ -181,7 +181,7 @@ export const Ch1StressTensor: React.FC<Ch1Props> = ({
         <aside className="lg:col-span-5 app-surface rounded-xl p-4 space-y-4 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border-subtle)] pb-2">
             <h3 className="text-sm font-bold">2. 想像：3次元応力テンソル操作</h3>
-            <div className="inline-flex rounded-lg border border-[var(--border-subtle)] overflow-hidden text-xs">
+            <div className="inline-flex rounded-lg border border-[var(--border-control)] overflow-hidden text-xs">
               <button
                 type="button"
                 onClick={() => handleToggleConvention('compression')}
@@ -198,7 +198,7 @@ export const Ch1StressTensor: React.FC<Ch1Props> = ({
                 onClick={() => handleToggleConvention('tension')}
                 className={`px-2.5 py-1 font-semibold cursor-pointer ${
                   convention === 'tension'
-                    ? 'bg-amber-600 text-white'
+                    ? 'bg-amber-700 text-white'
                     : 'app-surface-subtle'
                 }`}
               >
@@ -323,31 +323,31 @@ export const Ch1StressTensor: React.FC<Ch1Props> = ({
               >
                 <defs>
                   <marker id="c1-arr-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563eb" />
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--diagram-blue)" />
                   </marker>
                   <marker id="c1-arr-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626" />
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--diagram-red)" />
                   </marker>
                   <marker id="c1-arr-teal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
-                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#0d9488" />
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--diagram-teal)" />
                   </marker>
                 </defs>
 
                 {/* 座標軸ミニガイド */}
-                <g className="text-[10px] font-bold fill-current opacity-75">
-                  <line x1="36" y1="225" x2="66" y2="242" stroke="currentColor" strokeWidth="1.5" />
+                <g className="text-[10px] font-bold fill-[var(--text-muted)]">
+                  <line x1="36" y1="225" x2="66" y2="242" stroke="var(--text-muted)" strokeWidth="1.5" />
                   <text x="70" y="246">x</text>
-                  <line x1="36" y1="225" x2="10" y2="240" stroke="currentColor" strokeWidth="1.5" />
+                  <line x1="36" y1="225" x2="10" y2="240" stroke="var(--text-muted)" strokeWidth="1.5" />
                   <text x="4" y="250">y</text>
-                  <line x1="36" y1="225" x2="36" y2="192" stroke="currentColor" strokeWidth="1.5" />
+                  <line x1="36" y1="225" x2="36" y2="192" stroke="var(--text-muted)" strokeWidth="1.5" />
                   <text x="33" y="186">z</text>
                 </g>
 
                 {/* 立方体 3面 (+z 上面, +x 右前面, +y 左前面) */}
-                <polygon points={pts([p001, p101, p111, p011])} fill="#3b82f6" fillOpacity="0.14" stroke="currentColor" strokeOpacity="0.7" strokeWidth="1.6" />
-                <polygon points={pts([p100, p110, p111, p101])} fill="#3b82f6" fillOpacity="0.08" stroke="currentColor" strokeOpacity="0.7" strokeWidth="1.6" />
-                <polygon points={pts([p010, p110, p111, p011])} fill="#3b82f6" fillOpacity="0.20" stroke="currentColor" strokeOpacity="0.7" strokeWidth="1.6" />
-                <polygon points={pts([p000, p100, p110, p010])} fill="none" stroke="currentColor" strokeOpacity="0.2" strokeDasharray="3 3" />
+                <polygon points={pts([p001, p101, p111, p011])} fill="var(--diagram-blue)" fillOpacity="0.14" stroke="currentColor" strokeOpacity="0.78" strokeWidth="1.6" />
+                <polygon points={pts([p100, p110, p111, p101])} fill="var(--diagram-blue)" fillOpacity="0.08" stroke="currentColor" strokeOpacity="0.78" strokeWidth="1.6" />
+                <polygon points={pts([p010, p110, p111, p011])} fill="var(--diagram-blue)" fillOpacity="0.20" stroke="currentColor" strokeOpacity="0.78" strokeWidth="1.6" />
+                <polygon points={pts([p000, p100, p110, p010])} fill="none" stroke="currentColor" strokeOpacity="0.35" strokeDasharray="3 3" />
 
                 {/* σ_z 矢印 (+z面) */}
                 {Math.abs(physicalComp.szz) > 1 && (
@@ -356,7 +356,7 @@ export const Ch1StressTensor: React.FC<Ch1Props> = ({
                     y1={zIsComp ? topC[1] - zLen : topC[1]}
                     x2={topC[0]}
                     y2={zIsComp ? topC[1] : topC[1] - zLen}
-                    stroke={zIsComp ? '#2563eb' : '#dc2626'}
+                    stroke={zIsComp ? 'var(--diagram-blue)' : 'var(--diagram-red)'}
                     strokeWidth="2.5"
                     markerEnd={`url(#${zIsComp ? 'c1-arr-blue' : 'c1-arr-red'})`}
                   />
@@ -372,7 +372,7 @@ export const Ch1StressTensor: React.FC<Ch1Props> = ({
                     y1={xIsComp ? frontRightC[1] + xLen * 0.5 : frontRightC[1]}
                     x2={xIsComp ? frontRightC[0] : frontRightC[0] + xLen * 0.866}
                     y2={xIsComp ? frontRightC[1] : frontRightC[1] + xLen * 0.5}
-                    stroke={xIsComp ? '#2563eb' : '#dc2626'}
+                    stroke={xIsComp ? 'var(--diagram-blue)' : 'var(--diagram-red)'}
                     strokeWidth="2.5"
                     markerEnd={`url(#${xIsComp ? 'c1-arr-blue' : 'c1-arr-red'})`}
                   />
@@ -388,7 +388,7 @@ export const Ch1StressTensor: React.FC<Ch1Props> = ({
                     y1={yIsComp ? frontLeftC[1] + yLen * 0.5 : frontLeftC[1]}
                     x2={yIsComp ? frontLeftC[0] : frontLeftC[0] - yLen * 0.866}
                     y2={yIsComp ? frontLeftC[1] : frontLeftC[1] + yLen * 0.5}
-                    stroke={yIsComp ? '#2563eb' : '#dc2626'}
+                    stroke={yIsComp ? 'var(--diagram-blue)' : 'var(--diagram-red)'}
                     strokeWidth="2.5"
                     markerEnd={`url(#${yIsComp ? 'c1-arr-blue' : 'c1-arr-red'})`}
                   />
@@ -404,7 +404,7 @@ export const Ch1StressTensor: React.FC<Ch1Props> = ({
                     y1={topC[1] - Math.sign(physicalComp.tzx) * 8}
                     x2={topC[0] + Math.sign(physicalComp.tzx) * 14}
                     y2={topC[1] + Math.sign(physicalComp.tzx) * 8}
-                    stroke="#0d9488"
+                    stroke="var(--diagram-teal)"
                     strokeWidth="2"
                     markerEnd="url(#c1-arr-teal)"
                   />
@@ -415,7 +415,7 @@ export const Ch1StressTensor: React.FC<Ch1Props> = ({
                     y1={frontRightC[1] - Math.sign(physicalComp.txy) * 7}
                     x2={frontRightC[0] - Math.sign(physicalComp.txy) * 12}
                     y2={frontRightC[1] + Math.sign(physicalComp.txy) * 7}
-                    stroke="#0d9488"
+                    stroke="var(--diagram-teal)"
                     strokeWidth="2"
                     markerEnd="url(#c1-arr-teal)"
                   />
@@ -426,7 +426,7 @@ export const Ch1StressTensor: React.FC<Ch1Props> = ({
                     y1={frontLeftC[1] + Math.sign(physicalComp.tyz) * 14}
                     x2={frontLeftC[0]}
                     y2={frontLeftC[1] - Math.sign(physicalComp.tyz) * 14}
-                    stroke="#0d9488"
+                    stroke="var(--diagram-teal)"
                     strokeWidth="2"
                     markerEnd="url(#c1-arr-teal)"
                   />
@@ -435,15 +435,15 @@ export const Ch1StressTensor: React.FC<Ch1Props> = ({
 
               <div className="flex flex-wrap items-center justify-center gap-4 text-xs app-text-muted">
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 rounded-full bg-blue-600 inline-block" aria-hidden="true" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-[var(--diagram-blue)] inline-block" aria-hidden="true" />
                   圧縮応力（内向き）
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 rounded-full bg-red-600 inline-block" aria-hidden="true" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-[var(--diagram-red)] inline-block" aria-hidden="true" />
                   引張応力（外向き）
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 rounded-full bg-teal-600 inline-block" aria-hidden="true" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-[var(--diagram-teal)] inline-block" aria-hidden="true" />
                   せん断応力成分
                 </span>
               </div>

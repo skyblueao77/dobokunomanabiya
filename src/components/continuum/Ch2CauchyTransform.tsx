@@ -180,7 +180,7 @@ export const Ch2CauchyTransform: React.FC<Ch2Props> = ({
         <aside className="lg:col-span-5 app-surface rounded-xl p-4 space-y-4 shadow-sm">
           <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-2 gap-2 flex-wrap">
             <h3 className="text-sm font-bold">2. 想像：断面法線・座標回転シミュレーター</h3>
-            <div className="inline-flex rounded-lg border border-[var(--border-subtle)] overflow-hidden text-xs">
+            <div className="inline-flex rounded-lg border border-[var(--border-control)] overflow-hidden text-xs">
               <button
                 type="button"
                 onClick={() => setConvention('compression')}
@@ -194,7 +194,7 @@ export const Ch2CauchyTransform: React.FC<Ch2Props> = ({
                 type="button"
                 onClick={() => setConvention('tension')}
                 className={`px-2 py-1 font-semibold cursor-pointer ${
-                  convention === 'tension' ? 'bg-amber-600 text-white' : 'app-surface-subtle'
+                  convention === 'tension' ? 'bg-amber-700 text-white' : 'app-surface-subtle'
                 }`}
               >
                 引張正
@@ -236,24 +236,24 @@ export const Ch2CauchyTransform: React.FC<Ch2Props> = ({
               >
                 <defs>
                   <marker id="c2-n" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b" />
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--diagram-muted)" />
                   </marker>
                   <marker id="c2-t" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#7c3aed" />
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--diagram-violet)" />
                   </marker>
                   <marker id="c2-sn" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563eb" />
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--diagram-blue)" />
                   </marker>
                   <marker id="c2-ts" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#0d9488" />
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--diagram-teal)" />
                   </marker>
                 </defs>
 
                 {/* 元座標軸 x, y */}
-                <line x1="35" y1={cy} x2="325" y2={cy} stroke="currentColor" strokeOpacity="0.22" strokeDasharray="4 4" />
-                <line x1={cx} y1="260" x2={cx} y2="20" stroke="currentColor" strokeOpacity="0.22" strokeDasharray="4 4" />
-                <text x="328" y={cy + 4} className="text-[11px] fill-current opacity-60">x</text>
-                <text x={cx + 5} y="24" className="text-[11px] fill-current opacity-60">y</text>
+                <line x1="35" y1={cy} x2="325" y2={cy} stroke="currentColor" strokeOpacity="0.35" strokeDasharray="4 4" />
+                <line x1={cx} y1="260" x2={cx} y2="20" stroke="currentColor" strokeOpacity="0.35" strokeDasharray="4 4" />
+                <text x="328" y={cy + 4} className="text-[11px] fill-[var(--text-muted)]">x</text>
+                <text x={cx + 5} y="24" className="text-[11px] fill-[var(--text-muted)]">y</text>
 
                 {/* 回転後座標軸 x' (n方向), y' (m方向) */}
                 <line
@@ -261,11 +261,11 @@ export const Ch2CauchyTransform: React.FC<Ch2Props> = ({
                   y1={cy - ny * 110}
                   x2={cx + nx * 110}
                   y2={cy + ny * 110}
-                  stroke="#2563eb"
-                  strokeOpacity="0.35"
+                  stroke="var(--diagram-blue)"
+                  strokeOpacity="0.45"
                   strokeDasharray="3 3"
                 />
-                <text x={cx + nx * 114} y={cy + ny * 114} className="text-[11px] font-bold fill-blue-600 dark:fill-blue-300">
+                <text x={cx + nx * 114} y={cy + ny * 114} className="text-[11px] font-bold fill-[var(--diagram-blue)]">
                   x'
                 </text>
 
@@ -285,11 +285,11 @@ export const Ch2CauchyTransform: React.FC<Ch2Props> = ({
                   y1={cy}
                   x2={cx + nx * 38}
                   y2={cy + ny * 38}
-                  stroke="#64748b"
+                  stroke="var(--diagram-muted)"
                   strokeWidth="2"
                   markerEnd="url(#c2-n)"
                 />
-                <text x={cx + nx * 46} y={cy + ny * 46} className="text-[11px] font-bold fill-slate-500">
+                <text x={cx + nx * 46} y={cy + ny * 46} className="text-[11px] font-bold fill-[var(--text-muted)]">
                   n
                 </text>
 
@@ -301,11 +301,11 @@ export const Ch2CauchyTransform: React.FC<Ch2Props> = ({
                       y1={cy}
                       x2={cx + txSvg}
                       y2={cy + tySvg}
-                      stroke="#7c3aed"
+                      stroke="var(--diagram-violet)"
                       strokeWidth="2.5"
                       markerEnd="url(#c2-t)"
                     />
-                    <text x={cx + txSvg + 6} y={cy + tySvg} className="text-[11px] font-bold fill-violet-600 dark:fill-violet-300">
+                    <text x={cx + txSvg + 6} y={cy + tySvg} className="text-[11px] font-bold fill-[var(--diagram-violet)]">
                       t
                     </text>
                   </>
@@ -318,7 +318,7 @@ export const Ch2CauchyTransform: React.FC<Ch2Props> = ({
                     y1={cy}
                     x2={cx + snSvgX}
                     y2={cy + snSvgY}
-                    stroke="#2563eb"
+                    stroke="var(--diagram-blue)"
                     strokeWidth="2.2"
                     markerEnd="url(#c2-sn)"
                   />
@@ -332,7 +332,7 @@ export const Ch2CauchyTransform: React.FC<Ch2Props> = ({
                       y1={cy + snSvgY}
                       x2={cx + txSvg}
                       y2={cy + tySvg}
-                      stroke="#0d9488"
+                      stroke="var(--diagram-teal)"
                       strokeWidth="1.8"
                       strokeDasharray="3 2"
                       markerEnd="url(#c2-ts)"

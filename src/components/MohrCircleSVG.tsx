@@ -78,8 +78,8 @@ export const MohrCircleSVG: React.FC<MohrCircleSVGProps> = ({ inputs, result }) 
   const arcEndY = originY - arcRadius * Math.sin(twoThetaRad);
   const largeArcFlag = 2 * inputs.theta > 180 ? 1 : 0;
 
-  const circleColor = result.isFailure ? '#dc2626' : '#2563eb';
-  const circleFill = result.isFailure ? 'rgba(220, 38, 38, 0.10)' : 'rgba(37, 99, 235, 0.09)';
+  const circleColor = result.isFailure ? 'var(--diagram-red)' : 'var(--diagram-blue)';
+  const circleFill = result.isFailure ? 'var(--diagram-red-fill)' : 'var(--diagram-blue-fill)';
 
   return (
     <div className="app-surface relative w-full overflow-hidden rounded-xl shadow-sm">
@@ -96,12 +96,12 @@ export const MohrCircleSVG: React.FC<MohrCircleSVGProps> = ({ inputs, result }) 
         </div>
         {result.isFailure ? (
           <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/15 px-3 py-0.5 text-xs font-bold text-red-700 dark:text-red-300 border border-red-500/40">
-            <span className="h-2 w-2 rounded-full bg-red-600" aria-hidden="true" />
+            <span className="h-2 w-2 rounded-full bg-[var(--diagram-red)]" aria-hidden="true" />
             破壊 (Failure)
           </span>
         ) : (
           <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
+            <span className="h-2 w-2 rounded-full bg-[var(--diagram-emerald)]" aria-hidden="true" />
             安定 (Safe)
           </span>
         )}
@@ -120,7 +120,7 @@ export const MohrCircleSVG: React.FC<MohrCircleSVGProps> = ({ inputs, result }) 
         </defs>
 
         {/* 背景グリッド */}
-        <g stroke="currentColor" strokeOpacity="0.1" strokeWidth="1">
+        <g stroke="currentColor" strokeOpacity="0.16" strokeWidth="1">
           {sigmaTicks.map((s) => (
             <line key={`gx-${s}`} x1={toX(s)} y1={padTop} x2={toX(s)} y2={height - padBottom} />
           ))}
@@ -136,7 +136,7 @@ export const MohrCircleSVG: React.FC<MohrCircleSVGProps> = ({ inputs, result }) 
           x2={width - padRight}
           y2={originY}
           stroke="currentColor"
-          strokeOpacity="0.55"
+          strokeOpacity="0.72"
           strokeWidth="1.5"
         />
         {originX >= padLeft && originX <= width - padRight && (
@@ -146,13 +146,13 @@ export const MohrCircleSVG: React.FC<MohrCircleSVGProps> = ({ inputs, result }) 
             x2={originX}
             y2={height - padBottom}
             stroke="currentColor"
-            strokeOpacity="0.55"
+            strokeOpacity="0.72"
             strokeWidth="1.5"
           />
         )}
 
         {/* 目盛りラベル */}
-        <g className="text-[11px] fill-current opacity-70 font-mono-num">
+        <g className="text-[11px] fill-[var(--text-muted)] font-mono-num">
           {sigmaTicks.map((s) => (
             <text key={`tx-${s}`} x={toX(s)} y={originY + 16} textAnchor="middle">
               {s}
@@ -197,7 +197,7 @@ export const MohrCircleSVG: React.FC<MohrCircleSVGProps> = ({ inputs, result }) 
             y1={envY1}
             x2={toX(envEndSigma)}
             y2={envY2}
-            stroke="#d97706"
+            stroke="var(--diagram-amber)"
             strokeWidth="2"
           />
           <line
@@ -205,10 +205,10 @@ export const MohrCircleSVG: React.FC<MohrCircleSVGProps> = ({ inputs, result }) 
             y1={envNegY1}
             x2={toX(envEndSigma)}
             y2={envNegY2}
-            stroke="#d97706"
+            stroke="var(--diagram-amber)"
             strokeWidth="1.5"
             strokeDasharray="4 4"
-            opacity="0.6"
+            opacity="0.75"
           />
 
           {/* 全応力円（有効応力モード時は破線比較） */}
@@ -218,7 +218,7 @@ export const MohrCircleSVG: React.FC<MohrCircleSVGProps> = ({ inputs, result }) 
               cy={originY}
               r={rPx}
               fill="none"
-              stroke="#94a3b8"
+              stroke="var(--diagram-muted)"
               strokeWidth="2"
               strokeDasharray="6 4"
             />
@@ -239,7 +239,7 @@ export const MohrCircleSVG: React.FC<MohrCircleSVGProps> = ({ inputs, result }) 
             <path
               d={`M ${activeCx + arcRadius} ${originY} A ${arcRadius} ${arcRadius} 0 ${largeArcFlag} 0 ${arcEndX} ${arcEndY}`}
               fill="none"
-              stroke="#0d9488"
+              stroke="var(--diagram-teal)"
               strokeWidth="2"
             />
           )}
@@ -249,7 +249,7 @@ export const MohrCircleSVG: React.FC<MohrCircleSVGProps> = ({ inputs, result }) 
             y1={originY}
             x2={ptX}
             y2={ptY}
-            stroke="#0d9488"
+            stroke="var(--diagram-teal)"
             strokeWidth="2"
           />
 
@@ -258,8 +258,8 @@ export const MohrCircleSVG: React.FC<MohrCircleSVGProps> = ({ inputs, result }) 
             y1={ptY}
             x2={ptX}
             y2={originY}
-            stroke="#0d9488"
-            strokeWidth="1"
+            stroke="var(--diagram-teal)"
+            strokeWidth="1.2"
             strokeDasharray="3 3"
           />
 
@@ -293,11 +293,11 @@ export const MohrCircleSVG: React.FC<MohrCircleSVGProps> = ({ inputs, result }) 
             {inputs.useEffectiveStress ? "σ'₁" : 'σ₁'}
           </text>
 
-          <circle cx={ptX} cy={ptY} r="5.5" fill="#0d9488" stroke="#ffffff" strokeWidth="1.5" />
+          <circle cx={ptX} cy={ptY} r="5.5" fill="var(--diagram-teal)" stroke="var(--diagram-halo)" strokeWidth="1.5" />
           <text
             x={ptX + 8}
             y={ptY - 8}
-            className="text-xs font-bold fill-teal-600 dark:fill-teal-300 font-mono-num"
+            className="text-xs font-bold fill-[var(--diagram-teal)] font-mono-num"
           >
             ({result.activeSigmaTheta}, {result.tauTheta})
           </text>
@@ -307,7 +307,7 @@ export const MohrCircleSVG: React.FC<MohrCircleSVGProps> = ({ inputs, result }) 
               x={activeCx + (arcRadius + 14) * Math.cos(twoThetaRad / 2)}
               y={originY - (arcRadius + 14) * Math.sin(twoThetaRad / 2) + 4}
               textAnchor="middle"
-              className="text-[11px] font-bold fill-teal-600 dark:fill-teal-300"
+              className="text-[11px] font-bold fill-[var(--diagram-teal)]"
             >
               2θ={2 * inputs.theta}°
             </text>
@@ -318,13 +318,15 @@ export const MohrCircleSVG: React.FC<MohrCircleSVGProps> = ({ inputs, result }) 
       {/* 凡例 */}
       <div className="app-surface-subtle border-x-0 border-b-0 px-4 py-2 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs app-text-muted">
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-0.5 w-4 bg-amber-600 inline-block" aria-hidden="true" />
+          <span className="h-0.5 w-4 bg-[var(--diagram-amber)] inline-block" aria-hidden="true" />
           破壊包絡線 (τ_f = c + σ tanφ)
         </span>
         <span className="inline-flex items-center gap-1.5">
           <span
             className={`h-2.5 w-2.5 rounded-full border-2 inline-block ${
-              result.isFailure ? 'border-red-600 bg-red-500/20' : 'border-blue-600 bg-blue-500/20'
+              result.isFailure
+                ? 'border-[var(--diagram-red)] bg-[var(--diagram-red-fill)]'
+                : 'border-[var(--diagram-blue)] bg-[var(--diagram-blue-fill)]'
             }`}
             aria-hidden="true"
           />
@@ -332,12 +334,12 @@ export const MohrCircleSVG: React.FC<MohrCircleSVGProps> = ({ inputs, result }) 
         </span>
         {inputs.useEffectiveStress && (
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-0.5 w-4 border-t-2 border-dashed border-slate-400 inline-block" aria-hidden="true" />
+            <span className="h-0.5 w-4 border-t-2 border-dashed border-[var(--diagram-muted)] inline-block" aria-hidden="true" />
             全応力円 (破線)
           </span>
         )}
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-teal-600 inline-block" aria-hidden="true" />
+          <span className="h-2.5 w-2.5 rounded-full bg-[var(--diagram-teal)] inline-block" aria-hidden="true" />
           任意角の応力点 (2θ 回転)
         </span>
       </div>

@@ -151,7 +151,7 @@ export const MohrCircleModule: React.FC<MohrCircleModuleProps> = ({
             onClick={onToggleUnitComplete}
             className={`interactive-btn inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold border cursor-pointer ${
               isCompleted
-                ? 'bg-emerald-600 text-white border-emerald-700'
+                ? 'bg-emerald-700 text-white border-emerald-800 dark:border-emerald-500'
                 : 'app-surface'
             }`}
           >
@@ -244,8 +244,10 @@ export const MohrCircleModule: React.FC<MohrCircleModuleProps> = ({
                   onClick={() =>
                     updateField('useEffectiveStress', !inputs.useEffectiveStress)
                   }
-                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ${
-                    inputs.useEffectiveStress ? 'bg-indigo-600' : 'bg-slate-400'
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 transition-colors duration-200 ${
+                    inputs.useEffectiveStress
+                      ? 'bg-indigo-600 dark:bg-indigo-500 border-indigo-700 dark:border-indigo-300'
+                      : 'bg-slate-600 border-[var(--border-control)]'
                   }`}
                 >
                   <span
@@ -278,9 +280,9 @@ export const MohrCircleModule: React.FC<MohrCircleModuleProps> = ({
           >
             <div className="flex items-start gap-2.5">
               {result.isFailure ? (
-                <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" aria-hidden="true" />
+                <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" aria-hidden="true" />
               ) : (
-                <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" aria-hidden="true" />
+                <CheckCircle2 className="h-5 w-5 text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" aria-hidden="true" />
               )}
               <div className="text-xs space-y-1">
                 <div

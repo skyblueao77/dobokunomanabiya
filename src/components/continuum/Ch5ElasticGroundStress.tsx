@@ -265,22 +265,22 @@ export const Ch5ElasticGroundStress: React.FC<Ch5Props> = ({
               <div className="app-surface rounded-xl p-4 space-y-2 shadow-sm">
                 <h4 className="text-xs font-bold">微小要素の応力勾配と自重のつり合い</h4>
                 <svg viewBox="0 0 280 230" className="w-full h-auto select-none" role="img" aria-label="微分形の力のつり合い条件を示す微小土要素">
-                  <rect x="85" y="65" width="110" height="90" fill="#3b82f6" fillOpacity="0.08" stroke="currentColor" strokeWidth="1.8" />
-                  <text x="140" y="34" textAnchor="middle" className="text-[11px] font-bold fill-blue-700 dark:fill-blue-300">
+                  <rect x="85" y="65" width="110" height="90" fill="var(--diagram-blue)" fillOpacity="0.08" stroke="currentColor" strokeWidth="1.8" />
+                  <text x="140" y="34" textAnchor="middle" className="text-[11px] font-bold fill-[var(--diagram-blue)]">
                     σ_z (上端)
                   </text>
-                  <line x1="140" y1="40" x2="140" y2="62" stroke="#2563eb" strokeWidth="2.2" />
-                  <line x1="140" y1="184" x2="140" y2="158" stroke="#2563eb" strokeWidth="2.2" />
-                  <text x="140" y="200" textAnchor="middle" className="text-[11px] font-bold fill-blue-700 dark:fill-blue-300">
+                  <line x1="140" y1="40" x2="140" y2="62" stroke="var(--diagram-blue)" strokeWidth="2.2" />
+                  <line x1="140" y1="184" x2="140" y2="158" stroke="var(--diagram-blue)" strokeWidth="2.2" />
+                  <text x="140" y="200" textAnchor="middle" className="text-[11px] font-bold fill-[var(--diagram-blue)]">
                     σ_z + (∂σ_z/∂z)dz
                   </text>
-                  <text x="140" y="114" textAnchor="middle" className="text-xs font-bold fill-amber-700 dark:fill-amber-300">
+                  <text x="140" y="114" textAnchor="middle" className="text-xs font-bold fill-[var(--diagram-amber)]">
                     自重 γ·dx·dz ↓
                   </text>
-                  <text x="38" y="112" textAnchor="middle" className="text-[10px] font-semibold fill-teal-700 dark:fill-teal-300">
+                  <text x="38" y="112" textAnchor="middle" className="text-[10px] font-semibold fill-[var(--diagram-teal)]">
                     τ_xz
                   </text>
-                  <text x="238" y="112" textAnchor="middle" className="text-[10px] font-semibold fill-teal-700 dark:fill-teal-300">
+                  <text x="238" y="112" textAnchor="middle" className="text-[10px] font-semibold fill-[var(--diagram-teal)]">
                     τ_xz+(∂τ/∂x)dx
                   </text>
                 </svg>
@@ -305,21 +305,21 @@ export const Ch5ElasticGroundStress: React.FC<Ch5Props> = ({
                     y1={25 + (waterZ / 10) * 180}
                     x2="260"
                     y2={25 + (waterZ / 10) * 180}
-                    stroke="#0284c7"
+                    stroke="var(--diagram-sky)"
                     strokeDasharray="4 3"
                     strokeWidth="1.3"
                   />
-                  <text x="256" y={21 + (waterZ / 10) * 180} textAnchor="end" className="text-[10px] fill-sky-600 dark:fill-sky-300">
+                  <text x="256" y={21 + (waterZ / 10) * 180} textAnchor="end" className="text-[10px] fill-[var(--diagram-sky)]">
                     地下水位 z_w={waterZ}m
                   </text>
 
                   {/* ポリライン描画 (max stress ~240 kPa) */}
                   {(['sigmaVTotal', 'sigmaVEff', 'poreWaterU', 'sigmaHEff'] as const).map((key) => {
                     const colors: Record<typeof key, string> = {
-                      sigmaVTotal: '#64748b',
-                      sigmaVEff: '#2563eb',
-                      poreWaterU: '#0284c7',
-                      sigmaHEff: '#0d9488',
+                      sigmaVTotal: 'var(--diagram-muted)',
+                      sigmaVEff: 'var(--diagram-blue)',
+                      poreWaterU: 'var(--diagram-sky)',
+                      sigmaHEff: 'var(--diagram-teal)',
                     };
                     const pts = Array.from({ length: 21 }, (_, idx) => {
                       const z = idx * 0.5;
@@ -351,8 +351,8 @@ export const Ch5ElasticGroundStress: React.FC<Ch5Props> = ({
                     cx={40 + Math.min(210, (geoEval.sigmaVEff / 240) * 210)}
                     cy={25 + (evalZGeo / 10) * 180}
                     r="4.5"
-                    fill="#2563eb"
-                    stroke="#fff"
+                    fill="var(--diagram-blue)"
+                    stroke="var(--diagram-halo)"
                     strokeWidth="1.5"
                   />
                 </svg>
@@ -394,9 +394,9 @@ export const Ch5ElasticGroundStress: React.FC<Ch5Props> = ({
                   {/* 地表面ライン */}
                   <line x1="20" y1="36" x2="500" y2="36" stroke="currentColor" strokeWidth="2" />
                   {/* 集中荷重矢印 */}
-                  <line x1="260" y1="6" x2="260" y2="33" stroke="#dc2626" strokeWidth="3" />
-                  <polygon points="260,36 254,26 266,26" fill="#dc2626" />
-                  <text x="272" y="22" className="text-xs font-bold fill-red-600 dark:fill-red-300 font-mono-num">
+                  <line x1="260" y1="6" x2="260" y2="33" stroke="var(--diagram-red)" strokeWidth="3" />
+                  <polygon points="260,36 254,26 266,26" fill="var(--diagram-red)" />
+                  <text x="272" y="22" className="text-xs font-bold fill-[var(--diagram-red)] font-mono-num">
                     P = {loadP} kN
                   </text>
 
@@ -405,7 +405,7 @@ export const Ch5ElasticGroundStress: React.FC<Ch5Props> = ({
                     const xPx = 260 + cell.r * 36;
                     const yPx = 36 + cell.z * 28;
                     const ratio = Math.min(1, cell.val / Math.max(20, loadP * 0.12));
-                    const opacity = Math.max(0.03, Math.pow(ratio, 0.55) * 0.78);
+                    const opacity = Math.max(0.06, Math.pow(ratio, 0.5) * 0.82);
                     return (
                       <rect
                         key={idx}
@@ -413,16 +413,16 @@ export const Ch5ElasticGroundStress: React.FC<Ch5Props> = ({
                         y={yPx - 6.5}
                         width="17"
                         height="13.5"
-                        fill="#2563eb"
+                        fill="var(--diagram-blue)"
                         fillOpacity={opacity}
                       />
                     );
                   })}
 
                   {/* 観測点マーカー */}
-                  <line x1="260" y1="36" x2={260 + evalR * 36} y2={36 + evalZB * 28} stroke="#d97706" strokeWidth="1.5" strokeDasharray="4 3" />
-                  <circle cx={260 + evalR * 36} cy={36 + evalZB * 28} r="5.5" fill="#d97706" stroke="#fff" strokeWidth="1.5" />
-                  <text x={260 + evalR * 36 + 8} y={36 + evalZB * 28 + 4} className="text-xs font-bold fill-amber-700 dark:fill-amber-300 font-mono-num">
+                  <line x1="260" y1="36" x2={260 + evalR * 36} y2={36 + evalZB * 28} stroke="var(--diagram-amber)" strokeWidth="1.5" strokeDasharray="4 3" />
+                  <circle cx={260 + evalR * 36} cy={36 + evalZB * 28} r="5.5" fill="var(--diagram-amber)" stroke="var(--diagram-halo)" strokeWidth="1.5" />
+                  <text x={260 + evalR * 36 + 8} y={36 + evalZB * 28 + 4} className="text-xs font-bold fill-[var(--diagram-amber)] font-mono-num">
                     (r={evalR}m, z={evalZB}m): Δσ_z={round2(bouss.deltaSigmaZ)} kPa
                   </text>
                 </svg>
@@ -492,9 +492,9 @@ export const Ch5ElasticGroundStress: React.FC<Ch5Props> = ({
                     y="32"
                     width={stripB * 38}
                     height="22"
-                    fill="#2563eb"
+                    fill="var(--diagram-blue)"
                     fillOpacity="0.16"
-                    stroke="#2563eb"
+                    stroke="var(--diagram-blue)"
                     strokeWidth="1.5"
                   />
                   {Array.from({ length: divisions }, (_, i) => {
@@ -507,7 +507,7 @@ export const Ch5ElasticGroundStress: React.FC<Ch5Props> = ({
                         y1="14"
                         x2={ax}
                         y2="52"
-                        stroke="#dc2626"
+                        stroke="var(--diagram-red)"
                         strokeWidth={divisions > 20 ? '1' : '1.6'}
                       />
                     );
@@ -522,7 +522,7 @@ export const Ch5ElasticGroundStress: React.FC<Ch5Props> = ({
                   {/* 厳密帯荷重曲線 (実線青) */}
                   <polyline
                     fill="none"
-                    stroke="#2563eb"
+                    stroke="var(--diagram-blue)"
                     strokeWidth="2.5"
                     points={profilePoints
                       .map((p) => {
@@ -536,7 +536,7 @@ export const Ch5ElasticGroundStress: React.FC<Ch5Props> = ({
                   {/* 離散重ね合わせ曲線 (破線赤) */}
                   <polyline
                     fill="none"
-                    stroke="#dc2626"
+                    stroke="var(--diagram-red)"
                     strokeWidth="2"
                     strokeDasharray="5 3"
                     points={profilePoints
@@ -553,18 +553,18 @@ export const Ch5ElasticGroundStress: React.FC<Ch5Props> = ({
                     cx={270 + stripX * 38}
                     cy={245 - Math.min(155, (superRes.analytical.deltaSigmaZ / Math.max(stripQ, 1)) * 145)}
                     r="5"
-                    fill="#2563eb"
-                    stroke="#fff"
+                    fill="var(--diagram-blue)"
+                    stroke="var(--diagram-halo)"
                     strokeWidth="1.5"
                   />
                 </svg>
 
                 <div className="app-surface-subtle border-x-0 border-b-0 px-4 py-2 flex flex-wrap gap-4 text-xs app-text-muted">
                   <span className="inline-flex items-center gap-1.5">
-                    <span className="h-0.5 w-4 bg-blue-600 inline-block" /> 帯荷重・厳密積分解
+                    <span className="h-0.5 w-4 bg-[var(--diagram-blue)] inline-block" aria-hidden="true" /> 帯荷重・厳密積分解
                   </span>
                   <span className="inline-flex items-center gap-1.5">
-                    <span className="h-0.5 w-4 border-t-2 border-dashed border-red-600 inline-block" /> 線荷重 {divisions}本の重ね合わせ
+                    <span className="h-0.5 w-4 border-t-2 border-dashed border-[var(--diagram-red)] inline-block" aria-hidden="true" /> 線荷重 {divisions}本の重ね合わせ
                   </span>
                 </div>
               </div>

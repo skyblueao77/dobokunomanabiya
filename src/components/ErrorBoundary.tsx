@@ -35,7 +35,7 @@ export class ErrorBoundary extends React.Component<
           className="app-surface rounded-xl p-6 max-w-xl mx-auto my-8 space-y-4"
         >
           <div className="flex items-start gap-3">
-            <AlertTriangle className="h-6 w-6 text-amber-600 shrink-0" aria-hidden="true" />
+            <AlertTriangle className="h-6 w-6 text-amber-700 dark:text-amber-400 shrink-0" aria-hidden="true" />
             <div className="space-y-1">
               <h2 className="text-base font-bold">学習モジュールの表示に失敗しました</h2>
               <p className="text-sm app-text-muted">{this.state.message}</p>

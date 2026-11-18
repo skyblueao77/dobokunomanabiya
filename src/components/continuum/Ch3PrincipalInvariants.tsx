@@ -187,7 +187,11 @@ export const Ch3PrincipalInvariants: React.FC<Ch3Props> = ({
                 const val = orig.principalStresses[idx];
                 const dir = orig.principalDirections[idx];
                 const pct = Math.min(100, Math.max(4, (Math.abs(val) / maxAbsP) * 100));
-                const colors = ['bg-blue-600', 'bg-indigo-500', 'bg-teal-600'];
+                const colors = [
+                  'bg-[var(--diagram-blue)]',
+                  'bg-[var(--diagram-indigo)]',
+                  'bg-[var(--diagram-teal)]',
+                ];
                 return (
                   <div key={label} className="space-y-1 text-xs">
                     <div className="flex flex-wrap items-center justify-between gap-2">
@@ -196,7 +200,7 @@ export const Ch3PrincipalInvariants: React.FC<Ch3Props> = ({
                         主方向 v_{idx + 1} = ({round4(dir[0])}, {round4(dir[1])}, {round4(dir[2])})
                       </span>
                     </div>
-                    <div className="h-2.5 w-full rounded-full bg-[var(--surface-subtle)] overflow-hidden">
+                    <div className="h-2.5 w-full rounded-full bg-[var(--surface-subtle)] border border-[var(--border-subtle)] overflow-hidden">
                       <div className={`h-full rounded-full ${colors[idx]}`} style={{ width: `${pct}%` }} />
                     </div>
                   </div>
