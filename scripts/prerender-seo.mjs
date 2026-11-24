@@ -442,10 +442,72 @@ function buildAllRouteDescriptors() {
   return routes;
 }
 
-function renderHtmlFromTemplate(template, descriptor) {
-  let html = template;
+function extractScriptElements(html) {
+  const lower = html.toLowerCase();
+  const results = [];
+  let cursor = 0;
 
-  html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(descriptor.title)}</title>`);
+  while (cursor < lower.length) {
+    const start = lower.indexOf('<script', cursor);
+    if (start === -1) break;
+
+    const afterName = lower[start + 7];
+    if (afterName !== undefined && !/[\s>]/.test(afterName)) {
+      cursor = start + 7;
+      continue;
+    }
+
+    const openEnd = html.indexOf('>', start + 7);
+    if (openEnd === -1) {
+      throw new Error(`Unterminated <script> opening tag at index ${start}`);
+    }
+
+    let closeStart = lower.indexOf('</script', openEnd + 1);
+    while (closeStart !== -1) {
+      const ch = lower[closeStart + 8];
+      if (ch === '>' || (ch !== undefined && /\s/.test(ch))) {
+        break;
+      }
+      closeStart = lower.indexOf('</script', closeStart + 8);
+    }
+    if (closeStart === -1) {
+      throw new Error(`Missing </script> closing tag for <script> at index ${start}`);
+    }
+
+    const closeEnd = html.indexOf('>', closeStart + 8);
+    if (closeEnd === -1) {
+      throw new Error(`Unterminated </script> closing tag at index ${closeStart}`);
+    }
+
+    results.push({
+      start,
+      end: closeEnd + 1,
+      attrs: html.slice(start + 7, openEnd),
+      body: html.slice(openEnd + 1, closeStart),
+    });
+    cursor = closeEnd + 1;
+  }
+
+  return results;
+}
+
+function replaceTitleElement(html, newTitle) {
+  const lower = html.toLowerCase();
+  const start = lower.indexOf('<title>');
+  if (start === -1) return html;
+  const closeStart = lower.indexOf('</title', start + 7);
+  if (closeStart === -1) return html;
+  const closeEnd = html.indexOf('>', closeStart + 7);
+  if (closeEnd === -1) return html;
+  return (
+    html.slice(0, start) +
+    `<title>${escapeHtml(newTitle)}</title>` +
+    html.slice(closeEnd + 1)
+  );
+}
+
+function renderHtmlFromTemplate(template, descriptor) {
+  let html = replaceTitleElement(template, descriptor.title);
 
   html = html.replace(
     /(<meta\s+name="description"\s+content=")[^"]*(")/i,
@@ -494,15 +556,26 @@ function renderHtmlFromTemplate(template, descriptor) {
     `$1${escapeHtml(ogImageUrl)}$2`
   );
 
-  html = html.replace(
-    /<script\s+id="route-jsonld"\s+type="application\/ld\+json">[\s\S]*?<\/script>/i,
-    `<script id="route-jsonld" type="application/ld+json">${escapeJsonForHtmlScript(descriptor.jsonLd)}</script>`
+  const jsonLdEl = extractScriptElements(html).find((el) =>
+    /id\s*=\s*["']route-jsonld["']/i.test(el.attrs)
   );
+  if (!jsonLdEl) {
+    throw new Error('Template index.html is missing <script id="route-jsonld">');
+  }
+  html =
+    html.slice(0, jsonLdEl.start) +
+    `<script id="route-jsonld" type="application/ld+json">${escapeJsonForHtmlScript(descriptor.jsonLd)}</script>` +
+    html.slice(jsonLdEl.end);
 
-  html = html.replace(
-    /<div\s+id="root"><\/div>/i,
-    `<div id="root">${descriptor.rootHtml}\n    </div>`
-  );
+  const rootMarker = '<div id="root"></div>';
+  const rootIdx = html.indexOf(rootMarker);
+  if (rootIdx === -1) {
+    throw new Error('Template index.html is missing <div id="root"></div>');
+  }
+  html =
+    html.slice(0, rootIdx) +
+    `<div id="root">${descriptor.rootHtml}\n    </div>` +
+    html.slice(rootIdx + rootMarker.length);
 
   return html;
 }
@@ -658,10 +731,9 @@ function verifyGeneratedOutputs(routes) {
 
   for (const r of routes) {
     const html = fs.readFileSync(r.outputFile, 'utf8');
-    const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
-    for (const m of scripts) {
-      const attrs = m[1];
-      const body = m[2];
+    const scripts = extractScriptElements(html);
+    for (const scriptEl of scripts) {
+      const { attrs, body } = scriptEl;
       const hasSrc = /\bsrc\s*=/.test(attrs);
       const isJsonLd = /type\s*=\s*["']application\/ld\+json["']/i.test(attrs);
       if (!hasSrc && !isJsonLd) {

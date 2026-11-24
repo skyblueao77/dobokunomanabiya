@@ -93,13 +93,38 @@ jobs:
               }
               return out;
             }
+            function scanScripts(html) {
+              const lower = html.toLowerCase();
+              const out = [];
+              let pos = 0;
+              while (pos < lower.length) {
+                const start = lower.indexOf("<script", pos);
+                if (start === -1) break;
+                const ch = lower[start + 7];
+                if (ch !== undefined && !/[\s>]/.test(ch)) {
+                  pos = start + 7;
+                  continue;
+                }
+                const openEnd = html.indexOf(">", start + 7);
+                if (openEnd === -1) throw new Error("Unterminated <script>");
+                let closeStart = lower.indexOf("</script", openEnd + 1);
+                while (closeStart !== -1) {
+                  const endCh = lower[closeStart + 8];
+                  if (endCh === ">" || (endCh !== undefined && /\s/.test(endCh))) break;
+                  closeStart = lower.indexOf("</script", closeStart + 8);
+                }
+                if (closeStart === -1) throw new Error("Missing </script>");
+                const closeEnd = html.indexOf(">", closeStart + 8);
+                if (closeEnd === -1) throw new Error("Unterminated </script>");
+                out.push({ attrs: html.slice(start + 7, openEnd), body: html.slice(openEnd + 1, closeStart) });
+                pos = closeEnd + 1;
+              }
+              return out;
+            }
             const htmlFiles = walkHtml("dist");
             for (const file of htmlFiles) {
               const html = fs.readFileSync(file, "utf8");
-              const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
-              for (const match of scripts) {
-                const attrs = match[1];
-                const body = match[2];
+              for (const { attrs, body } of scanScripts(html)) {
                 const hasSrc = /\bsrc\s*=/.test(attrs);
                 const isJsonLd = /type\s*=\s*["\x27]application\/ld\+json["\x27]/i.test(attrs);
                 if (!hasSrc && !isJsonLd) {
