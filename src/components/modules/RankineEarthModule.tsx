@@ -4,6 +4,7 @@ import {
   calculateRankineEarthPressure,
   type RankineInputs,
 } from '../../utils/civilPhysics';
+import { buildRoutePath, isPlainLeftClick } from '../../utils/router';
 import { SliderInput } from '../SliderInput';
 import { MathFormula } from '../MathFormula';
 
@@ -42,14 +43,19 @@ export const RankineEarthModule: React.FC<RankineEarthModuleProps> = ({
     <div className="space-y-6">
       <div className="app-surface rounded-xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-1">
-          <button
-            type="button"
-            onClick={onBackToPortal}
+          <a
+            href={buildRoutePath('home', 'all')}
+            onClick={(e) => {
+              if (isPlainLeftClick(e)) {
+                e.preventDefault();
+                onBackToPortal();
+              }
+            }}
             className="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 dark:text-blue-400 hover:underline cursor-pointer"
           >
             <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
             ポータル一覧に戻る
-          </button>
+          </a>
           <h1 id="main-content" tabIndex={-1} className="portal-h1 font-bold">
             土質力学｜ランキン土圧（主働・受働土圧）
           </h1>

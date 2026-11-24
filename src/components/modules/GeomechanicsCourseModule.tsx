@@ -1,6 +1,12 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { type UnitId } from '../../data/curriculum';
+import {
+  buildRoutePath,
+  getSearchParamFromLocation,
+  isPlainLeftClick,
+  normalizePathname,
+} from '../../utils/router';
 import { CopyShareButton } from '../CopyShareButton';
 import { Ch1StressTensor } from '../continuum/Ch1StressTensor';
 import { Ch2CauchyTransform } from '../continuum/Ch2CauchyTransform';
@@ -57,13 +63,11 @@ const CHAPTERS: {
 
 const TOTAL_EXERCISE_COUNT = CHAPTERS.length * 2;
 
+const UNIT_PATH = buildRoutePath('geomechanics-continuum');
+
 function parseInitialChapter(): ChapterIndex {
   try {
-    const hash = window.location.hash;
-    const qIdx = hash.indexOf('?');
-    if (qIdx === -1) return 1;
-    const params = new URLSearchParams(hash.slice(qIdx + 1));
-    const ch = Number(params.get('ch'));
+    const ch = Number(getSearchParamFromLocation('ch'));
     if (ch >= 1 && ch <= 6 && Number.isInteger(ch)) {
       return ch as ChapterIndex;
     }
@@ -97,18 +101,25 @@ export const GeomechanicsCourseModule: React.FC<GeomechanicsCourseModuleProps> =
   const tabRefs = useRef<Record<number, HTMLButtonElement | null>>({});
 
   useEffect(() => {
-    const onHashChange = () => {
+    const onLocationChange = () => {
       const next = parseInitialChapter();
       setActiveChapter((prev) => (prev !== next ? next : prev));
     };
-    window.addEventListener('hashchange', onHashChange);
-    return () => window.removeEventListener('hashchange', onHashChange);
+    window.addEventListener('popstate', onLocationChange);
+    window.addEventListener('hashchange', onLocationChange);
+    return () => {
+      window.removeEventListener('popstate', onLocationChange);
+      window.removeEventListener('hashchange', onLocationChange);
+    };
   }, []);
 
   useEffect(() => {
-    const nextHash = `#/unit/geomechanics-continuum?ch=${activeChapter}`;
-    if (window.location.hash !== nextHash) {
-      window.history.replaceState(null, '', nextHash);
+    if (normalizePathname(window.location.pathname) !== UNIT_PATH) {
+      return;
+    }
+    const nextUrl = activeChapter === 1 ? UNIT_PATH : `${UNIT_PATH}?ch=${activeChapter}`;
+    if (window.location.pathname + window.location.search !== nextUrl) {
+      window.history.replaceState(null, '', nextUrl);
     }
   }, [activeChapter]);
 
@@ -152,14 +163,19 @@ export const GeomechanicsCourseModule: React.FC<GeomechanicsCourseModuleProps> =
       {/* コースヘッダー */}
       <div className="app-surface rounded-xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-1 max-w-2xl">
-          <button
-            type="button"
-            onClick={onBackToPortal}
+          <a
+            href={buildRoutePath('home', 'all')}
+            onClick={(e) => {
+              if (isPlainLeftClick(e)) {
+                e.preventDefault();
+                onBackToPortal();
+              }
+            }}
             className="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 dark:text-blue-400 hover:underline cursor-pointer"
           >
             <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
             ポータル一覧に戻る
-          </button>
+          </a>
           <h1 id="main-content" tabIndex={-1} className="portal-h1 font-bold">
             土質力学・地盤連続体｜応力テンソル〜弾性地盤の応力と変形
           </h1>

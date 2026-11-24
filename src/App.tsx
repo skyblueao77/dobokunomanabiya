@@ -1,8 +1,6 @@
 import { Suspense, lazy, useEffect, useState } from 'react';
 import {
   LEARNING_UNITS,
-  SUBJECTS,
-  getSubjectMeta,
   type SubjectId,
   type UnitId,
 } from './data/curriculum';
@@ -14,10 +12,19 @@ import {
   type StudyProgress,
   type ThemePreference,
 } from './utils/storage';
+import {
+  buildRoutePath,
+  isPlainLeftClick,
+  parseLocation,
+  type AppRoute,
+} from './utils/router';
+import { applyRouteSeoToDocument } from './utils/seoHead';
 import { PortalHeader } from './components/PortalHeader';
 import { PortalHome } from './components/PortalHome';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { WipNoticeBanner } from './components/WipNoticeBanner';
+import { UnitBreadcrumb } from './components/UnitBreadcrumb';
+import { UnitFaqSection } from './components/UnitFaqSection';
 
 const GeomechanicsCourseModule = lazy(
   () => import('./components/modules/GeomechanicsCourseModule')
@@ -34,49 +41,47 @@ const NonlinearProgrammingCourseModule = lazy(
 );
 const LegalPage = lazy(() => import('./components/LegalPage'));
 
-type Route = 'home' | 'legal' | UnitId;
-
-interface ParsedHash {
-  route: Route;
-  subject: SubjectId;
-}
-
-function parseRouteFromHash(): ParsedHash {
-  const hash = window.location.hash;
-  if (hash === '#/legal' || hash.startsWith('#/legal?')) {
-    return { route: 'legal', subject: 'all' };
-  }
-  if (hash.startsWith('#/subject/')) {
-    const rawSubject = hash.slice('#/subject/'.length).split('?')[0] as Exclude<SubjectId, 'all'>;
-    if (SUBJECTS.some((s) => s.id === rawSubject)) {
-      return { route: 'home', subject: rawSubject };
-    }
-  }
-  if (hash.startsWith('#/unit/')) {
-    const rawId = hash.slice('#/unit/'.length).split('?')[0] as UnitId;
-    const matched = LEARNING_UNITS.find((u) => u.id === rawId);
-    if (matched) {
-      return { route: rawId, subject: matched.subjectId };
-    }
-  }
-  return { route: 'home', subject: 'all' };
-}
-
 export function App() {
-  const initialParsed = parseRouteFromHash();
-  const [route, setRoute] = useState<Route>(initialParsed.route);
+  const [initialParsed] = useState(() =>
+    parseLocation(window.location.pathname, window.location.search, window.location.hash)
+  );
+  const [route, setRoute] = useState<AppRoute>(initialParsed.route);
   const [selectedSubject, setSelectedSubject] = useState<SubjectId>(initialParsed.subject);
   const [progress, setProgress] = useState<StudyProgress>(() => loadStudyProgress());
   const [themePref, setThemePref] = useState<ThemePreference>(() => getThemePreference());
 
   useEffect(() => {
-    const onHashChange = () => {
-      const parsed = parseRouteFromHash();
+    if (initialParsed.legacyHashRedirectPath) {
+      window.history.replaceState(null, '', initialParsed.legacyHashRedirectPath);
+    }
+  }, [initialParsed.legacyHashRedirectPath]);
+
+  useEffect(() => {
+    const syncFromLocation = () => {
+      const parsed = parseLocation(
+        window.location.pathname,
+        window.location.search,
+        window.location.hash
+      );
+      if (parsed.legacyHashRedirectPath) {
+        window.history.replaceState(null, '', parsed.legacyHashRedirectPath);
+      }
       setRoute(parsed.route);
       setSelectedSubject(parsed.subject);
     };
+
+    const onHashChange = () => {
+      if (window.location.hash.startsWith('#/')) {
+        syncFromLocation();
+      }
+    };
+
+    window.addEventListener('popstate', syncFromLocation);
     window.addEventListener('hashchange', onHashChange);
-    return () => window.removeEventListener('hashchange', onHashChange);
+    return () => {
+      window.removeEventListener('popstate', syncFromLocation);
+      window.removeEventListener('hashchange', onHashChange);
+    };
   }, []);
 
   // Cross-tab sync for color-scheme override
@@ -92,41 +97,34 @@ export function App() {
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
-  // SPA document title update on route change (WCAG 2.4.2)
+  // Dynamic title, canonical, OGP and JSON-LD update on route change
   useEffect(() => {
-    if (route === 'home') {
-      if (selectedSubject !== 'all') {
-        const subjectMeta = getSubjectMeta(selectedSubject);
-        document.title = `${subjectMeta.name}｜土木の学び舎`;
-      } else {
-        document.title = '土木の学び舎｜土木工学インタラクティブ学習ポータル';
-      }
-    } else if (route === 'legal') {
-      document.title = '利用規約・免責事項・プライバシーポリシー｜土木の学び舎';
-    } else {
-      const unit = LEARNING_UNITS.find((u) => u.id === route);
-      document.title = unit
-        ? `${unit.title}｜土木の学び舎`
-        : '土木の学び舎｜土木工学インタラクティブ学習ポータル';
-    }
+    applyRouteSeoToDocument(route, selectedSubject);
   }, [route, selectedSubject]);
 
-  const navigate = (nextRoute: Route, subjectOverride?: SubjectId) => {
+  const navigate = (nextRoute: AppRoute, subjectOverride?: SubjectId, search = '') => {
     setRoute(nextRoute);
     if (nextRoute === 'home') {
       const nextSubject = subjectOverride ?? 'all';
       setSelectedSubject(nextSubject);
-      window.location.hash = nextSubject === 'all' ? '#/' : `#/subject/${nextSubject}`;
+      const nextPath = buildRoutePath('home', nextSubject);
+      if (window.location.pathname + window.location.search !== nextPath) {
+        window.history.pushState(null, '', nextPath);
+      }
     } else if (nextRoute === 'legal') {
       setSelectedSubject('all');
-      window.location.hash = '#/legal';
+      const nextPath = buildRoutePath('legal');
+      if (window.location.pathname + window.location.search !== nextPath) {
+        window.history.pushState(null, '', nextPath);
+      }
     } else {
       const matched = LEARNING_UNITS.find((u) => u.id === nextRoute);
       if (matched) {
         setSelectedSubject(matched.subjectId);
       }
-      if (!window.location.hash.startsWith(`#/unit/${nextRoute}`)) {
-        window.location.hash = `#/unit/${nextRoute}`;
+      const nextPath = buildRoutePath(nextRoute, 'all', search);
+      if (window.location.pathname + window.location.search !== nextPath) {
+        window.history.pushState(null, '', nextPath);
       }
       setProgress((prev) => {
         const updated: StudyProgress = { ...prev, lastVisitedUnit: nextRoute };
@@ -142,9 +140,9 @@ export function App() {
 
   const handleSelectSubjectOnHome = (subject: SubjectId) => {
     setSelectedSubject(subject);
-    const nextHash = subject === 'all' ? '#/' : `#/subject/${subject}`;
-    if (window.location.hash !== nextHash) {
-      window.history.replaceState(null, '', nextHash);
+    const nextPath = buildRoutePath('home', subject);
+    if (window.location.pathname + window.location.search !== nextPath) {
+      window.history.replaceState(null, '', nextPath);
     }
   };
 
@@ -225,6 +223,11 @@ export function App() {
     });
   };
 
+  const activeUnit =
+    route !== 'home' && route !== 'legal'
+      ? LEARNING_UNITS.find((u) => u.id === route)
+      : undefined;
+
   return (
     <div className="min-h-screen flex flex-col">
       <PortalHeader
@@ -240,6 +243,15 @@ export function App() {
           showDisclaimerLink={route !== 'legal'}
           onOpenDisclaimer={() => navigate('legal')}
         />
+        {activeUnit && (
+          <div className="mb-4">
+            <UnitBreadcrumb
+              subjectId={activeUnit.subjectId}
+              unitTitle={activeUnit.title}
+              onNavigate={navigate}
+            />
+          </div>
+        )}
         <ErrorBoundary onReset={() => navigate('home')}>
           <Suspense
             fallback={
@@ -275,10 +287,7 @@ export function App() {
                 completedProblemIds={progress.completedProblemIds}
                 onToggleProblemDone={toggleProblemDone}
                 onBackToPortal={() => navigate('home')}
-                onOpenContinuumCourse={() => {
-                  window.location.hash = '#/unit/geomechanics-continuum?ch=4';
-                  navigate('geomechanics-continuum');
-                }}
+                onOpenContinuumCourse={() => navigate('geomechanics-continuum', undefined, '?ch=4')}
               />
             )}
             {route === 'rankine-earth-pressure' && (
@@ -325,22 +334,32 @@ export function App() {
             {route === 'legal' && <LegalPage onBackToPortal={() => navigate('home')} />}
           </Suspense>
         </ErrorBoundary>
+        {activeUnit && (
+          <div className="mt-6">
+            <UnitFaqSection unitId={activeUnit.id} />
+          </div>
+        )}
       </main>
 
       <footer className="border-t border-[var(--border-subtle)] py-5 px-4 sm:px-6 text-xs app-text-muted">
         <div className="mx-auto max-w-7xl flex flex-wrap items-center justify-between gap-2">
           <span>
-            土木の学び舎 — 土木工学インタラクティブ学習ポータル（現在開発中・多くの誤りを含む可能性あり）
+            土木の学び舎 — 土木工学・数理計画インタラクティブ学習ポータル（現在開発中・多くの誤りを含む可能性あり）
           </span>
           <div className="flex flex-wrap items-center gap-4">
             <span>日本の大学・高専 教科書準拠（土質力学：圧縮正）</span>
-            <button
-              type="button"
-              onClick={() => navigate('legal')}
+            <a
+              href={buildRoutePath('legal')}
+              onClick={(e) => {
+                if (isPlainLeftClick(e)) {
+                  e.preventDefault();
+                  navigate('legal');
+                }
+              }}
               className="underline hover:text-[var(--text-primary)] cursor-pointer"
             >
               利用規約・免責事項・プライバシーポリシー・技術者倫理
-            </button>
+            </a>
           </div>
         </div>
       </footer>

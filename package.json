@@ -6,7 +6,7 @@
   "packageManager": "npm@11.21.2",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "node scripts/build.mjs",
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "vitest run"

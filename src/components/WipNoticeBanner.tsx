@@ -1,5 +1,6 @@
 import React from 'react';
 import { AlertTriangle, ArrowRight } from 'lucide-react';
+import { buildRoutePath, isPlainLeftClick } from '../utils/router';
 
 interface WipNoticeBannerProps {
   showDisclaimerLink?: boolean;
@@ -34,14 +35,19 @@ export const WipNoticeBanner: React.FC<WipNoticeBannerProps> = ({
           </p>
           {showDisclaimerLink && onOpenDisclaimer && (
             <div className="pt-0.5">
-              <button
-                type="button"
-                onClick={onOpenDisclaimer}
+              <a
+                href={buildRoutePath('legal')}
+                onClick={(e) => {
+                  if (isPlainLeftClick(e)) {
+                    e.preventDefault();
+                    onOpenDisclaimer();
+                  }
+                }}
                 className="app-notice-accent inline-flex items-center gap-1 text-xs font-bold underline underline-offset-2 cursor-pointer py-1"
               >
                 免責事項・利用上の注意を確認する
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-              </button>
+              </a>
             </div>
           )}
         </div>

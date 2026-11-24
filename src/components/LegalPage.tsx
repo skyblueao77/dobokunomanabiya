@@ -1,4 +1,5 @@
 import { Accessibility, ArrowLeft, BookOpen, ExternalLink, Lock, Scale, ShieldAlert } from 'lucide-react';
+import { buildRoutePath, isPlainLeftClick } from '../utils/router';
 
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -17,51 +18,81 @@ export default function LegalPage({ onBackToPortal }: LegalPageProps) {
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <button
-          type="button"
-          onClick={onBackToPortal}
+        <a
+          href={buildRoutePath('home', 'all')}
+          onClick={(e) => {
+            if (isPlainLeftClick(e)) {
+              e.preventDefault();
+              onBackToPortal();
+            }
+          }}
           className="interactive-btn inline-flex items-center gap-2 rounded-lg border border-[var(--border-control)] px-3 py-1.5 text-sm font-medium cursor-pointer"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           ポータルへ戻る
-        </button>
+        </a>
 
         <nav aria-label="法的・倫理的情報ナビゲーション" className="flex flex-wrap gap-2 text-xs">
-          <button
-            type="button"
-            onClick={() => scrollToSection('disclaimer')}
+          <a
+            href="#disclaimer"
+            onClick={(e) => {
+              if (isPlainLeftClick(e)) {
+                e.preventDefault();
+                scrollToSection('disclaimer');
+              }
+            }}
             className="interactive-btn rounded-md border border-[var(--border-control)] px-2.5 py-1 cursor-pointer"
           >
             免責事項
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollToSection('terms')}
+          </a>
+          <a
+            href="#terms"
+            onClick={(e) => {
+              if (isPlainLeftClick(e)) {
+                e.preventDefault();
+                scrollToSection('terms');
+              }
+            }}
             className="interactive-btn rounded-md border border-[var(--border-control)] px-2.5 py-1 cursor-pointer"
           >
             利用規約
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollToSection('privacy')}
+          </a>
+          <a
+            href="#privacy"
+            onClick={(e) => {
+              if (isPlainLeftClick(e)) {
+                e.preventDefault();
+                scrollToSection('privacy');
+              }
+            }}
             className="interactive-btn rounded-md border border-[var(--border-control)] px-2.5 py-1 cursor-pointer"
           >
             プライバシー・外部送信
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollToSection('ethics')}
+          </a>
+          <a
+            href="#ethics"
+            onClick={(e) => {
+              if (isPlainLeftClick(e)) {
+                e.preventDefault();
+                scrollToSection('ethics');
+              }
+            }}
             className="interactive-btn rounded-md border border-[var(--border-control)] px-2.5 py-1 cursor-pointer"
           >
             技術者倫理
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollToSection('accessibility')}
+          </a>
+          <a
+            href="#accessibility"
+            onClick={(e) => {
+              if (isPlainLeftClick(e)) {
+                e.preventDefault();
+                scrollToSection('accessibility');
+              }
+            }}
             className="interactive-btn rounded-md border border-[var(--border-control)] px-2.5 py-1 cursor-pointer"
           >
             アクセシビリティ方針
-          </button>
+          </a>
         </nav>
       </div>
 

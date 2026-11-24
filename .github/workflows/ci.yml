@@ -20,10 +20,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: "24"
           cache: "npm"
@@ -37,10 +37,10 @@ jobs:
       - name: Run unit tests (vitest)
         run: npm test
 
-      - name: Type-check & build production bundle
+      - name: Type-check, build & prerender SEO/AEO bundle
         run: npm run build
 
-      - name: Verify production artifacts & CSP safety
+      - name: Verify production artifacts, SEO/AEO & CSP safety
         run: |
           set -euo pipefail
           for f in \
@@ -51,31 +51,71 @@ jobs:
             dist/registerSW.js \
             dist/robots.txt \
             dist/sitemap.xml \
+            dist/llms.txt \
+            dist/llms-full.txt \
+            dist/og-image.png \
             dist/theme-init.js \
             dist/favicon.svg \
             dist/icon-192.png \
-            dist/icon-512.png; do
+            dist/icon-512.png \
+            dist/legal/index.html \
+            dist/subject/structural/index.html \
+            dist/subject/hydraulics/index.html \
+            dist/subject/soil/index.html \
+            dist/subject/math-programming/index.html \
+            dist/unit/geomechanics-continuum/index.html \
+            dist/unit/mohr-circle/index.html \
+            dist/unit/rankine-earth-pressure/index.html \
+            dist/unit/beam-sfd-bmd/index.html \
+            dist/unit/open-channel-flow/index.html \
+            dist/unit/lp-optimization/index.html \
+            dist/unit/nlp-optimization/index.html \
+            dist/unit/geomechanics-continuum.md \
+            dist/unit/mohr-circle.md \
+            dist/unit/rankine-earth-pressure.md \
+            dist/unit/beam-sfd-bmd.md \
+            dist/unit/open-channel-flow.md \
+            dist/unit/lp-optimization.md \
+            dist/unit/nlp-optimization.md; do
             test -f "$f" || { echo "Missing required artifact: $f"; exit 1; }
           done
 
-          # Ensure every <script> tag either has a src attribute or is type="application/ld+json"
+          # Ensure every <script> tag in all generated HTML files has src= or type="application/ld+json"
           node -e '
             const fs = require("node:fs");
-            const html = fs.readFileSync("dist/index.html", "utf8");
-            const scripts = [...html.matchAll(/<script\b([^>]*)>/gi)].map((m) => m[1]);
-            for (const attrs of scripts) {
-              const hasSrc = /\bsrc\s*=/.test(attrs);
-              const isJsonLd = /type\s*=\s*["\x27]application\/ld\+json["\x27]/i.test(attrs);
-              if (!hasSrc && !isJsonLd) {
-                console.error("Inline executable <script> violates strict CSP:", attrs);
-                process.exit(1);
+            const path = require("node:path");
+            function walkHtml(dir) {
+              const out = [];
+              for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+                const full = path.join(dir, entry.name);
+                if (entry.isDirectory()) out.push(...walkHtml(full));
+                else if (entry.name.endsWith(".html")) out.push(full);
+              }
+              return out;
+            }
+            const htmlFiles = walkHtml("dist");
+            for (const file of htmlFiles) {
+              const html = fs.readFileSync(file, "utf8");
+              const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
+              for (const match of scripts) {
+                const attrs = match[1];
+                const body = match[2];
+                const hasSrc = /\bsrc\s*=/.test(attrs);
+                const isJsonLd = /type\s*=\s*["\x27]application\/ld\+json["\x27]/i.test(attrs);
+                if (!hasSrc && !isJsonLd) {
+                  console.error("Inline executable <script> violates strict CSP in", file, attrs);
+                  process.exit(1);
+                }
+                if (isJsonLd) {
+                  JSON.parse(body);
+                }
               }
             }
-            console.log("Verified", scripts.length, "<script> tags in dist/index.html");
+            console.log("Verified strict CSP & valid JSON-LD across", htmlFiles.length, "HTML files");
           '
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dist-bundle
           path: dist/
@@ -91,16 +131,16 @@ jobs:
       deployments: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Download build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: dist-bundle
           path: dist/
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: "24"
 
