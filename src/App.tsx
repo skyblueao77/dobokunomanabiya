@@ -26,6 +26,12 @@ const MohrCircleModule = lazy(() => import('./components/modules/MohrCircleModul
 const RankineEarthModule = lazy(() => import('./components/modules/RankineEarthModule'));
 const BeamDiagramModule = lazy(() => import('./components/modules/BeamDiagramModule'));
 const OpenChannelModule = lazy(() => import('./components/modules/OpenChannelModule'));
+const LinearProgrammingCourseModule = lazy(
+  () => import('./components/modules/LinearProgrammingCourseModule')
+);
+const NonlinearProgrammingCourseModule = lazy(
+  () => import('./components/modules/NonlinearProgrammingCourseModule')
+);
 const LegalPage = lazy(() => import('./components/LegalPage'));
 
 type Route = 'home' | 'legal' | UnitId;
@@ -195,6 +201,30 @@ export function App() {
     });
   };
 
+  const toggleMathProgExerciseDone = (exerciseId: string) => {
+    setProgress((prev) => {
+      const exists = prev.completedMathProgExerciseIds.includes(exerciseId);
+      const completedMathProgExerciseIds = exists
+        ? prev.completedMathProgExerciseIds.filter((id) => id !== exerciseId)
+        : [...prev.completedMathProgExerciseIds, exerciseId];
+      const updated = { ...prev, completedMathProgExerciseIds };
+      saveStudyProgress(updated);
+      return updated;
+    });
+  };
+
+  const markMathProgExerciseDone = (exerciseId: string) => {
+    setProgress((prev) => {
+      if (prev.completedMathProgExerciseIds.includes(exerciseId)) return prev;
+      const updated = {
+        ...prev,
+        completedMathProgExerciseIds: [...prev.completedMathProgExerciseIds, exerciseId],
+      };
+      saveStudyProgress(updated);
+      return updated;
+    });
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <PortalHeader
@@ -269,6 +299,26 @@ export function App() {
               <OpenChannelModule
                 isCompleted={progress.completedUnits.includes('open-channel-flow')}
                 onToggleUnitComplete={() => toggleUnitComplete('open-channel-flow')}
+                onBackToPortal={() => navigate('home')}
+              />
+            )}
+            {route === 'lp-optimization' && (
+              <LinearProgrammingCourseModule
+                isCompleted={progress.completedUnits.includes('lp-optimization')}
+                onToggleUnitComplete={() => toggleUnitComplete('lp-optimization')}
+                completedExerciseIds={progress.completedMathProgExerciseIds}
+                onToggleExerciseDone={toggleMathProgExerciseDone}
+                onMarkExerciseDone={markMathProgExerciseDone}
+                onBackToPortal={() => navigate('home')}
+              />
+            )}
+            {route === 'nlp-optimization' && (
+              <NonlinearProgrammingCourseModule
+                isCompleted={progress.completedUnits.includes('nlp-optimization')}
+                onToggleUnitComplete={() => toggleUnitComplete('nlp-optimization')}
+                completedExerciseIds={progress.completedMathProgExerciseIds}
+                onToggleExerciseDone={toggleMathProgExerciseDone}
+                onMarkExerciseDone={markMathProgExerciseDone}
                 onBackToPortal={() => navigate('home')}
               />
             )}
