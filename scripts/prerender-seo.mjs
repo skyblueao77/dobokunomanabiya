@@ -753,8 +753,16 @@ function verifyGeneratedOutputs(routes) {
 
   for (const r of routes) {
     const html = fs.readFileSync(r.outputFile, 'utf8');
-    if (html.includes('fonts.googleapis.com') || html.includes('fonts.gstatic.com')) {
-      throw new Error(`External Google Fonts reference still present in ${r.outputFile}`);
+    for (const [rawUrl] of html.matchAll(/\bhttps?:\/\/[^\s"'<>]+/gi)) {
+      let parsedHost = '';
+      try {
+        parsedHost = new URL(rawUrl).hostname.toLowerCase();
+      } catch {
+        continue;
+      }
+      if (parsedHost === 'fonts.googleapis.com' || parsedHost === 'fonts.gstatic.com') {
+        throw new Error(`External Google Fonts reference still present in ${r.outputFile}`);
+      }
     }
     const scripts = extractScriptElements(html);
     for (const scriptEl of scripts) {

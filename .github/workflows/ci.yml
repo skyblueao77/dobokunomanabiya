@@ -133,9 +133,17 @@ jobs:
             const htmlFiles = walkHtml("dist");
             for (const file of htmlFiles) {
               const html = fs.readFileSync(file, "utf8");
-              if (html.includes("fonts.googleapis.com") || html.includes("fonts.gstatic.com")) {
-                console.error("External Google Fonts reference found in", file);
-                process.exit(1);
+              for (const [rawUrl] of html.matchAll(/\bhttps?:\/\/[^\s"\x27<>]+/gi)) {
+                let parsedHost = "";
+                try {
+                  parsedHost = new URL(rawUrl).hostname.toLowerCase();
+                } catch {
+                  continue;
+                }
+                if (parsedHost === "fonts.googleapis.com" || parsedHost === "fonts.gstatic.com") {
+                  console.error("External Google Fonts reference found in", file);
+                  process.exit(1);
+                }
               }
               for (const { attrs, body } of scanScripts(html)) {
                 const hasSrc = /\bsrc\s*=/.test(attrs);
