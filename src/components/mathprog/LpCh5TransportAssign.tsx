@@ -28,13 +28,14 @@ const DEMAND = [25, 25, 30];
 const DEFAULT_SUPPLY: [number, number, number] = [40, 28, 22];
 
 const DEFAULT_VEHICLES: GridPoint[] = [
-  { id: 'A', label: '車A', x: 1, y: 2 },
+  { id: 'A', label: '車A', x: 1, y: 1 },
   { id: 'B', label: '車B', x: 2, y: 5 },
   { id: 'C', label: '車C', x: 5, y: 5 },
 ];
 const TARGET_BRIDGES: GridPoint[] = [
   { id: 'P', label: '橋梁P', x: 4, y: 5 },
   { id: 'Q', label: '橋梁Q', x: 7, y: 7 },
+  { id: 'R', label: '橋梁R', x: 1, y: 4 },
 ];
 
 export const LpCh5TransportAssign: React.FC<LpCh5Props> = ({
@@ -77,76 +78,59 @@ export const LpCh5TransportAssign: React.FC<LpCh5Props> = ({
   const exercises: ContinuumExercise[] = [
     {
       id: 'lp-ch5-q1',
-      title: '問1：生コンクリート輸送問題におけるプラント丙の能力増強判断',
+      title: '問1：プラント乙の出荷能力増強に伴う最小総輸送費用の算出',
       category: '輸送問題とシャドー・プライス',
       statement:
-        '初期条件（供給能力 甲=40, 乙=28, 丙=22、需要 25, 25, 30、最小総費用 365 万円、各プラントのシャドー・プライス 甲=0, 乙=2, 丙=7 万円/単位）において、プラント丙の出荷能力を月あたり 4 万円で 1 単位増強できるとする。1 単位増強すべきか、また 10 単位など大幅に増強する場合の注意点として正しいものはどれか。',
-      kind: 'choice',
-      choices: [
-        {
-          id: 'a',
-          label:
-            '1単位増強で輸送費が7万円減り費用4万円を上回るため増強すべきだが、大幅増強では基底が変わり同じ7万円/単位の削減が維持されない',
-        },
-        {
-          id: 'b',
-          label:
-            'シャドー・プライス7万円は増強による費用の増加を表すため、1単位増強すると逆に総費用が増えてしまい増強すべきでない',
-        },
-        {
-          id: 'c',
-          label:
-            'シャドー・プライスが7万円なので、10単位増強すれば必ず70万円の輸送費削減がそのまま達成できる',
-        },
-        {
-          id: 'd',
-          label:
-            'プラント甲の出荷能力に余裕があるため、プラント丙を増強しても総輸送費用は一切変化しない',
-        },
-      ],
-      correctChoiceId: 'a',
-      hint: '能力増強1単位あたりの輸送費削減額（7万円）と増強コスト（4万円）を比較します。大幅増強時は現場3の需要上限や他プラントの輸送ルート切り替わりでシャドー・プライスが低下・変化します。',
+        '初期条件（供給能力 甲=40, 乙=28, 丙=22、需要 25, 25, 30、最小総費用 365 万円、各プラントのシャドー・プライス 甲=0, 乙=2, 丙=7 万円/単位）において、プラント乙の出荷能力を 28 台から 29 台へ 1 単位増強したときの新しい最小総輸送費用（万円）を求めよ。',
+      mathContext:
+        '\\Delta C_{\\text{輸送}} = -(\\text{シャドー・プライス}) \\times \\Delta S_2 \\quad (\\Delta S_2 = 1)',
+      kind: 'numeric',
+      expectedValue: 363,
+      tolerance: 0.2,
+      unit: '万円',
+      inputHint: 'プラント乙のシャドー・プライス 2 万円/単位は、能力が 1 台増えたときの総輸送費用の減少額を表します。',
+      hint: '初期最小費用 365 万円から、シャドー・プライス 2 万円を引きます。また実際にルートを見ると甲→現場2(単価7)が1台減り、乙→現場2(単価5)が1台増えるため差額 -2 万円になります。',
       steps: [
         {
-          label: '1単位増強の損益を比較する',
-          math: '\\text{輸送費削減 } 7\\text{ 万円} - \\text{増強費 } 4\\text{ 万円} = +3\\text{ 万円（純利益増）} \\implies \\text{1単位増強すべき}',
+          label: 'シャドー・プライス（2万円/単位）による減少額を確認する',
+          math: '365 - 2 \\times 1 = 363\\text{ 万円}',
         },
         {
-          label: '大幅増強時（例: +8単位→能力30）の真の費用減少を確認する',
-          math: '365 - 315 = 50\\text{ 万円} < 7 \\times 8 = 56\\text{ 万円（途中で基底が切り替わるため）}',
+          label: '輸送ルートの入れ替えでも検算する（甲→現場2が 5→4 台、乙→現場2が 20→21 台）',
+          math: '\\Delta C = (5 - 7) \\times 1 = -2\\text{ 万円} \\implies 363\\text{ 万円（なお大幅増強時は基底変化に注意）}',
         },
       ],
-      answerSummary: '1単位は増強すべき（純+3万円）、ただし大幅増強時は基底変更により線形予測が成立しない',
+      answerSummary: '363 万円（増強前 365 万円から 2 万円減少）',
       onApplyPreset: () => {
-        setSupply([40, 28, 22]);
-        setExpandC(8);
+        setSupply([40, 29, 22]);
+        setExpandC(1);
       },
     },
     {
       id: 'lp-ch5-q2',
-      title: '問2：格子道路グリッドにおける貪欲法と全体最適解の距離差',
+      title: '問2：3×3 正方割当問題（パトロール車 3 台 → 橋梁 3 箇所）の最小合計距離',
       category: '割当問題（マンハッタン距離）',
       statement:
-        '緊急パトロール車 A(1,2), B(2,5), C(5,5) から、点検対象橋梁 P(4,5), Q(7,7) へ1台ずつ（最大1箇所担当）配車する。「最もマンハッタン距離が短い車と橋の組から順に確定する（貪欲法）」による合計距離と、LP（全体最適）による最小合計距離の差は何 km か。',
+        '緊急パトロール車 A(1,1), B(2,5), C(5,5) から、点検対象橋梁 P(4,5), Q(7,7), R(1,4) へ各車 1 箇所ずつ（1 対 1）割り当てる。マンハッタン距離 d((x₁,y₁),(x₂,y₂)) = |x₁−x₂| + |y₁−y₂| に基づく全体最適解の合計移動距離の最小値（km）を求めよ。',
       mathContext:
-        'd((x_1,y_1),(x_2,y_2)) = |x_1-x_2| + |y_1-y_2|',
+        'd_{AP}=7,\\ d_{AQ}=12,\\ d_{AR}=3,\\quad d_{BP}=2,\\ d_{BQ}=7,\\ d_{BR}=2,\\quad d_{CP}=1,\\ d_{CQ}=4,\\ d_{CR}=5',
       kind: 'numeric',
-      expectedValue: 2,
+      expectedValue: 9,
       tolerance: 0.1,
       unit: 'km',
-      inputHint: '距離表を作って、最短ペア C→P (1 km) を先に確定した場合と、B→P, C→Q を組にした場合を比べます。',
-      hint: '貪欲法は C→P (1) と B→Q (7) で合計 8 km。全体最適は B→P (2) と C→Q (4) で合計 6 km です。',
+      inputHint: '近い順に C→P (1 km) を確定する貪欲法（合計 15 km）ではなく、全 6 通りの組合せを比較します。',
+      hint: '車Aは橋梁Qから非常に遠い（12 km）ため、車Cを橋梁Q(4 km)に回し、車Aを橋梁R(3 km)、車Bを橋梁P(2 km)へ割り当てます。',
       steps: [
         {
-          label: '各ペアのマンハッタン距離を計算する',
-          math: 'd_{AP}=6,\\ d_{AQ}=11,\\ d_{BP}=2,\\ d_{BQ}=7,\\ d_{CP}=1,\\ d_{CQ}=4',
+          label: '貪欲法（最短ペア順確定）の結果を確認する',
+          math: '\\text{C→P (1) + B→R (2) + A→Q (12) = 15 km（最大単車距離 12 km）}',
         },
         {
-          label: '貪欲法と全体最適解の合計距離を比較する',
-          math: '\\text{貪欲法: } 1+7=8\\text{ km},\\quad \\text{全体最適: } 2+4=6\\text{ km} \\implies \\text{差 } = 8 - 6 = 2\\text{ km}',
+          label: '全体最適解（A→R, B→P, C→Q）の合計距離を求める',
+          math: 'd_{AR} + d_{BP} + d_{CQ} = 3 + 2 + 4 = 9\\text{ km（最大単車距離も 4 km へ短縮）}',
         },
       ],
-      answerSummary: '2 km（貪欲法 8 km − 全体最適 6 km）',
+      answerSummary: '9 km（A→R: 3 km, B→P: 2 km, C→Q: 4 km。貪欲法 15 km より 6 km 短縮）',
       onApplyPreset: resetAssign,
     },
   ];
@@ -182,6 +166,15 @@ export const LpCh5TransportAssign: React.FC<LpCh5Props> = ({
               1対1の配車・割当で「最も近いペアを1組確定して次を選ぶ」<strong>貪欲法</strong>は、他の対象にとって重要な担い手を先に奪ってしまい、残された対象の距離が跳ね上がることがあります。全体最適ではすべての組合せを同時に評価します。
             </p>
           </div>
+        </div>
+
+        <div className="rounded-lg border border-indigo-500/35 bg-indigo-500/10 p-4 space-y-1.5 text-xs leading-relaxed">
+          <div className="font-bold text-indigo-800 dark:text-indigo-200">
+            技術者倫理とモデル化の限界（効率性 vs 公平性・安全性・レジリエンス）
+          </div>
+          <p className="app-text-muted">
+            数理計画における「最適解」は、設定した<strong>単一の目的関数と確定的な前提のもとでの最適</strong>に過ぎません。たとえば緊急点検配車では「総移動距離の最小化（効率性）」と「最も遅れる現場への最大到着時間の最小化・重要度の高い老朽橋梁の優先（公平性・安全性）」が対立し得ます。また、輸送計画でも費用だけでなく環境負荷（CO₂・騒音）、労務時間規制、需要変動や災害時の冗長能力（レジリエンス）を含めた総合的な技術的判断が求められます。
+          </p>
         </div>
       </section>
 
@@ -312,7 +305,7 @@ export const LpCh5TransportAssign: React.FC<LpCh5Props> = ({
                             x={mx}
                             y={my + 4}
                             textAnchor="middle"
-                            className="text-[11px] font-bold fill-current font-mono-num"
+                            className="text-xs font-bold fill-current font-mono-num"
                           >
                             {round2(flow)}
                           </text>
@@ -341,7 +334,7 @@ export const LpCh5TransportAssign: React.FC<LpCh5Props> = ({
                       x={70}
                       y={55 + i * 68}
                       textAnchor="middle"
-                      className="text-[11px] fill-[var(--diagram-teal)] font-mono-num font-semibold"
+                      className="text-xs fill-[var(--diagram-teal)] font-mono-num font-semibold"
                     >
                       SP: {formatRational(trRes.supplyShadowPrices[i])} 万円
                     </text>
@@ -368,7 +361,7 @@ export const LpCh5TransportAssign: React.FC<LpCh5Props> = ({
                       x={390}
                       y={55 + j * 68}
                       textAnchor="middle"
-                      className="text-[11px] fill-[var(--text-muted)] font-mono-num"
+                      className="text-xs fill-[var(--text-muted)] font-mono-num"
                     >
                       需要 {DEMAND[j]} 台
                     </text>
@@ -591,10 +584,10 @@ export const LpCh5TransportAssign: React.FC<LpCh5Props> = ({
                         stroke="currentColor"
                         strokeOpacity="0.16"
                       />
-                      <text x={gx(i)} y={gy(0) + 15} textAnchor="middle" className="text-[10px] fill-[var(--text-muted)] font-mono-num">
+                      <text x={gx(i)} y={gy(0) + 15} textAnchor="middle" className="text-xs fill-[var(--text-muted)] font-mono-num">
                         {i}
                       </text>
-                      <text x={gx(0) - 10} y={gy(i) + 3} textAnchor="end" className="text-[10px] fill-[var(--text-muted)] font-mono-num">
+                      <text x={gx(0) - 10} y={gy(i) + 3} textAnchor="end" className="text-xs fill-[var(--text-muted)] font-mono-num">
                         {i}
                       </text>
                     </g>

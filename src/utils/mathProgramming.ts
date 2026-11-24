@@ -269,7 +269,7 @@ export function solveLP2D(input: Lp2DInput): Lp2DResult {
 }
 
 /* ==========================================================================
-   2. 変則ガウス・ジョルダン消去ステッパー
+   2. ピボット掃き出し法ステッパー（行交換なし）
    ========================================================================== */
 
 export interface GaussJordanStep {
@@ -379,7 +379,7 @@ export interface SimplexStep {
   rows: number[][]; // 制約行の係数行列
   rhs: number[]; // 右辺（基底変数の値）
   enteringCol: number | null;
-  ratios: (number | null)[]; // 増加限界 (a_{i,enter} > 0 のみ計算、<=0 は null)
+  ratios: (number | null)[]; // 最小比テスト (a_{i,enter} > 0 のみ計算、<=0 は null)
   leavingRow: number | null;
   status: SimplexStatus;
   note: string;
@@ -558,7 +558,7 @@ export function runSimplexSteps(problem: SimplexProblemInput): SimplexRunResult 
   for (let i = 0; i < m; i++) {
     if (normCons[i].op === '<=') {
       const col = varNames.length;
-      varNames.push(`λ${i + 1}`);
+      varNames.push(`s${i + 1}`);
       slackCols.push(col);
       constraintSlackOrSurplusCol.push(col);
       for (let r = 0; r < m; r++) {
@@ -566,7 +566,7 @@ export function runSimplexSteps(problem: SimplexProblemInput): SimplexRunResult 
       }
     } else if (normCons[i].op === '>=') {
       const col = varNames.length;
-      varNames.push(`λ${i + 1}`);
+      varNames.push(`s${i + 1}`);
       slackCols.push(col);
       constraintSlackOrSurplusCol.push(col);
       for (let r = 0; r < m; r++) {

@@ -281,7 +281,7 @@ export const NlpContourPlot: React.FC<NlpContourPlotProps> = ({
                   <text
                     x={toPxX(x) + 7}
                     y={toPxY(y) - 6}
-                    className="text-[10px] font-bold fill-current font-mono-num"
+                    className="text-xs font-bold fill-current font-mono-num"
                   >
                     x({idx})
                   </text>
@@ -376,7 +376,7 @@ export const NlpContourPlot: React.FC<NlpContourPlotProps> = ({
         {xTicks.map((t) => (
           <g key={`xt-${t}`}>
             <line x1={toPxX(t)} y1={padT + plotH} x2={toPxX(t)} y2={padT + plotH + 4} stroke="currentColor" strokeOpacity="0.6" />
-            <text x={toPxX(t)} y={padT + plotH + 16} textAnchor="middle" className="text-[10px] fill-[var(--text-muted)] font-mono-num">
+            <text x={toPxX(t)} y={padT + plotH + 16} textAnchor="middle" className="text-xs fill-[var(--text-muted)] font-mono-num">
               {t}
             </text>
           </g>
@@ -385,7 +385,7 @@ export const NlpContourPlot: React.FC<NlpContourPlotProps> = ({
         {yTicks.map((t) => (
           <g key={`yt-${t}`}>
             <line x1={padL - 4} y1={toPxY(t)} x2={padL} y2={toPxY(t)} stroke="currentColor" strokeOpacity="0.6" />
-            <text x={padL - 7} y={toPxY(t) + 3} textAnchor="end" className="text-[10px] fill-[var(--text-muted)] font-mono-num">
+            <text x={padL - 7} y={toPxY(t) + 3} textAnchor="end" className="text-xs fill-[var(--text-muted)] font-mono-num">
               {t}
             </text>
           </g>

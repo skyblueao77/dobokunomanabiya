@@ -65,7 +65,7 @@ describe('mathProgramming', () => {
     expect(minRes.optimalValue).toBeCloseTo(23, 6);
   });
 
-  it('変則ガウス・ジョルダン消去法：行交換なしで基底変数の値を読み取れる', () => {
+  it('ピボット掃き出し法（行交換なし）：基底変数の値を直接読み取れる', () => {
     const res = runGaussJordanCustomOrder(
       [
         [2, 0, 1],
@@ -86,7 +86,7 @@ describe('mathProgramming', () => {
     expect(res.solution[2]).toBeCloseTo(5, 6);
   });
 
-  it('シンプレックス法：標準3変数最大化・負係数（増加限界除外）・二段階法を解く', () => {
+  it('シンプレックス法：標準3変数最大化・負係数（最小比除外）・二段階法を解く', () => {
     // 1. 標準3変数最大化
     const sim1 = runSimplexSteps({
       sense: 'max',
@@ -104,8 +104,10 @@ describe('mathProgramming', () => {
     expect(sim1.optimalObjective).toBeCloseTo(78, 6);
     expect(sim1.dualSolution[0]).toBeCloseTo(2, 6);
     expect(sim1.dualSolution[1]).toBeCloseTo(1, 6);
+    expect(sim1.steps[0].varNames).toContain('s1');
+    expect(sim1.steps[0].varNames).toContain('s2');
 
-    // 2. 負係数あり・増加限界の非正係数行除外
+    // 2. 負係数あり・最小比テストの非正係数行除外
     const sim2 = runSimplexSteps({
       sense: 'max',
       c: [2, 5],
@@ -254,21 +256,34 @@ describe('mathProgramming', () => {
     expect(trPlus8.totalCost).toBeCloseTo(315, 6);
     expect(tr.totalCost - trPlus8.totalCost).toBeCloseTo(50, 6);
 
-    // マンハッタン距離による緊急パトロール車割当
+    // プラント乙を +1 (28->29) した場合は費用が 2 減って 363 になる
+    const trEtaPlus1 = solveTransportation(
+      [
+        [4, 7, 11],
+        [6, 5, 8],
+        [9, 6, 3],
+      ],
+      [40, 29, 22],
+      [25, 25, 30]
+    );
+    expect(trEtaPlus1.totalCost).toBeCloseTo(363, 6);
+
+    // マンハッタン距離による緊急パトロール車 3x3 正方割当
     const assign = solveAssignmentManhattan(
       [
-        { id: 'A', label: '車A', x: 1, y: 2 },
+        { id: 'A', label: '車A', x: 1, y: 1 },
         { id: 'B', label: '車B', x: 2, y: 5 },
         { id: 'C', label: '車C', x: 5, y: 5 },
       ],
       [
         { id: 'P', label: '橋梁P', x: 4, y: 5 },
         { id: 'Q', label: '橋梁Q', x: 7, y: 7 },
+        { id: 'R', label: '橋梁R', x: 1, y: 4 },
       ]
     );
-    expect(assign.optimal.totalDistance).toBe(6);
-    expect(assign.greedy.totalDistance).toBe(8);
-    expect(assign.gap).toBe(2);
+    expect(assign.optimal.totalDistance).toBe(9);
+    expect(assign.greedy.totalDistance).toBe(15);
+    expect(assign.gap).toBe(6);
   });
 
   it('非線形計画モデル：最適性条件・定値性・狭義凸性・感度・包絡線定理・ニュートン法を検証する', () => {

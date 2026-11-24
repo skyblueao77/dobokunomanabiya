@@ -126,11 +126,11 @@ export const LpCh4Sensitivity: React.FC<LpCh4Props> = ({
       expectedValue: 6,
       tolerance: 0.05,
       unit: '',
-      inputHint: 'スラック変数 λ₂ 列の係数 (-1/2, 1/2) を用いて x₁ ≥ 0, x₃ ≥ 0 となる範囲を解きます。',
+      inputHint: 'スラック変数 s₂ 列の係数 (-1/2, 1/2) を用いて x₁ ≥ 0, x₃ ≥ 0 となる範囲を解きます。',
       hint: '3 - (1/2)Δb₂ ≥ 0 から上限 Δb₂ ≤ 6 が、9 + (1/2)Δb₂ ≥ 0 から下限 Δb₂ ≥ -18 が得られます。',
       steps: [
         {
-          label: '最適タブローの λ₂ 列の係数 (-1/2, 1/2) から各基底変数の非負条件を立てる',
+          label: '最適タブローの s₂ 列の係数 (-1/2, 1/2) から各基底変数の非負条件を立てる',
           math: 'x_1 = 3 - \\frac{1}{2}\\Delta b_2 \\ge 0,\\quad x_3 = 9 + \\frac{1}{2}\\Delta b_2 \\ge 0',
         },
         {
@@ -152,13 +152,13 @@ export const LpCh4Sensitivity: React.FC<LpCh4Props> = ({
       statement:
         '同じ基準問題において、基底変数 x₁ の目的係数 5 が 5 + Δc₁ に変化する。現在の最適基底 (x₁, x₃) が最適性を失わない（全非基底変数の z 行係数が 0 以上を保つ）Δc₁ の最大値（上限）を求めよ。',
       mathContext:
-        '\\text{第1基底行 }(x_1\\text{行})\\text{ の非基底係数 } (x_2, \\lambda_1, \\lambda_2) = \\left(-\\frac{1}{4},\\; \\frac{3}{4},\\; -\\frac{1}{2}\\right),\\quad \\bar{\\mathbf{c}} = (1,\\; 2,\\; 1)',
+        '\\text{第1基底行 }(x_1\\text{行})\\text{ の非基底係数 } (x_2, s_1, s_2) = \\left(-\\frac{1}{4},\\; \\frac{3}{4},\\; -\\frac{1}{2}\\right),\\quad \\bar{\\mathbf{c}} = (1,\\; 2,\\; 1)',
       kind: 'numeric',
       expectedValue: 2,
       tolerance: 0.05,
       unit: '',
       inputHint: '非基底列 k ごとに (z行係数) + (x₁行係数) × Δc₁ ≥ 0 を立てて共通範囲を求めます。',
-      hint: 'x₂列: 1 - (1/4)Δc₁ ≥ 0 (Δc₁ ≤ 4)、λ₁列: 2 + (3/4)Δc₁ ≥ 0 (Δc₁ ≥ -8/3)、λ₂列: 1 - (1/2)Δc₁ ≥ 0 (Δc₁ ≤ 2) の共通部分をとります。',
+      hint: 'x₂列: 1 - (1/4)Δc₁ ≥ 0 (Δc₁ ≤ 4)、s₁列: 2 + (3/4)Δc₁ ≥ 0 (Δc₁ ≥ -8/3)、s₂列: 1 - (1/2)Δc₁ ≥ 0 (Δc₁ ≤ 2) の共通部分をとります。',
       steps: [
         {
           label: '各非基底列に対する z 行係数更新式を立てる',
@@ -222,11 +222,11 @@ export const LpCh4Sensitivity: React.FC<LpCh4Props> = ({
           <div className="app-surface-subtle rounded-lg p-4 space-y-2">
             <h3 className="font-bold text-sm">① 制約右辺値（資源量）の変化 Δbᵢ</h3>
             <p className="text-xs app-text-muted">
-              制約 <MathFormula math="i" /> の右辺が <MathFormula math="b_i + \Delta b_i" /> に変わると、最適タブローのスラック列 <MathFormula math="\lambda_i" /> の係数 <MathFormula math="\alpha_{r,\lambda_i}" /> を使って基底変数の値が更新されます。すべて <MathFormula math="\ge 0" /> を保つ範囲では最適基底が変わりません。
+              制約 <MathFormula math="i" /> の右辺が <MathFormula math="b_i + \Delta b_i" /> に変わると、最適タブローのスラック列 <MathFormula math="s_i" /> の係数 <MathFormula math="\alpha_{r,s_i}" /> を使って基底変数の値が更新されます。すべて <MathFormula math="\ge 0" /> を保つ範囲では最適基底が変わりません。
             </p>
             <MathFormula
               block
-              math={`b_r^*(\\Delta b_i) = b_r^* + \\alpha_{r,\\lambda_i}\\Delta b_i \\ge 0,\\quad z^*(\\Delta b_i) = z^* + y_i^*\\Delta b_i`}
+              math={`b_r^*(\\Delta b_i) = b_r^* + \\alpha_{r,s_i}\\Delta b_i \\ge 0,\\quad z^*(\\Delta b_i) = z^* + y_i^*\\Delta b_i`}
             />
           </div>
 
@@ -431,10 +431,10 @@ export const LpCh4Sensitivity: React.FC<LpCh4Props> = ({
                   strokeWidth="2"
                 />
 
-                <text x={padL + pW} y={padT + pH + 22} textAnchor="end" className="text-[11px] fill-[var(--text-muted)] font-mono-num">
+                <text x={padL + pW} y={padT + pH + 22} textAnchor="end" className="text-xs fill-[var(--text-muted)] font-mono-num">
                   {mode === 'rhs' ? `Δb_${conIdx + 1}` : `Δc_${varIdx + 1}`} = {activeDelta}
                 </text>
-                <text x={toCx(0) + 4} y={padT + 12} className="text-[11px] fill-[var(--text-muted)] font-mono-num">
+                <text x={toCx(0) + 4} y={padT + 12} className="text-xs fill-[var(--text-muted)] font-mono-num">
                   Δ=0 (z*=78)
                 </text>
               </svg>

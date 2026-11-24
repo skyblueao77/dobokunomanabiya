@@ -35,7 +35,7 @@ const SIMPLEX_PRESETS: Record<SimplexPresetId, SimplexPreset> = {
     primalLatex:
       '\\max_{x_1,x_2,x_3}\\; 5x_1 + 3x_2 + 7x_3 \\quad\\text{s.t. } 2x_1 + x_2 + 2x_3 \\le 24,\\; x_1 + 2x_2 + 3x_3 \\le 30,\\; x_1,x_2,x_3 \\ge 0',
     standardFormLatex:
-      '\\begin{aligned} z - 5x_1 - 3x_2 - 7x_3 &= 0 \\\\ 2x_1 + x_2 + 2x_3 + \\lambda_1 &= 24 \\\\ x_1 + 2x_2 + 3x_3 + \\lambda_2 &= 30 \\quad (x_j, \\lambda_i \\ge 0) \\end{aligned}',
+      '\\begin{aligned} z - 5x_1 - 3x_2 - 7x_3 &= 0 \\\\ 2x_1 + x_2 + 2x_3 + s_1 &= 24 \\\\ x_1 + 2x_2 + 3x_3 + s_2 &= 30 \\quad (x_j, s_i \\ge 0) \\end{aligned}',
     problem: {
       sense: 'max',
       c: [5, 3, 7],
@@ -48,13 +48,13 @@ const SIMPLEX_PRESETS: Record<SimplexPresetId, SimplexPreset> = {
   },
   'neg-coeff': {
     id: 'neg-coeff',
-    title: '② 負係数を含む制約と「増加限界の除外ルール」',
+    title: '② 負係数を含む制約と「最小比テストの除外ルール」',
     description:
-      'ピボット列に 0 以下の係数が現れた行は、進入変数を増やしても負にならないため最小比計算から除外します。',
+      'ピボット列に 0 以下の係数が現れた行は、進入変数を増やしても負にならないため最小比テスト（b/a）の計算から除外します。',
     primalLatex:
       '\\max_{x_1,x_2}\\; 2x_1 + 5x_2 \\quad\\text{s.t. } -x_1 + x_2 \\le 4,\\; x_1 + 2x_2 \\le 14,\\; 3x_1 - x_2 \\le 15,\\; x_1,x_2 \\ge 0',
     standardFormLatex:
-      '\\begin{aligned} z - 2x_1 - 5x_2 &= 0 \\\\ -x_1 + x_2 + \\lambda_1 &= 4 \\\\ x_1 + 2x_2 + \\lambda_2 &= 14 \\\\ 3x_1 - x_2 + \\lambda_3 &= 15 \\quad (x_j, \\lambda_i \\ge 0) \\end{aligned}',
+      '\\begin{aligned} z - 2x_1 - 5x_2 &= 0 \\\\ -x_1 + x_2 + s_1 &= 4 \\\\ x_1 + 2x_2 + s_2 &= 14 \\\\ 3x_1 - x_2 + s_3 &= 15 \\quad (x_j, s_i \\ge 0) \\end{aligned}',
     problem: {
       sense: 'max',
       c: [2, 5],
@@ -74,7 +74,7 @@ const SIMPLEX_PRESETS: Record<SimplexPresetId, SimplexPreset> = {
     primalLatex:
       '\\min_{x_1,x_2}\\; 2x_1 + 5x_2 \\quad\\text{s.t. } x_1 + 2x_2 \\ge 6,\\; 2x_1 + x_2 \\ge 6,\\; x_1,x_2 \\ge 0',
     standardFormLatex:
-      '\\begin{aligned} (-w) + 2x_1 + 5x_2 &= 0 \\quad (z = -w \\text{ を最大化}) \\\\ x_1 + 2x_2 - \\lambda_1 + a_1 &= 6 \\\\ 2x_1 + x_2 - \\lambda_2 + a_2 &= 6 \\quad (x_j, \\lambda_i, a_i \\ge 0) \\end{aligned}',
+      '\\begin{aligned} (-w) + 2x_1 + 5x_2 &= 0 \\quad (z = -w \\text{ を最大化}) \\\\ x_1 + 2x_2 - s_1 + a_1 &= 6 \\\\ 2x_1 + x_2 - s_2 + a_2 &= 6 \\quad (x_j, s_i, a_i \\ge 0) \\end{aligned}',
     problem: {
       sense: 'min',
       c: [2, 5],
@@ -92,7 +92,7 @@ export const LpCh2Simplex: React.FC<LpCh2Props> = ({
   onToggleDone,
   onMarkDone,
 }) => {
-  // 2A: 変則ガウス・ジョルダン消去
+  // 2A: ピボット掃き出し法（行交換なし）
   const gjRes = useMemo(
     () =>
       runGaussJordanCustomOrder(
@@ -131,21 +131,21 @@ export const LpCh2Simplex: React.FC<LpCh2Props> = ({
     {
       id: 'lp-ch2-q1',
       title: '問1：負係数を含む制約がある LP のシンプレックス法',
-      category: '増加限界とシンプレックス法',
+      category: '最小比テストとシンプレックス法',
       statement:
-        '次の線形計画問題をシンプレックス法で解く。初回反復で x₂ を進入変数に選んだとき、増加限界の計算ルールに注意しながら反復を進め、目的関数 z の最適値を求めよ。',
+        '次の線形計画問題をシンプレックス法で解く。初回反復で x₂ を進入変数に選んだとき、最小比テスト（b/a）の適用ルールに注意しながら反復を進め、目的関数 z の最適値を求めよ。',
       mathContext:
         '\\max_{x_1, x_2} 2x_1 + 5x_2 \\quad\\text{s.t. } -x_1 + x_2 \\le 4,\\; x_1 + 2x_2 \\le 14,\\; 3x_1 - x_2 \\le 15,\\; x_1, x_2 \\ge 0',
       kind: 'numeric',
       expectedValue: 34,
       tolerance: 0.2,
       unit: '',
-      inputHint: '第3制約の x₂ 係数は -1 ≤ 0 のため増加限界の計算対象から除外します。',
-      hint: '初回は x₂ が進入し、第1制約の増加限界 4/1=4 が最小なので λ₁ が退出して (x₁, x₂)=(0, 4) へ移動。次に x₁ が進入し (2, 6) で最適になります。',
+      inputHint: '第3制約の x₂ 係数は -1 ≤ 0 のため最小比テストの計算対象から除外します。',
+      hint: '初回は x₂ が進入し、第1制約の最小比 4/1=4 が最小なので s₁ が退出して (x₁, x₂)=(0, 4) へ移動。次に x₁ が進入し (2, 6) で最適になります。',
       steps: [
         {
-          label: '反復1：x₂ 列を進入列に選び、増加限界を計算（第3行は係数 -1 ≤ 0 のため除外）',
-          math: '\\text{第1行: } \\frac{4}{1}=4,\\quad \\text{第2行: } \\frac{14}{2}=7,\\quad \\text{第3行: 除外} \\implies \\text{最小比 } 4\\text{（}\\lambda_1\\text{ 退出）}',
+          label: '反復1：x₂ 列を進入列に選び、最小比を計算（第3行は係数 -1 ≤ 0 のため除外）',
+          math: '\\text{第1行: } \\frac{4}{1}=4,\\quad \\text{第2行: } \\frac{14}{2}=7,\\quad \\text{第3行: 除外} \\implies \\text{最小比 } 4\\text{（}s_1\\text{ 退出）}',
         },
         {
           label: '反復2：x₁ を進入させると (x₁, x₂) = (2, 6) に到達し、全 z 行係数が非負となる',
@@ -171,11 +171,11 @@ export const LpCh2Simplex: React.FC<LpCh2Props> = ({
       hint: '反復1で x₃ が第2行 (30/3=10) から進入し、反復2で x₁ が第1行から進入すると基底 (x₁, x₃) = (3, 9) に到達します。',
       steps: [
         {
-          label: '反復1：x₃ を進入させ λ₂ を退出させる（基底: λ₁=4, x₃=10, z=70）',
+          label: '反復1：x₃ を進入させ s₂ を退出させる（基底: s₁=4, x₃=10, z=70）',
           math: '\\min\\left(\\frac{24}{2},\\ \\frac{30}{3}\\right) = 10 \\implies x_3 = 10',
         },
         {
-          label: '反復2：z 行で唯一負の x₁ を進入させ λ₁ を退出させる',
+          label: '反復2：z 行で唯一負の x₁ を進入させ s₁ を退出させる',
           math: 'x_1 = 3,\\ x_2 = 0,\\ x_3 = 9 \\implies z^* = 5(3) + 3(0) + 7(9) = 78',
         },
       ],
@@ -190,7 +190,7 @@ export const LpCh2Simplex: React.FC<LpCh2Props> = ({
       <section className="app-surface rounded-xl p-5 space-y-4 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border-subtle)] pb-2.5">
           <h2 className="text-base sm:text-lg font-bold">
-            1. 理解：等式標準形・変則掃き出し法とシンプレックス法の原理
+            1. 理解：等式標準形・ピボット掃き出し法とシンプレックス法の原理
           </h2>
           <span className="rounded-md bg-blue-500/15 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:text-blue-300 border border-blue-500/30">
             第2章：等式標準形とシンプレックス法
@@ -201,12 +201,12 @@ export const LpCh2Simplex: React.FC<LpCh2Props> = ({
           <div className="app-surface-subtle rounded-lg p-4 space-y-2">
             <h3 className="font-bold text-sm">① 等式標準形への変換</h3>
             <p className="text-xs app-text-muted">
-              各不等式制約に非負の<strong>スラック変数</strong> <MathFormula math="\lambda_i \ge 0" />（<MathFormula math="\ge" /> なら余剰変数 <MathFormula math="-\lambda_i" /> と人為変数 <MathFormula math="a_i" />）を導入して等式に揃え、目的関数も <MathFormula math="z - \sum c_j x_j = 0" /> の形にまとめます。
+              各不等式制約に非負の<strong>スラック変数</strong> <MathFormula math="s_i \ge 0" />（<MathFormula math="\ge" /> なら余剰変数 <MathFormula math="-s_i" /> と人為変数 <MathFormula math="a_i" />）を導入して等式に揃え、目的関数も <MathFormula math="z - \sum c_j x_j = 0" /> の形にまとめます。
             </p>
           </div>
 
           <div className="app-surface-subtle rounded-lg p-4 space-y-2">
-            <h3 className="font-bold text-sm">② ピボット選択（増加限界の注意点）</h3>
+            <h3 className="font-bold text-sm">② ピボット選択（最小比テストの注意点）</h3>
             <ul className="text-xs app-text-muted list-disc pl-4 space-y-1">
               <li>
                 <strong>進入列</strong>：<MathFormula math="z" /> 行の非基底係数が負（最も小さい値）の変数を選ぶ。すべて <MathFormula math="\ge 0" /> なら最適！
@@ -218,20 +218,20 @@ export const LpCh2Simplex: React.FC<LpCh2Props> = ({
           </div>
 
           <div className="app-surface-subtle rounded-lg p-4 space-y-2">
-            <h3 className="font-bold text-sm">③ 変則ガウス・ジョルダン法</h3>
+            <h3 className="font-bold text-sm">③ ピボット掃き出し法と退化・複数解</h3>
             <p className="text-xs app-text-muted">
-              行を入れ替えなくても、<strong>各行にどの変数の単位列ベクトル（1 と 0 のみ）が配置されているか</strong>を追跡すれば、右辺の値からそのまま基底変数の解を読み取れます。これがタブローの「基底変数」列の意味です。
+              行を入れ替えなくても、各行に対応する単位列ベクトルを追跡すれば右辺から基底変数の解を直接読めます。また、最適タブローで非基底変数の <MathFormula math="z" /> 行係数が <strong>0</strong> なら別の最適解が存在し、基底値が <strong>0</strong> を含む場合は<strong>退化</strong>（巡回防止に添字規則が必要）となります。
             </p>
           </div>
         </div>
       </section>
 
-      {/* 2A. 変則ガウス・ジョルダン消去ステッパー */}
+      {/* 2A. ピボット掃き出し法ステッパー */}
       <section className="app-surface rounded-xl p-5 space-y-4 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border-subtle)] pb-2.5">
           <div>
             <h2 className="text-sm sm:text-base font-bold">
-              2A. 想像：変則ガウス・ジョルダン消去ステッパー（行交換なし）
+              2A. 想像：ピボット掃き出し法ステッパー（行交換なし）
             </h2>
             <p className="text-xs app-text-muted mt-0.5">
               ピボット位置を「第2行 x₂ → 第3行 x₁ → 第1行 x₃」の順に掃き出し、行と変数の対応がどう決まるかを確認します。
