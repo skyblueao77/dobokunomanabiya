@@ -140,7 +140,8 @@ function buildAllRouteDescriptors() {
       </header>
       <main id="main-content" class="mx-auto max-w-7xl px-4 py-6 space-y-6">
         <aside aria-label="開発中および内容の正確性に関する重要なお知らせ">
-          <p><strong>開発中（WIP）</strong>：本サイトは教育・学習補助目的で開発中であり、掲載内容・計算結果に誤りを含む可能性があります。必ず教科書・公的基準と照合し、実務設計・意思決定への利用は避けてください。</p>
+          <p><strong>開発中（WIP）</strong>：現在開発中のため、掲載内容・計算結果には多くの間違いが存在します</p>
+          <p class="text-xs sm:text-sm">本サイトは制作途上であり、解説文・数式・計算ロジック・図解・演習問題の解答に多くの誤りや未検証の記述が含まれています。学習の補助参考としてのみご利用いただき、必ず大学・高専の教科書や公的基準と照合してください（実務設計・施工・試験解答等への利用は厳禁です）。</p>
         </aside>
         <section>
           <h1>${escapeHtml(meta.h1)}</h1>
@@ -725,19 +726,59 @@ function updateServiceWorkerIndexRevision(indexHtmlContent) {
   }
 }
 
+function getAllowedInlineScriptSha256Set() {
+  const headersPath = fs.existsSync(path.join(distDir, '_headers'))
+    ? path.join(distDir, '_headers')
+    : path.join(publicDir, '_headers');
+  const headersText = fs.readFileSync(headersPath, 'utf8');
+  const cspMatch = headersText.match(/^\s*Content-Security-Policy:\s*(.+)$/im);
+  if (!cspMatch) {
+    throw new Error(`Missing Content-Security-Policy in ${headersPath}`);
+  }
+  const scriptSrcMatch = cspMatch[1].match(/\bscript-src\s+([^;]+)/i);
+  if (!scriptSrcMatch) {
+    throw new Error('Missing script-src directive in Content-Security-Policy');
+  }
+  const hashes = new Set();
+  for (const m of scriptSrcMatch[1].matchAll(/'(sha256-[A-Za-z0-9+/=]+)'/g)) {
+    hashes.add(m[1]);
+  }
+  return hashes;
+}
+
 function verifyGeneratedOutputs(routes) {
   const seenTitles = new Set();
   const seenCanonicals = new Set();
+  const allowedScriptHashes = getAllowedInlineScriptSha256Set();
 
   for (const r of routes) {
     const html = fs.readFileSync(r.outputFile, 'utf8');
+    for (const [rawUrl] of html.matchAll(/\bhttps?:\/\/[^\s"'<>]+/gi)) {
+      let parsedHost = '';
+      try {
+        parsedHost = new URL(rawUrl).hostname.toLowerCase();
+      } catch {
+        continue;
+      }
+      if (parsedHost === 'fonts.googleapis.com' || parsedHost === 'fonts.gstatic.com') {
+        throw new Error(`External Google Fonts reference still present in ${r.outputFile}`);
+      }
+    }
     const scripts = extractScriptElements(html);
     for (const scriptEl of scripts) {
       const { attrs, body } = scriptEl;
       const hasSrc = /\bsrc\s*=/.test(attrs);
       const isJsonLd = /type\s*=\s*["']application\/ld\+json["']/i.test(attrs);
+      if (hasSrc && /registerSW\.js/i.test(attrs) && !/\bdefer\b/i.test(attrs)) {
+        throw new Error(`Render-blocking registerSW.js without defer in ${r.outputFile}`);
+      }
       if (!hasSrc && !isJsonLd) {
-        throw new Error(`CSP violation (inline script) in ${r.outputFile}: ${attrs}`);
+        const digest = `sha256-${crypto.createHash('sha256').update(body, 'utf8').digest('base64')}`;
+        if (!allowedScriptHashes.has(digest)) {
+          throw new Error(
+            `CSP violation (inline script hash ${digest} not in script-src) in ${r.outputFile}: ${attrs}`
+          );
+        }
       }
       if (isJsonLd) {
         JSON.parse(body);

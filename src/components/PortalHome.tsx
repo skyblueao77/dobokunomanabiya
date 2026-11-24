@@ -222,6 +222,7 @@ export const PortalHome: React.FC<PortalHomeProps> = ({
                     </span>
                     <a
                       href={unitHref}
+                      aria-label={`${unit.title}のシミュレーターを開く`}
                       onClick={(e) => {
                         if (isPlainLeftClick(e)) {
                           e.preventDefault();

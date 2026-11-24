@@ -7,7 +7,7 @@
     <meta name="text-scale" content="scale" />
     <!-- MANDATORY: Declare support for both light and dark themes -->
     <meta name="color-scheme" content="light dark" />
-    <script src="/theme-init.js"></script>
+    <script id="theme-init">try{var t=localStorage.getItem('color-scheme');if(t==='light'||t==='dark'){var m=document.querySelector('meta[name="color-scheme"]');if(m)m.content=t}}catch{}</script>
     <title>土木の学び舎｜土木工学・数理計画インタラクティブ学習ポータル</title>
     <meta
       name="description"
@@ -68,12 +68,6 @@
         ]
       }
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
   </head>
   <body>
     <div id="root"></div>

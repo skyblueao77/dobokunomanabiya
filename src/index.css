@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "katex/dist/katex.min.css";
 
 /* Synchronize Tailwind v4 dark:* utilities with manual meta[name="color-scheme"] override and OS preference */
 @custom-variant dark {
@@ -258,7 +257,7 @@
   body {
     background-color: var(--surface-page);
     color: var(--text-primary);
-    font-family: "Inter", "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", "Yu Gothic UI", "Yu Gothic", Meiryo, sans-serif;
     line-height: 1.5;
     text-align: start;
     overflow-wrap: break-word;
@@ -323,7 +322,7 @@
   }
 
   .font-mono-num {
-    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     font-variant-numeric: tabular-nums;
   }
 }
@@ -442,10 +441,6 @@
 .header-inner > * {
   flex-shrink: 0;
   white-space: nowrap;
-}
-
-.site-header.is-measuring * {
-  transition: none !important;
 }
 
 .site-header .menu-button {
