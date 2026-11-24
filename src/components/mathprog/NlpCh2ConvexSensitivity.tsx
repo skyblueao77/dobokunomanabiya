@@ -174,6 +174,10 @@ export const NlpCh2ConvexSensitivity: React.FC<NlpCh2Props> = ({
             <MathFormula block math={`\\frac{dF^*}{d\\theta} = \\frac{\\partial f}{\\partial\\theta}(\\mathbf{x}^*(\\theta);\\theta)`} />
           </div>
         </div>
+
+        <p className="text-xs app-text-muted border-t border-[var(--border-subtle)] pt-3">
+          ※ 注意：陰関数定理・包絡線定理が与える感度は現在点まわりの<strong>局所的な1次近似</strong>であり、パラメータの大幅変化時や実務の土木計画に存在する<strong>不等式制約・非凸性・不確実性</strong>がある場合には成立条件や大域挙動を別途検証する必要があります。
+        </p>
       </section>
 
       {/* 2. 想像パート */}
@@ -202,7 +206,7 @@ export const NlpCh2ConvexSensitivity: React.FC<NlpCh2Props> = ({
 
           <div className="app-surface-subtle rounded-lg p-3 overflow-x-auto space-y-1.5">
             <MathFormula block math={model.formulaLatex} />
-            <div className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+            <div className="text-xs font-bold text-emerald-700 dark:text-emerald-300">
               定義域全域で狭義凸となる根拠（シルベスター判定）：
             </div>
             <MathFormula block math={CONVEX_PROOF_LATEX[modelId]} />

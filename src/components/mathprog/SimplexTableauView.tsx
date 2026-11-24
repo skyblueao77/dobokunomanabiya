@@ -64,7 +64,7 @@ export const SimplexTableauView: React.FC<SimplexTableauViewProps> = ({
             })}
             {highlightPivot && (
               <th scope="col" className="px-2.5 py-2 text-right font-bold whitespace-nowrap">
-                増加限界
+                最小比 (b/a)
               </th>
             )}
           </tr>
@@ -156,7 +156,7 @@ export const SimplexTableauView: React.FC<SimplexTableauViewProps> = ({
                     {step.enteringCol === null ? (
                       <span className="app-text-muted">—</span>
                     ) : ratioVal === null ? (
-                      <span className="text-[11px] app-text-muted">除外 (≤0)</span>
+                      <span className="text-xs app-text-muted">除外 (≤0)</span>
                     ) : (
                       <span className={isLeaving ? 'font-bold text-amber-700 dark:text-amber-300' : ''}>
                         {formatRational(ratioVal)}

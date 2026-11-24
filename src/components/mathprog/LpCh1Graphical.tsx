@@ -431,7 +431,7 @@ export const LpCh1Graphical: React.FC<LpCh1Props> = ({
                       x={toX(t)}
                       y={padT + plotH + 16}
                       textAnchor="middle"
-                      className="text-[11px] fill-[var(--text-muted)] font-mono-num"
+                      className="text-xs fill-[var(--text-muted)] font-mono-num"
                     >
                       {t}
                     </text>
@@ -439,7 +439,7 @@ export const LpCh1Graphical: React.FC<LpCh1Props> = ({
                       x={padL - 8}
                       y={toY(t) + 4}
                       textAnchor="end"
-                      className="text-[11px] fill-[var(--text-muted)] font-mono-num"
+                      className="text-xs fill-[var(--text-muted)] font-mono-num"
                     >
                       {t}
                     </text>

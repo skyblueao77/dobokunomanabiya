@@ -212,7 +212,7 @@ export const LpCh3Duality: React.FC<LpCh3Props> = ({
           <div className="app-surface-subtle rounded-lg p-4 space-y-2">
             <h3 className="font-bold text-sm">③ タブローからの読取と潜在価格</h3>
             <p className="text-xs app-text-muted">
-              主問題をシンプレックス法で解いた<strong>最適タブローの <MathFormula math="z" /> 行におけるスラック列 <MathFormula math="\lambda_i" /> の係数</strong>がそのまま双対最適解 <MathFormula math="y_i^*" />（＝制約右辺を1増やしたときの最適値変化率・シャドー・プライス）になります。
+              主問題をシンプレックス法で解いた<strong>最適タブローの <MathFormula math="z" /> 行におけるスラック列 <MathFormula math="s_i" /> の係数</strong>がそのまま双対最適解 <MathFormula math="y_i^*" />（＝制約右辺を1増やしたときの最適値変化率・シャドー・プライス）になります。なお、主問題が<strong>退化</strong>（基底変数が0を含む状態）している場合、双対解やシャドー・プライスが一意に定まらず、増加側と減少側で変化率が異なる点に注意が必要です。
             </p>
           </div>
         </div>

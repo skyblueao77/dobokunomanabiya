@@ -154,9 +154,9 @@ export const NlpCh3Newton: React.FC<NlpCh3Props> = ({
           </div>
 
           <div className="app-surface-subtle rounded-lg p-4 space-y-2">
-            <h3 className="font-bold text-sm">2次収束と定義域への注意</h3>
+            <h3 className="font-bold text-sm">2次収束と非凸・定義域外への注意</h3>
             <p className="text-xs sm:text-sm app-text-muted">
-              解の近傍では誤差が反復ごとに「2乗」で縮む<strong>2次収束</strong>を示します。一方、直線探索（ステップ幅調整）を入れない場合、遠い初期点では定義域（<MathFormula math="x_1 > 0" /> 等）の外へ飛び出す危険があるため、実務ではバックトラック直線探索と組み合わせます。
+              解の近傍では誤差が反復ごとに「2乗」で縮む<strong>2次収束</strong>を示します。一方、直線探索（ステップ幅調整）を入れない場合、遠い初期点では定義域（<MathFormula math="x_1 > 0" /> 等）の外へ飛び出す危険があり、非凸関数ではヘッセ行列が非正定値になって鞍点や極大点へ引き寄せられることもあるため、実務では直線探索や修正ヘッセ行列と併用します。
             </p>
           </div>
         </div>
@@ -336,12 +336,23 @@ export const NlpCh3Newton: React.FC<NlpCh3Props> = ({
                     {newtonRecords.map((r) => (
                       <tr
                         key={`nr-${r.k}`}
-                        onClick={() => setStepIdx(r.k)}
-                        className={`cursor-pointer ${
-                          r.k === safeIdx ? 'bg-blue-500/15 font-bold' : 'hover:bg-[var(--surface-subtle)]'
-                        }`}
+                        className={r.k === safeIdx ? 'bg-blue-500/15 font-bold' : ''}
                       >
-                        <td className="px-2.5 py-1.5">{r.k}</td>
+                        <td className="px-2 py-1">
+                          <button
+                            type="button"
+                            aria-pressed={r.k === safeIdx}
+                            aria-label={`反復ステップ ${r.k} を表示`}
+                            onClick={() => setStepIdx(r.k)}
+                            className={`rounded px-2.5 py-1 text-xs font-semibold cursor-pointer border ${
+                              r.k === safeIdx
+                                ? 'bg-blue-700 text-white border-blue-700'
+                                : 'app-surface-subtle border-[var(--border-control)] hover:opacity-90'
+                            }`}
+                          >
+                            {r.k}
+                          </button>
+                        </td>
                         <td className="px-2.5 py-1.5 text-right">{round4(r.x[0])}</td>
                         <td className="px-2.5 py-1.5 text-right">{round4(r.x[1])}</td>
                         <td className="px-2.5 py-1.5 text-right">{round4(r.f)}</td>
@@ -353,8 +364,8 @@ export const NlpCh3Newton: React.FC<NlpCh3Props> = ({
                   </tbody>
                 </table>
               </div>
-              <p className="text-[11px] app-text-muted">
-                現在選択: x⁽⁰⁾ = ({round2(x0_1)}, {round2(x0_2)})。テーブル行をクリックしてステップを切り替えられます。
+              <p className="text-xs app-text-muted">
+                現在選択: x⁽⁰⁾ = ({round2(x0_1)}, {round2(x0_2)})。ステップ番号ボタンを押して反復を切り替えられます。
               </p>
             </div>
           )}

@@ -73,7 +73,7 @@ export default function LegalPage({ onBackToPortal }: LegalPageProps) {
           「土木の学び舎」（以下「本サイト」といいます）をご利用いただくにあたり、法的・倫理的・アクセシビリティの観点から以下の事項をご確認ください。本サイトを利用した時点で、これらの内容に同意したものとみなします。
         </p>
         <p className="text-xs app-text-muted font-mono-num">
-          制定日：2026年11月16日 ／ 最終改定日：2026年11月17日
+          制定日：2026年11月16日 ／ 最終改定日：2026年11月24日
         </p>
       </header>
 
@@ -96,12 +96,12 @@ export default function LegalPage({ onBackToPortal }: LegalPageProps) {
 
           <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 space-y-1.5">
             <p className="font-bold text-amber-700 dark:text-amber-300">
-              重要：教育・学習目的限定（実務設計・施工への使用禁止）
+              重要：教育・学習目的限定（実務設計・経営判断への使用禁止）
             </p>
             <p>
-              本サイトで提供される計算結果、グラフ、図解およびシミュレーションは、土木工学の概念理解および学習支援のみを目的としています。
+              本サイトで提供される計算結果、グラフ、図解およびシミュレーションは、土木工学および数理計画の概念理解と学習支援のみを目的としています。
               <strong>
-                実際の土木構造物・建築物の設計、施工計画、安全照査、公的機関への申請等には絶対に使用しないでください。
+                実際の土木構造物・建築物の設計、施工計画、安全照査、公的機関への申請、ならびに事業投資判断、資材調達・発注、緊急配車、予算配分などの実務意思決定には絶対に使用しないでください。
               </strong>
               実務においては、必ず関係法令、最新の各種設計基準（道路橋示方書、地盤工学会基準、水理公式集等）および有資格者（技術士等）の専門的判断に従ってください。
             </p>
@@ -114,7 +114,7 @@ export default function LegalPage({ onBackToPortal }: LegalPageProps) {
             </li>
             <li>
               <strong className="text-[var(--text-primary)]">モデルの単純化と計算精度：</strong>
-              本サイトのシミュレーションは教育上の分かりやすさを優先し、一様地盤・理想弾塑性体・定常流などの単純化された仮定に基づいています。また、数値計算上の丸め誤差やプログラム上の不具合等により、厳密解や実際の物理現象と異なる結果が生じる場合があります。
+              本サイトのシミュレーションは教育上の分かりやすさを優先し、一様地盤・理想弾塑性体・定常流などの物理的単純化や、確定論的・線形近似・単一目的関数による数理計画モデルの単純化に基づいています。また、数値計算上の丸め誤差・局所解への収束やプログラム上の不具合等により、厳密解や実際の現象と異なる結果が生じる場合があります。
             </li>
             <li>
               <strong className="text-[var(--text-primary)]">損害賠償の免責：</strong>
@@ -209,16 +209,24 @@ export default function LegalPage({ onBackToPortal }: LegalPageProps) {
 
         <div className="space-y-3 text-sm leading-relaxed app-text-muted">
           <p>
-            土木工学は、道路・橋梁・河川・地盤などの社会インフラを通じて、人々の生命・財産および安全な暮らしを支える重要な学問・技術分野です。本サイトは、以下の倫理的姿勢を重視しています。
+            土木工学および社会基盤計画は、道路・橋梁・河川・地盤・輸送網などの社会インフラを通じて、人々の生命・財産および安全な暮らしを支える重要な学問・技術分野です。本サイトは、以下の倫理的姿勢を重視しています。
           </p>
           <ul className="list-disc pl-5 space-y-2">
             <li>
               <strong className="text-[var(--text-primary)]">ブラックボックス化への戒め：</strong>
-              計算ツールやソフトウェアの出力を無批判に鵜呑みにせず、常に背後にある力学原理・仮定条件・物理的意味を理解し、妥当性を自ら検証する姿勢を大切にしてください。
+              計算ツールやソフトウェアの出力を無批判に鵜呑みにせず、常に背後にある力学原理・最適化条件・仮定条件・物理的および工学的意味を理解し、妥当性を自ら検証する姿勢を大切にしてください。
+            </li>
+            <li>
+              <strong className="text-[var(--text-primary)]">数理最適化における価値判断と社会的責任：</strong>
+              最適化手法が示す「最適解」は、設定した単一の目的関数と制約のもとでの数学的帰結に過ぎません。実務の計画立案では、総費用や総距離といった効率性だけでなく、公平性・人命や構造物の安全性・環境負荷・災害時の冗長性（レジリエンス）など、数値化しにくい価値判断との両立が技術者に求められます。
             </li>
             <li>
               <strong className="text-[var(--text-primary)]">学術的誠実性（Academic Integrity）：</strong>
               本サイトの計算機能や演習解説は、自らの理解を深めるための補助教材として提供されています。学校の課題や試験において、理解を伴わないまま結果を転記する等の不正行為には使用しないでください。
+            </li>
+            <li>
+              <strong className="text-[var(--text-primary)]">知的財産権および講義資料等の適切な取り扱い：</strong>
+              本サイトの教材・問題設定・解説文は、著作権の保護対象とならない一般的な学術理論および標準的手法に基づき独自に作成されています。大学等の学習管理システム（LMS）等で配布される講義資料・スライド・授業動画の無断転載や再配布は一切行わない方針をとっており、利用者の皆様にも各教育機関の規程および著作権の遵守を求めます。
             </li>
           </ul>
         </div>
@@ -233,7 +241,7 @@ export default function LegalPage({ onBackToPortal }: LegalPageProps) {
 
         <div className="space-y-3 text-sm leading-relaxed app-text-muted">
           <p>
-            「土木の学び舎」は、改正障害者差別解消法の趣旨および日本産業規格（JIS X 8341-3:2016）ならびに国際規格 WCAG 2.2（ISO/IEC 40500:2025）の考え方を踏まえ、年齢や障害の有無、利用環境にかかわらず誰もが土木工学を学べるウェブサイトの実現を目指しています。
+            「土木の学び舎」は、改正障害者差別解消法の趣旨および日本産業規格（JIS X 8341-3:2016）ならびに国際規格 WCAG 2.2（ISO/IEC 40500:2025）の考え方を踏まえ、年齢や障害の有無、利用環境にかかわらず誰もが土木工学・数理計画を学べるウェブサイトの実現を目指しています。
           </p>
           <ul className="list-disc pl-5 space-y-2">
             <li>
@@ -246,17 +254,30 @@ export default function LegalPage({ onBackToPortal }: LegalPageProps) {
             </li>
             <li>
               <strong className="text-[var(--text-primary)]">今後の課題と合理的配慮のご相談：</strong>
-              インタラクティブな SVG 図解やリアルタイム数式表示（KaTeX）の一部において、支援技術での詳細な読み上げに制約が残る場合があります。利用上の障壁や代替手段・合理的配慮に関するご要望は、下記の GitHub Issues よりお知らせください。
+              インタラクティブな SVG 図解やリアルタイム数式表示（KaTeX）の一部において、支援技術での詳細な読み上げに制約が残る場合があります。利用上の障壁や代替手段・合理的配慮に関するご要望は、{' '}
+              <a
+                href="https://github.com/skyblueao77/dobokunomanabiya/issues"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline inline-flex items-center gap-0.5 text-[var(--text-primary)] hover:text-blue-700 dark:hover:text-blue-400"
+              >
+                GitHub Issues（土木の学び舎）
+                <ExternalLink className="h-3 w-3" aria-hidden="true" />
+              </a>{' '}
+              よりお知らせください。
             </li>
           </ul>
         </div>
       </section>
 
-      {/* 6. 著作権表記 */}
-      <section className="app-surface rounded-xl p-6 space-y-2 text-sm app-text-muted">
+      {/* 6. 著作権表記およびオープンソースライセンス */}
+      <section className="app-surface rounded-xl p-6 space-y-3 text-sm app-text-muted">
         <h2 className="text-base font-bold text-[var(--text-primary)]">
-          6. 著作権表記
+          6. 著作権表記およびオープンソースソフトウェア（OSS）ライセンス
         </h2>
+        <p className="text-xs leading-relaxed">
+          本サイトのフロントエンド構築および数式・UI 表示には、以下のオープンソースソフトウェアを利用しています：React / React DOM（MIT License）、KaTeX（MIT License）、Lucide React（ISC License）、@oddbird/popover-polyfill（BSD-3-Clause License）。各ライブラリの著作権はそれぞれの開発者に帰属します。
+        </p>
         <p className="pt-1 text-xs">
           © {CURRENT_YEAR} 土木の学び舎. All rights reserved.
         </p>
