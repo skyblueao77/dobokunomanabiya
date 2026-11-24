@@ -7,9 +7,9 @@ import {
 } from './curriculum';
 
 describe('curriculum', () => {
-  it('orders top-bar subjects as 構造力学, 水理学, 土質力学', () => {
-    expect(SUBJECTS.map((s) => s.id)).toEqual(['structural', 'hydraulics', 'soil']);
-    expect(SUBJECTS.map((s) => s.name)).toEqual(['構造力学', '水理学', '土質力学']);
+  it('orders top-bar subjects as 構造力学, 水理学, 土質力学, 数理計画', () => {
+    expect(SUBJECTS.map((s) => s.id)).toEqual(['structural', 'hydraulics', 'soil', 'math-programming']);
+    expect(SUBJECTS.map((s) => s.name)).toEqual(['構造力学', '水理学', '土質力学', '数理計画']);
   });
 
   it('returns learning units grouped by subject without gaps', () => {
@@ -24,6 +24,10 @@ describe('curriculum', () => {
       'geomechanics-continuum',
       'mohr-circle',
       'rankine-earth-pressure',
+    ]);
+    expect(getUnitsBySubject('math-programming').map((u) => u.id)).toEqual([
+      'lp-optimization',
+      'nlp-optimization',
     ]);
   });
 

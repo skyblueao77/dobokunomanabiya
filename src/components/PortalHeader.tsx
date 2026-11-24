@@ -104,11 +104,13 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
     structural: null,
     hydraulics: null,
     soil: null,
+    'math-programming': null,
   });
   const submenuRefs = useRef<Record<NavSubjectId, HTMLUListElement | null>>({
     structural: null,
     hydraulics: null,
     soil: null,
+    'math-programming': null,
   });
 
   const isWideRef = useRef(false);

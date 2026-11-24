@@ -6,6 +6,7 @@ export interface StudyProgress {
   completedUnits: UnitId[];
   completedProblemIds: number[];
   completedContinuumExerciseIds: string[];
+  completedMathProgExerciseIds: string[];
   lastVisitedUnit: UnitId | null;
 }
 
@@ -13,6 +14,7 @@ const DEFAULT_PROGRESS: StudyProgress = {
   completedUnits: [],
   completedProblemIds: [],
   completedContinuumExerciseIds: [],
+  completedMathProgExerciseIds: [],
   lastVisitedUnit: null,
 };
 
@@ -28,6 +30,9 @@ export function loadStudyProgress(): StudyProgress {
         : [],
       completedContinuumExerciseIds: Array.isArray(parsed.completedContinuumExerciseIds)
         ? parsed.completedContinuumExerciseIds
+        : [],
+      completedMathProgExerciseIds: Array.isArray(parsed.completedMathProgExerciseIds)
+        ? parsed.completedMathProgExerciseIds
         : [],
       lastVisitedUnit: parsed.lastVisitedUnit ?? null,
     };

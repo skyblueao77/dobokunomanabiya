@@ -1,11 +1,13 @@
-export type SubjectId = 'all' | 'soil' | 'structural' | 'hydraulics';
+export type SubjectId = 'all' | 'soil' | 'structural' | 'hydraulics' | 'math-programming';
 
 export type UnitId =
   | 'geomechanics-continuum'
   | 'mohr-circle'
   | 'rankine-earth-pressure'
   | 'beam-sfd-bmd'
-  | 'open-channel-flow';
+  | 'open-channel-flow'
+  | 'lp-optimization'
+  | 'nlp-optimization';
 
 export interface SubjectMeta {
   id: Exclude<SubjectId, 'all'>;
@@ -43,6 +45,12 @@ export const SUBJECTS: SubjectMeta[] = [
     name: '土質力学',
     englishName: 'Soil Mechanics',
     description: '応力状態・破壊規準・土圧・有効応力など地盤工学の基盤単元',
+  },
+  {
+    id: 'math-programming',
+    name: '数理計画',
+    englishName: 'Mathematical Programming',
+    description: '線形計画・シンプレックス法・双対理論・感度分析・非線形最適化の基盤単元',
   },
 ];
 
@@ -97,6 +105,28 @@ export const LEARNING_UNITS: LearningUnit[] = [
     estimatedMinutes: 12,
     tags: ['マニング式', 'フルード数', '常流/射流'],
     hasPracticeSet: false,
+  },
+  {
+    id: 'lp-optimization',
+    subjectId: 'math-programming',
+    title: '線形計画法（図解法〜シンプレックス・双対・輸送計画）',
+    subtitle:
+      '定式化・図解法・変則掃き出し法・シンプレックスタブロー・双対理論と相補性・感度分析・輸送/割当問題（全5章）',
+    level: '重要単元',
+    estimatedMinutes: 60,
+    tags: ['図解法', 'シンプレックス法', '双対理論', '感度分析', '輸送/割当', '演習10問'],
+    hasPracticeSet: true,
+  },
+  {
+    id: 'nlp-optimization',
+    subjectId: 'math-programming',
+    title: '非線形計画法（最適性条件・狭義凸性・ニュートン法）',
+    subtitle:
+      '一階/二階最適性条件とヘッセ行列・狭義凸性とパラメータ感度分析・包絡線定理・多変数ニュートン法（全3章）',
+    level: '応用',
+    estimatedMinutes: 40,
+    tags: ['ヘッセ行列', '狭義凸性', '包絡線定理', 'ニュートン法', '演習6問'],
+    hasPracticeSet: true,
   },
 ];
 
