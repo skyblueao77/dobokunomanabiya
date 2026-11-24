@@ -14,6 +14,16 @@ export default {
         },
       });
     }
+    if (url.pathname.startsWith('/.well-known/')) {
+      return new Response('Not Found', {
+        status: 404,
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'no-store',
+          'X-Content-Type-Options': 'nosniff',
+        },
+      });
+    }
     return env.ASSETS.fetch(request);
   },
 };

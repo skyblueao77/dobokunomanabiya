@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useLayoutEffect, useRef } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import { ChevronDown, Compass, Menu, Monitor, Moon, SlidersHorizontal, Sun } from 'lucide-react';
 import {
   SUBJECTS,
@@ -9,6 +9,8 @@ import { buildRoutePath, isPlainLeftClick, type AppRoute } from '../utils/router
 import { type ThemePreference } from '../utils/storage';
 
 type NavSubjectId = Exclude<SubjectId, 'all'>;
+
+const WIDE_HEADER_MEDIA_QUERY = '(min-width: 62rem)';
 
 interface PortalHeaderProps {
   activeRoute: AppRoute;
@@ -94,8 +96,11 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
   const menuId = `${baseId}-site-menu`;
   const settingsId = `${baseId}-settings`;
 
-  const headerRef = useRef<HTMLElement | null>(null);
-  const innerRef = useRef<HTMLDivElement | null>(null);
+  const [isWide, setIsWide] = useState<boolean>(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return false;
+    return window.matchMedia(WIDE_HEADER_MEDIA_QUERY).matches;
+  });
+
   const menuRef = useRef<HTMLUListElement | null>(null);
   const settingsBtnRef = useRef<HTMLButtonElement | null>(null);
   const settingsPopRef = useRef<HTMLDivElement | null>(null);
@@ -113,8 +118,7 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
     'math-programming': null,
   });
 
-  const isWideRef = useRef(false);
-  const lastCollapsedWidthRef = useRef(0);
+  const isWideRef = useRef(isWide);
   const hoverPreviewRef = useRef<Set<NavSubjectId>>(new Set());
 
   const closeAllNavigationPopovers = () => {
@@ -128,86 +132,43 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
     }
   };
 
-  useLayoutEffect(() => {
-    const header = headerRef.current;
-    const inner = innerRef.current;
-    const menu = menuRef.current;
-    if (!header || !inner || !menu) return;
-
-    let rafId = 0;
-
-    const syncLayout = (forceRemeasure = false) => {
-      const currentWidth = header.getBoundingClientRect().width;
-      const currentlyWide = header.classList.contains('is-wide');
-
-      if (!forceRemeasure && !currentlyWide && currentWidth <= lastCollapsedWidthRef.current) {
-        return;
-      }
-
-      const wasMenuOpen = !currentlyWide && isPopoverOpen(menu);
-
-      header.classList.add('is-measuring', 'is-wide');
-      menu.removeAttribute('popover');
-
-      const wide = inner.scrollWidth <= inner.clientWidth;
-      header.classList.toggle('is-wide', wide);
-
-      if (!wide) {
-        lastCollapsedWidthRef.current = currentWidth;
-      } else {
-        lastCollapsedWidthRef.current = 0;
-      }
-
-      window.cancelAnimationFrame(rafId);
-      rafId = window.requestAnimationFrame(() => {
-        header.classList.remove('is-measuring');
-      });
-
-      const modeChanged = isWideRef.current !== wide || forceRemeasure;
-      isWideRef.current = wide;
-
-      if (wide) {
-        menu.removeAttribute('popover');
-        for (const subject of SUBJECTS) {
-          const sub = submenuRefs.current[subject.id];
-          const trig = triggerRefs.current[subject.id];
-          if (!sub || !trig) continue;
-          sub.setAttribute('popover', 'auto');
-          sub.hidden = false;
-          trig.setAttribute('aria-expanded', isPopoverOpen(sub) ? 'true' : 'false');
-        }
-      } else {
-        menu.setAttribute('popover', 'auto');
-        if (wasMenuOpen) {
-          showPopoverSafe(menu);
-        }
-        for (const subject of SUBJECTS) {
-          const sub = submenuRefs.current[subject.id];
-          const trig = triggerRefs.current[subject.id];
-          if (!sub || !trig) continue;
-          sub.removeAttribute('popover');
-          if (modeChanged) {
-            sub.hidden = true;
-            trig.setAttribute('aria-expanded', 'false');
-          }
-        }
-      }
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mq = window.matchMedia(WIDE_HEADER_MEDIA_QUERY);
+    const update = (matches: boolean) => {
+      isWideRef.current = matches;
+      setIsWide(matches);
     };
-
-    syncLayout(true);
-
-    const observer = new ResizeObserver((entries) => {
-      const menuResized = entries.some((entry) => entry.target === menu);
-      syncLayout(menuResized);
-    });
-    observer.observe(header);
-    observer.observe(menu);
-
-    return () => {
-      observer.disconnect();
-      window.cancelAnimationFrame(rafId);
-    };
+    update(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => update(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
   }, []);
+
+  useEffect(() => {
+    isWideRef.current = isWide;
+    hoverPreviewRef.current.clear();
+
+    if (isWide) {
+      hidePopoverSafe(menuRef.current);
+      for (const subject of SUBJECTS) {
+        const sub = submenuRefs.current[subject.id];
+        const trig = triggerRefs.current[subject.id];
+        if (!sub || !trig) continue;
+        sub.hidden = false;
+        trig.setAttribute('aria-expanded', isPopoverOpen(sub) ? 'true' : 'false');
+      }
+    } else {
+      for (const subject of SUBJECTS) {
+        const sub = submenuRefs.current[subject.id];
+        const trig = triggerRefs.current[subject.id];
+        if (!sub || !trig) continue;
+        hidePopoverSafe(sub);
+        sub.hidden = true;
+        trig.setAttribute('aria-expanded', 'false');
+      }
+    }
+  }, [isWide]);
 
   useEffect(() => {
     const cleanups: (() => void)[] = [];
@@ -324,17 +285,15 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
 
   return (
     <header
-      ref={headerRef}
-      className="site-header sticky top-0 z-30 border-b border-[var(--border-subtle)] bg-[var(--surface-card)]/95 text-[var(--text-primary)] backdrop-blur"
+      className={`site-header sticky top-0 z-30 border-b border-[var(--border-subtle)] bg-[var(--surface-card)]/95 text-[var(--text-primary)] backdrop-blur${
+        isWide ? ' is-wide' : ''
+      }`}
     >
       <a href="#main-content" className="skip-link visually-hidden">
         メインコンテンツへスキップ
       </a>
 
-      <div
-        ref={innerRef}
-        className="header-inner mx-auto max-w-7xl px-3 sm:px-6 py-2 flex items-center justify-between gap-3"
-      >
+      <div className="header-inner mx-auto max-w-7xl px-3 sm:px-6 py-2 flex items-center justify-between gap-3">
         <a
           href={buildRoutePath('home', 'all')}
           onClick={(e) => {
@@ -374,6 +333,7 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
           <ul
             ref={menuRef}
             id={menuId}
+            popover={isWide ? undefined : 'auto'}
             className="site-menu app-surface rounded-xl p-2 shadow-xl"
           >
             <li>
@@ -430,6 +390,7 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
                       submenuRefs.current[subject.id] = el;
                     }}
                     id={subId}
+                    popover={isWide ? 'auto' : undefined}
                     className="dropdown-list app-surface rounded-xl p-1.5 shadow-xl"
                   >
                     {units.map((unit) => {

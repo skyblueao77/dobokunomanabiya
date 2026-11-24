@@ -54,7 +54,6 @@ jobs:
             dist/llms.txt \
             dist/llms-full.txt \
             dist/og-image.png \
-            dist/theme-init.js \
             dist/favicon.svg \
             dist/icon-192.png \
             dist/icon-512.png \
@@ -80,10 +79,20 @@ jobs:
             test -f "$f" || { echo "Missing required artifact: $f"; exit 1; }
           done
 
-          # Ensure every <script> tag in all generated HTML files has src= or type="application/ld+json"
+          # Ensure every <script> tag in all generated HTML files satisfies strict CSP (hash-checked inline scripts) & valid JSON-LD
           node -e '
+            const crypto = require("node:crypto");
             const fs = require("node:fs");
             const path = require("node:path");
+            const headersText = fs.readFileSync("dist/_headers", "utf8");
+            const cspMatch = headersText.match(/^\s*Content-Security-Policy:\s*(.+)$/im);
+            if (!cspMatch) throw new Error("Missing Content-Security-Policy in dist/_headers");
+            const scriptSrcMatch = cspMatch[1].match(/\bscript-src\s+([^;]+)/i);
+            if (!scriptSrcMatch) throw new Error("Missing script-src in CSP");
+            const allowedHashes = new Set();
+            for (const m of scriptSrcMatch[1].matchAll(/\x27(sha256-[A-Za-z0-9+/=]+)\x27/g)) {
+              allowedHashes.add(m[1]);
+            }
             function walkHtml(dir) {
               const out = [];
               for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -124,12 +133,23 @@ jobs:
             const htmlFiles = walkHtml("dist");
             for (const file of htmlFiles) {
               const html = fs.readFileSync(file, "utf8");
+              if (html.includes("fonts.googleapis.com") || html.includes("fonts.gstatic.com")) {
+                console.error("External Google Fonts reference found in", file);
+                process.exit(1);
+              }
               for (const { attrs, body } of scanScripts(html)) {
                 const hasSrc = /\bsrc\s*=/.test(attrs);
                 const isJsonLd = /type\s*=\s*["\x27]application\/ld\+json["\x27]/i.test(attrs);
-                if (!hasSrc && !isJsonLd) {
-                  console.error("Inline executable <script> violates strict CSP in", file, attrs);
+                if (hasSrc && /registerSW\.js/i.test(attrs) && !/\bdefer\b/i.test(attrs)) {
+                  console.error("Render-blocking registerSW.js without defer in", file);
                   process.exit(1);
+                }
+                if (!hasSrc && !isJsonLd) {
+                  const digest = "sha256-" + crypto.createHash("sha256").update(body, "utf8").digest("base64");
+                  if (!allowedHashes.has(digest)) {
+                    console.error("Inline executable <script> violates strict CSP in", file, digest, attrs);
+                    process.exit(1);
+                  }
                 }
                 if (isJsonLd) {
                   JSON.parse(body);
