@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { ArrowLeft, CheckCircle2, RotateCcw } from 'lucide-react';
 import { calculateSimplySupportedBeam, type BeamInputs } from '../../utils/civilPhysics';
+import { buildRoutePath, isPlainLeftClick } from '../../utils/router';
 import { SliderInput } from '../SliderInput';
 import { MathFormula } from '../MathFormula';
 
@@ -56,14 +57,19 @@ export const BeamDiagramModule: React.FC<BeamDiagramModuleProps> = ({
     <div className="space-y-6">
       <div className="app-surface rounded-xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-1">
-          <button
-            type="button"
-            onClick={onBackToPortal}
+          <a
+            href={buildRoutePath('home', 'all')}
+            onClick={(e) => {
+              if (isPlainLeftClick(e)) {
+                e.preventDefault();
+                onBackToPortal();
+              }
+            }}
             className="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 dark:text-blue-400 hover:underline cursor-pointer"
           >
             <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
             ポータル一覧に戻る
-          </button>
+          </a>
           <h1 id="main-content" tabIndex={-1} className="portal-h1 font-bold">
             構造力学｜単純梁の SFD・BMD 解析
           </h1>

@@ -1,0 +1,33 @@
+# 土木の学び舎
+
+> 日本の大学・高専の土木系カリキュラム（圧縮正規約の土質力学・構造力学・水理学・数理計画）に準拠した、無料・登録不要・ブラウザ完結型の図解・計算シミュレーター集です。 日本の標準教科書規約（土質力学：圧縮正、BMD：下側引張正）に準拠し、個人情報は一切収集しません（現在開発中・教育学習補助限定・実務利用禁止）。
+
+## 収録科目
+- [構造力学（Structural Mechanics）](https://dobokunomanabiya.skyblueao77.workers.dev/subject/structural): 構造力学の基礎となる単純梁の支点反力、せん断力図 (SFD)、曲げモーメント図 (BMD) を集中荷重・等分布荷重スライダーとリアルタイムグラフで学べます。
+- [水理学（Hydraulics）](https://dobokunomanabiya.skyblueao77.workers.dev/subject/hydraulics): 水理学の開水路等流における通水断面積・潤辺・径深、マニングの平均流速公式、流量、フルード数による常流・限界流・射流の判定を図解で学べます。
+- [土質力学（Soil Mechanics）](https://dobokunomanabiya.skyblueao77.workers.dev/subject/soil): 日本の教科書標準の圧縮正・引張負規約に基づき、地盤連続体の応力テンソル・コーシーの公式・用極法・モールの応力円・破壊規準・有効応力・ランキン土圧を図解と演習で学べます。
+- [数理計画（Mathematical Programming）](https://dobokunomanabiya.skyblueao77.workers.dev/subject/math-programming): 社会基盤・土木計画で活用される線形計画法（図解法・シンプレックス法・双対理論・感度分析・輸送/割当問題）と非線形計画法（最適性条件・ヘッセ行列・包絡線定理・ニュートン法）を図解と演習で学べます。
+
+## 学習単元シミュレーター
+- [地盤の応力と変形（連続体力学〜弾性地盤）](https://dobokunomanabiya.skyblueao77.workers.dev/unit/geomechanics-continuum): 地盤連続体における2次元・3次元応力テンソル、コーシーの公式による座標変換、主応力と不変量、用極法（ポール法）、Boussinesq の弾性地盤内応力と重ね合わせ・変形解析を全6章・オリジナル演習12問で学べます。
+- [モールの応力円・破壊規準](https://dobokunomanabiya.skyblueao77.workers.dev/unit/mohr-circle): 圧縮正規約（圧縮＋・引張−）に準拠したモールの応力円、実空間微小土要素の任意傾斜角 θ と円周角 2θ、モール・クーロン破壊規準、テルツァーギの有効応力をスライダーと途中式・演習3問で直感的に学べます。
+- [ランキン土圧（主働・受働土圧）](https://dobokunomanabiya.skyblueao77.workers.dev/unit/rankine-earth-pressure): 鉛直背面壁に作用するランキン主働土圧係数 Ka・受働土圧係数 Kp、上載荷重 q と粘着力 c による土圧分布、引張亀裂深さ z₀、合力 Pa・Pp の計算過程をリアルタイム図解で学べます。
+- [単純梁の SFD・BMD 解析](https://dobokunomanabiya.skyblueao77.workers.dev/unit/beam-sfd-bmd): 集中荷重 P（任意位置 a）と等分布荷重 w が同時に作用する静定単純梁の支点反力 RA・RB、せん断力図 (SFD)、曲げモーメント図 (BMD・下側引張正)、最大曲げモーメント位置をリアルタイム可視化できます。
+- [開水路等流・マニングの公式](https://dobokunomanabiya.skyblueao77.workers.dev/unit/open-channel-flow): 台形および長方形断面の開水路における通水断面積 A、潤辺 P、径深 R、マニングの公式による平均流速 v、流量 Q、フルード数 Fr による常流・射流判定をリアルタイム断面図とともに学べます。
+- [線形計画法（図解法〜シンプレックス・双対・輸送計画）](https://dobokunomanabiya.skyblueao77.workers.dev/unit/lp-optimization): 土木計画・資源配分で使われる線形計画法を全5章（定式化と図解法・シンプレックス法と二段階法・双対理論と相補性・感度分析と許容範囲・輸送問題と割当問題）と演習10問で体感しながら学べます。
+- [非線形計画法（最適性条件・狭義凸性・ニュートン法）](https://dobokunomanabiya.skyblueao77.workers.dev/unit/nlp-optimization): 制約なし非線形最適化の理論と数値計算を全3章（1階・2階最適性条件とヘッセ行列、狭義凸性と陰関数定理・包絡線定理、多変数ニュートン法と最急降下法の比較）と演習6問で学べます。
+
+## 単元別 Markdown リファレンス
+- [地盤の応力と変形（連続体力学〜弾性地盤） (Markdown)](https://dobokunomanabiya.skyblueao77.workers.dev/unit/geomechanics-continuum.md): 主要公式・学習目標・FAQの要約
+- [モールの応力円・破壊規準 (Markdown)](https://dobokunomanabiya.skyblueao77.workers.dev/unit/mohr-circle.md): 主要公式・学習目標・FAQの要約
+- [ランキン土圧（主働・受働土圧） (Markdown)](https://dobokunomanabiya.skyblueao77.workers.dev/unit/rankine-earth-pressure.md): 主要公式・学習目標・FAQの要約
+- [単純梁の SFD・BMD 解析 (Markdown)](https://dobokunomanabiya.skyblueao77.workers.dev/unit/beam-sfd-bmd.md): 主要公式・学習目標・FAQの要約
+- [開水路等流・マニングの公式 (Markdown)](https://dobokunomanabiya.skyblueao77.workers.dev/unit/open-channel-flow.md): 主要公式・学習目標・FAQの要約
+- [線形計画法（図解法〜シンプレックス・双対・輸送計画） (Markdown)](https://dobokunomanabiya.skyblueao77.workers.dev/unit/lp-optimization.md): 主要公式・学習目標・FAQの要約
+- [非線形計画法（最適性条件・狭義凸性・ニュートン法） (Markdown)](https://dobokunomanabiya.skyblueao77.workers.dev/unit/nlp-optimization.md): 主要公式・学習目標・FAQの要約
+
+## 全単元統合ガイド
+- [llms-full.txt](https://dobokunomanabiya.skyblueao77.workers.dev/llms-full.txt): 全4科目・全7単元の主要公式、符号規約、学習目標、FAQ の統合ドキュメント
+
+## Optional
+- [利用規約・免責事項・プライバシーポリシー・技術者倫理](https://dobokunomanabiya.skyblueao77.workers.dev/legal): 開発中注記、実務利用禁止、localStorage利用、WCAG 2.2 AA方針、OSSライセンス

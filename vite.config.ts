@@ -11,9 +11,11 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: false,
-      includeAssets: ['favicon.svg', 'icon-192.png', 'icon-512.png', 'theme-init.js'],
+      includeAssets: ['favicon.svg', 'icon-192.png', 'icon-512.png', 'og-image.png', 'theme-init.js'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2,woff,ttf,webmanifest}'],
+        navigateFallback: 'index.html',
+        navigateFallbackDenylist: [/^\/api\//, /\/[^/?]+\.[^/]+$/],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

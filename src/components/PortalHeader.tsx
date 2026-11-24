@@ -4,16 +4,16 @@ import {
   SUBJECTS,
   getUnitsBySubject,
   type SubjectId,
-  type UnitId,
 } from '../data/curriculum';
+import { buildRoutePath, isPlainLeftClick, type AppRoute } from '../utils/router';
 import { type ThemePreference } from '../utils/storage';
 
 type NavSubjectId = Exclude<SubjectId, 'all'>;
 
 interface PortalHeaderProps {
-  activeRoute: 'home' | 'legal' | UnitId;
+  activeRoute: AppRoute;
   activeSubject: SubjectId;
-  onNavigate: (route: 'home' | UnitId, subjectOverride?: SubjectId) => void;
+  onNavigate: (route: AppRoute, subjectOverride?: SubjectId) => void;
   themePref: ThemePreference;
   onChangeTheme: (pref: ThemePreference) => void;
 }
@@ -336,11 +336,13 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
         className="header-inner mx-auto max-w-7xl px-3 sm:px-6 py-2 flex items-center justify-between gap-3"
       >
         <a
-          href="#/"
+          href={buildRoutePath('home', 'all')}
           onClick={(e) => {
-            e.preventDefault();
-            onNavigate('home', 'all');
-            closeAllNavigationPopovers();
+            if (isPlainLeftClick(e)) {
+              e.preventDefault();
+              onNavigate('home', 'all');
+              closeAllNavigationPopovers();
+            }
           }}
           className="site-logo flex items-center gap-2 rounded-lg px-1 py-1 shrink-0"
         >
@@ -376,12 +378,14 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
           >
             <li>
               <a
-                href="#/"
+                href={buildRoutePath('home', 'all')}
                 aria-current={isPortalAllCurrent ? 'page' : undefined}
                 onClick={(e) => {
-                  e.preventDefault();
-                  onNavigate('home', 'all');
-                  closeAllNavigationPopovers();
+                  if (isPlainLeftClick(e)) {
+                    e.preventDefault();
+                    onNavigate('home', 'all');
+                    closeAllNavigationPopovers();
+                  }
                 }}
                 className="nav-link-item inline-flex items-center rounded-md px-3 py-2 text-xs sm:text-sm font-medium hover:bg-[var(--surface-subtle)] transition-colors"
               >
@@ -433,12 +437,14 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
                       return (
                         <li key={unit.id}>
                           <a
-                            href={`#/unit/${unit.id}`}
+                            href={buildRoutePath(unit.id)}
                             aria-current={isUnitCurrent ? 'page' : undefined}
                             onClick={(e) => {
-                              e.preventDefault();
-                              onNavigate(unit.id);
-                              closeAllNavigationPopovers();
+                              if (isPlainLeftClick(e)) {
+                                e.preventDefault();
+                                onNavigate(unit.id);
+                                closeAllNavigationPopovers();
+                              }
                             }}
                             className="dropdown-link flex flex-col gap-0.5 rounded-lg px-3 py-2 text-xs sm:text-sm hover:bg-[var(--surface-subtle)] transition-colors"
                           >
@@ -452,16 +458,18 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
                     })}
                     <li className="dropdown-divider-item border-t border-[var(--border-subtle)] mt-1 pt-1">
                       <a
-                        href={`#/subject/${subject.id}`}
+                        href={buildRoutePath('home', subject.id)}
                         aria-current={
                           activeRoute === 'home' && activeSubject === subject.id
                             ? 'page'
                             : undefined
                         }
                         onClick={(e) => {
-                          e.preventDefault();
-                          onNavigate('home', subject.id);
-                          closeAllNavigationPopovers();
+                          if (isPlainLeftClick(e)) {
+                            e.preventDefault();
+                            onNavigate('home', subject.id);
+                            closeAllNavigationPopovers();
+                          }
                         }}
                         className="dropdown-link flex items-center justify-between rounded-lg px-3 py-2 text-xs font-semibold text-[var(--accent-color)] hover:bg-[var(--surface-subtle)] transition-colors"
                       >

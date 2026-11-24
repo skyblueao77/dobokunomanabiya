@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { ArrowRight, CheckCircle2, Clock, Search } from 'lucide-react';
+import { ArrowRight, BookOpen, CheckCircle2, Clock, HelpCircle, Search } from 'lucide-react';
+import seoCatalog from '../data/seoCatalog.json';
 import {
   LEARNING_UNITS,
   SUBJECTS,
@@ -7,6 +8,7 @@ import {
   type SubjectId,
   type UnitId,
 } from '../data/curriculum';
+import { buildRoutePath, isPlainLeftClick } from '../utils/router';
 import { type StudyProgress } from '../utils/storage';
 
 interface PortalHomeProps {
@@ -50,6 +52,9 @@ export const PortalHome: React.FC<PortalHomeProps> = ({
     })),
   ];
 
+  const activeSubjectMeta =
+    selectedSubject === 'all' ? null : seoCatalog.subjects[selectedSubject];
+
   return (
     <div className="space-y-8">
       {/* ポータル概要 + 進捗トラッカー */}
@@ -57,13 +62,15 @@ export const PortalHome: React.FC<PortalHomeProps> = ({
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
             <p className="text-xs font-semibold tracking-wider text-blue-700 dark:text-blue-400">
-              土木工学インタラクティブ学習ポータル
+              {activeSubjectMeta
+                ? `${activeSubjectMeta.name}（${activeSubjectMeta.englishName}）｜${seoCatalog.siteName}`
+                : '土木工学・数理計画 インタラクティブ学習ポータル'}
             </p>
             <h1 id="main-content" tabIndex={-1} className="portal-h1 font-bold tracking-tight">
-              土木の学び舎
+              {activeSubjectMeta ? activeSubjectMeta.h1 : seoCatalog.routes.home.h1}
             </h1>
             <p className="text-sm sm:text-base app-text-muted leading-relaxed">
-              日本の大学・高専の土木系カリキュラム（圧縮正規約の土質力学・構造力学・水理学・数理計画）に準拠した、ブラウザ完結型の図解・計算シミュレーター集です。URL共有と学習進捗保存に対応し、オフライン環境でも動作します。
+              {activeSubjectMeta ? activeSubjectMeta.lead : seoCatalog.routes.home.lead}
             </p>
           </div>
 
@@ -81,14 +88,19 @@ export const PortalHome: React.FC<PortalHomeProps> = ({
               className="w-full h-2.5 rounded-full overflow-hidden"
             />
             {progress.lastVisitedUnit && (
-              <button
-                type="button"
-                onClick={() => onOpenUnit(progress.lastVisitedUnit!)}
+              <a
+                href={buildRoutePath(progress.lastVisitedUnit)}
+                onClick={(e) => {
+                  if (isPlainLeftClick(e)) {
+                    e.preventDefault();
+                    onOpenUnit(progress.lastVisitedUnit!);
+                  }
+                }}
                 className="text-xs font-semibold text-blue-700 dark:text-blue-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
               >
                 前回の続きを開く
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-              </button>
+              </a>
             )}
           </div>
         </div>
@@ -153,6 +165,7 @@ export const PortalHome: React.FC<PortalHomeProps> = ({
             {filteredUnits.map((unit) => {
               const subject = getSubjectMeta(unit.subjectId);
               const isDone = progress.completedUnits.includes(unit.id);
+              const unitHref = buildRoutePath(unit.id);
 
               return (
                 <article
@@ -161,9 +174,18 @@ export const PortalHome: React.FC<PortalHomeProps> = ({
                 >
                   <div className="unit-card-body">
                     <div className="unit-card-meta-row flex flex-wrap items-center justify-between gap-2 text-xs">
-                      <span className="inline-flex items-center gap-1.5 font-semibold text-blue-700 dark:text-blue-400">
+                      <a
+                        href={buildRoutePath('home', subject.id)}
+                        onClick={(e) => {
+                          if (isPlainLeftClick(e)) {
+                            e.preventDefault();
+                            onSelectSubject(subject.id);
+                          }
+                        }}
+                        className="inline-flex items-center gap-1.5 font-semibold text-blue-700 dark:text-blue-400 hover:underline"
+                      >
                         {subject.name}（{subject.englishName}）
-                      </span>
+                      </a>
 
                       <div className="flex items-center gap-2">
                         <span className="app-surface-subtle rounded-md px-2 py-0.5 text-xs font-medium">
@@ -198,20 +220,129 @@ export const PortalHome: React.FC<PortalHomeProps> = ({
                       <Clock className="h-3.5 w-3.5" aria-hidden="true" />
                       目安 {unit.estimatedMinutes}分
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => onOpenUnit(unit.id)}
+                    <a
+                      href={unitHref}
+                      onClick={(e) => {
+                        if (isPlainLeftClick(e)) {
+                          e.preventDefault();
+                          onOpenUnit(unit.id);
+                        }
+                      }}
                       className="interactive-btn inline-flex items-center gap-1.5 rounded-lg bg-blue-700 text-white px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer"
                     >
                       シミュレーターを開く
                       <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                    </button>
+                    </a>
                   </div>
                 </article>
               );
             })}
           </div>
         )}
+      </section>
+
+      {/* AEO セクション1：収録4科目・主要公式リファレンス */}
+      <section aria-labelledby="formula-reference-heading" className="app-surface rounded-2xl p-6 shadow-sm space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border-subtle)] pb-3">
+          <h2 id="formula-reference-heading" className="text-base sm:text-lg font-bold inline-flex items-center gap-2">
+            <BookOpen className="h-5 w-5 text-blue-700 dark:text-blue-400" aria-hidden="true" />
+            収録4科目・主要公式リファレンス
+          </h2>
+          <span className="text-xs app-text-muted">大学・高専標準カリキュラム対応</span>
+        </div>
+
+        <p className="text-xs sm:text-sm app-text-muted leading-relaxed">
+          本ポータルでは、構造力学・水理学・土質力学・数理計画の重要単元について、日本の教科書規約（土質力学：圧縮正、BMD：下側引張正）に沿った図解と計算途中式を提供しています。
+        </p>
+
+        <div className="overflow-x-auto rounded-xl border border-[var(--border-subtle)]">
+          <table className="w-full border-collapse text-xs sm:text-sm">
+            <thead>
+              <tr className="app-surface-subtle border-b border-[var(--border-subtle)]">
+                <th scope="col" className="px-3.5 py-2.5 text-left font-bold whitespace-nowrap">科目・対象</th>
+                <th scope="col" className="px-3.5 py-2.5 text-left font-bold">収録単元</th>
+                <th scope="col" className="px-3.5 py-2.5 text-left font-bold">代表的な公式・手法</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--border-subtle)]">
+              {SUBJECTS.map((subject) => {
+                const sSeo = seoCatalog.subjects[subject.id];
+                const units = LEARNING_UNITS.filter((u) => u.subjectId === subject.id);
+                return (
+                  <tr key={subject.id} className="align-top">
+                    <th scope="row" className="px-3.5 py-3 text-left whitespace-nowrap">
+                      <a
+                        href={buildRoutePath('home', subject.id)}
+                        onClick={(e) => {
+                          if (isPlainLeftClick(e)) {
+                            e.preventDefault();
+                            onSelectSubject(subject.id);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }
+                        }}
+                        className="font-bold text-blue-700 dark:text-blue-400 hover:underline block"
+                      >
+                        {subject.name}
+                      </a>
+                      <span className="text-xs font-normal app-text-muted">{sSeo.educationalLevel}</span>
+                    </th>
+                    <td className="px-3.5 py-3">
+                      <ul className="space-y-1">
+                        {units.map((u) => (
+                          <li key={u.id}>
+                            <a
+                              href={buildRoutePath(u.id)}
+                              onClick={(e) => {
+                                if (isPlainLeftClick(e)) {
+                                  e.preventDefault();
+                                  onOpenUnit(u.id);
+                                }
+                              }}
+                              className="font-medium hover:underline text-[var(--text-primary)]"
+                            >
+                              {u.title}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </td>
+                    <td className="px-3.5 py-3 space-y-1.5">
+                      {sSeo.keyFormulas.map((kf) => (
+                        <div key={kf.name} className="text-xs">
+                          <span className="font-semibold">{kf.name}：</span>
+                          <code className="font-mono-num text-blue-700 dark:text-blue-300">{kf.formula}</code>
+                        </div>
+                      ))}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* AEO セクション2：よくある質問（JSON-LD FAQPage と 100% 同一テキスト） */}
+      <section aria-labelledby="portal-faq-heading" className="app-surface rounded-2xl p-6 shadow-sm space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border-subtle)] pb-3">
+          <h2 id="portal-faq-heading" className="text-base sm:text-lg font-bold inline-flex items-center gap-2">
+            <HelpCircle className="h-5 w-5 text-blue-700 dark:text-blue-400" aria-hidden="true" />
+            よくある質問（FAQ）
+          </h2>
+          <span className="text-xs app-text-muted">ご利用方法・符号規約・免責事項</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {seoCatalog.portalFaqs.map((faq) => (
+            <article
+              key={faq.question}
+              className="app-surface-subtle rounded-xl p-4 space-y-1.5"
+            >
+              <h3 className="text-sm font-bold leading-snug">{faq.question}</h3>
+              <p className="text-xs sm:text-sm app-text-muted leading-relaxed">{faq.answer}</p>
+            </article>
+          ))}
+        </div>
       </section>
     </div>
   );

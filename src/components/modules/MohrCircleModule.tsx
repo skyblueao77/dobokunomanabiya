@@ -1,12 +1,20 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, ArrowLeft, CheckCircle2, RotateCcw } from 'lucide-react';
 import { calculateMohrCircle, type MohrInputs } from '../../utils/mohrPhysics';
+import {
+  buildRoutePath,
+  getSearchParamFromLocation,
+  isPlainLeftClick,
+  normalizePathname,
+} from '../../utils/router';
 import { SliderInput } from '../SliderInput';
 import { MohrCircleSVG } from '../MohrCircleSVG';
 import { SoilElementSVG } from '../SoilElementSVG';
 import { CalculationSteps } from '../CalculationSteps';
 import { PracticeProblems } from '../PracticeProblems';
 import { CopyShareButton } from '../CopyShareButton';
+
+const UNIT_PATH = buildRoutePath('mohr-circle');
 
 const DEFAULT_INPUTS: MohrInputs = {
   sigma1: 200,
@@ -20,12 +28,8 @@ const DEFAULT_INPUTS: MohrInputs = {
 
 function parseInitialInputs(): MohrInputs {
   try {
-    const hash = window.location.hash;
-    const queryIdx = hash.indexOf('?');
-    if (queryIdx === -1) return DEFAULT_INPUTS;
-    const params = new URLSearchParams(hash.slice(queryIdx + 1));
     const num = (key: string, fallback: number) => {
-      const val = params.get(key);
+      const val = getSearchParamFromLocation(key);
       if (val === null) return fallback;
       const parsed = Number(val);
       return Number.isFinite(parsed) ? parsed : fallback;
@@ -39,7 +43,7 @@ function parseInitialInputs(): MohrInputs {
       c: Math.max(0, Math.min(100, num('c', DEFAULT_INPUTS.c))),
       phi: Math.max(0, Math.min(45, num('phi', DEFAULT_INPUTS.phi))),
       u: Math.max(0, Math.min(200, num('u', DEFAULT_INPUTS.u))),
-      useEffectiveStress: params.get('eff') === '1',
+      useEffectiveStress: getSearchParamFromLocation('eff') === '1',
     };
   } catch {
     return DEFAULT_INPUTS;
@@ -68,6 +72,23 @@ export const MohrCircleModule: React.FC<MohrCircleModuleProps> = ({
   const result = useMemo(() => calculateMohrCircle(inputs), [inputs]);
 
   useEffect(() => {
+    if (normalizePathname(window.location.pathname) !== UNIT_PATH) {
+      return;
+    }
+    const isDefault =
+      inputs.sigma1 === DEFAULT_INPUTS.sigma1 &&
+      inputs.sigma3 === DEFAULT_INPUTS.sigma3 &&
+      inputs.theta === DEFAULT_INPUTS.theta &&
+      inputs.c === DEFAULT_INPUTS.c &&
+      inputs.phi === DEFAULT_INPUTS.phi &&
+      inputs.u === DEFAULT_INPUTS.u &&
+      inputs.useEffectiveStress === DEFAULT_INPUTS.useEffectiveStress;
+    if (isDefault) {
+      if (window.location.pathname + window.location.search !== UNIT_PATH) {
+        window.history.replaceState(null, '', UNIT_PATH);
+      }
+      return;
+    }
     const params = new URLSearchParams({
       s1: String(inputs.sigma1),
       s3: String(inputs.sigma3),
@@ -77,9 +98,9 @@ export const MohrCircleModule: React.FC<MohrCircleModuleProps> = ({
       u: String(inputs.u),
       eff: inputs.useEffectiveStress ? '1' : '0',
     });
-    const nextHash = `#/unit/mohr-circle?${params.toString()}`;
-    if (window.location.hash !== nextHash) {
-      window.history.replaceState(null, '', nextHash);
+    const nextUrl = `${UNIT_PATH}?${params.toString()}`;
+    if (window.location.pathname + window.location.search !== nextUrl) {
+      window.history.replaceState(null, '', nextUrl);
     }
   }, [inputs]);
 
@@ -109,22 +130,32 @@ export const MohrCircleModule: React.FC<MohrCircleModuleProps> = ({
       <div className="app-surface rounded-xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              onClick={onBackToPortal}
+            <a
+              href={buildRoutePath('home', 'all')}
+              onClick={(e) => {
+                if (isPlainLeftClick(e)) {
+                  e.preventDefault();
+                  onBackToPortal();
+                }
+              }}
               className="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 dark:text-blue-400 hover:underline cursor-pointer"
             >
               <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
               ポータル一覧に戻る
-            </button>
+            </a>
             {onOpenContinuumCourse && (
-              <button
-                type="button"
-                onClick={onOpenContinuumCourse}
+              <a
+                href={buildRoutePath('geomechanics-continuum', 'all', '?ch=4')}
+                onClick={(e) => {
+                  if (isPlainLeftClick(e)) {
+                    e.preventDefault();
+                    onOpenContinuumCourse();
+                  }
+                }}
                 className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300 hover:underline cursor-pointer"
               >
                 一般応力・用極法（応力と変形コース 第4章）へ →
-              </button>
+              </a>
             )}
           </div>
           <h1 id="main-content" tabIndex={-1} className="portal-h1 font-bold">
