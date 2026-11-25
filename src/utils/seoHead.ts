@@ -1,6 +1,8 @@
-import seoCatalog from '../data/seoCatalog.json';
+import seoHomeCatalog from '../data/seoHomeCatalog.json';
+import seoUnitsCatalog from '../data/seoUnitsCatalog.json';
 import { SUBJECTS, type SubjectId, type UnitId } from '../data/curriculum';
 import { buildRoutePath, type AppRoute } from './router';
+import { toTrustedJsonLdScript } from './trustedTypes';
 
 export interface RouteSeoData {
   path: string;
@@ -20,7 +22,7 @@ interface FaqItem {
 
 export function getSiteUrl(): string {
   const envSiteUrl = import.meta.env?.VITE_SITE_URL as string | undefined;
-  const base = (envSiteUrl && envSiteUrl.trim()) || seoCatalog.defaultSiteUrl;
+  const base = (envSiteUrl && envSiteUrl.trim()) || seoHomeCatalog.defaultSiteUrl;
   return base.replace(/\/+$/, '');
 }
 
@@ -46,17 +48,21 @@ export function buildRouteSeoData(
   siteUrl = getSiteUrl()
 ): RouteSeoData {
   const cleanSiteUrl = siteUrl.replace(/\/+$/, '');
-  const ogImageUrl = `${cleanSiteUrl}${seoCatalog.ogImagePath}`;
+  const ogImageUrl = `${cleanSiteUrl}${seoHomeCatalog.ogImagePath}`;
   const providerOrg = {
     '@type': 'Organization',
     '@id': `${cleanSiteUrl}/#organization`,
-    name: seoCatalog.siteName,
+    name: seoHomeCatalog.siteName,
     url: `${cleanSiteUrl}/`,
-    sameAs: [seoCatalog.repositoryUrl],
+    logo: {
+      '@type': 'ImageObject',
+      url: `${cleanSiteUrl}/icon-512.png`,
+    },
+    sameAs: [seoHomeCatalog.repositoryUrl],
   };
 
   if (route === 'legal') {
-    const meta = seoCatalog.routes.legal;
+    const meta = seoUnitsCatalog.routes.legal;
     const canonicalUrl = `${cleanSiteUrl}${meta.path}`;
     return {
       path: meta.path,
@@ -77,7 +83,7 @@ export function buildRouteSeoData(
             name: meta.h1,
             description: meta.description,
             inLanguage: 'ja',
-            dateModified: seoCatalog.lastModified,
+            dateModified: seoHomeCatalog.lastModified,
             isPartOf: { '@id': `${cleanSiteUrl}/#website` },
           },
           {
@@ -100,10 +106,10 @@ export function buildRouteSeoData(
   if (route === 'home') {
     if (subject !== 'all') {
       const sKey = subject as Exclude<SubjectId, 'all'>;
-      const sMeta = seoCatalog.subjects[sKey];
+      const sMeta = seoHomeCatalog.subjects[sKey];
       const canonicalUrl = `${cleanSiteUrl}${sMeta.path}`;
       const subjectUnits = (
-        Object.entries(seoCatalog.units) as [UnitId, (typeof seoCatalog.units)[UnitId]][]
+        Object.entries(seoUnitsCatalog.units) as [UnitId, (typeof seoUnitsCatalog.units)[UnitId]][]
       ).filter(([, u]) => u.subjectId === sKey);
 
       return {
@@ -125,7 +131,7 @@ export function buildRouteSeoData(
               name: sMeta.h1,
               description: sMeta.description,
               inLanguage: 'ja',
-              dateModified: seoCatalog.lastModified,
+              dateModified: seoHomeCatalog.lastModified,
               about: { '@type': 'Thing', name: `${sMeta.name} (${sMeta.englishName})` },
               mainEntity: {
                 '@type': 'ItemList',
@@ -149,9 +155,9 @@ export function buildRouteSeoData(
       };
     }
 
-    const homeMeta = seoCatalog.routes.home;
+    const homeMeta = seoHomeCatalog.routes.home;
     const canonicalUrl = `${cleanSiteUrl}/`;
-    const allUnits = Object.values(seoCatalog.units);
+    const allUnits = Object.values(seoUnitsCatalog.units);
 
     return {
       path: '/',
@@ -167,7 +173,8 @@ export function buildRouteSeoData(
           {
             '@type': 'WebSite',
             '@id': `${cleanSiteUrl}/#website`,
-            name: seoCatalog.siteName,
+            name: seoHomeCatalog.siteName,
+            alternateName: [`${seoHomeCatalog.siteName}｜土木工学・数理計画インタラクティブ学習ポータル`],
             url: canonicalUrl,
             inLanguage: 'ja',
             description: homeMeta.description,
@@ -177,7 +184,7 @@ export function buildRouteSeoData(
           {
             '@type': 'WebApplication',
             '@id': `${cleanSiteUrl}/#webapp`,
-            name: seoCatalog.siteName,
+            name: seoHomeCatalog.siteName,
             url: canonicalUrl,
             description: homeMeta.description,
             applicationCategory: 'EducationalApplication',
@@ -185,6 +192,7 @@ export function buildRouteSeoData(
             browserRequirements: 'Requires JavaScript',
             inLanguage: 'ja',
             isAccessibleForFree: true,
+            publisher: { '@id': `${cleanSiteUrl}/#organization` },
             offers: {
               '@type': 'Offer',
               price: '0',
@@ -207,7 +215,7 @@ export function buildRouteSeoData(
               url: `${cleanSiteUrl}${u.path}`,
             })),
           },
-          buildFaqSchema(`${cleanSiteUrl}/#faq`, seoCatalog.portalFaqs),
+          buildFaqSchema(`${cleanSiteUrl}/#faq`, seoHomeCatalog.portalFaqs),
         ],
       },
     };
@@ -215,10 +223,10 @@ export function buildRouteSeoData(
 
   // Unit page
   const unitId = route;
-  const uMeta = seoCatalog.units[unitId];
-  const sMeta = seoCatalog.subjects[uMeta.subjectId as Exclude<SubjectId, 'all'>];
+  const uMeta = seoUnitsCatalog.units[unitId];
+  const sMeta = seoHomeCatalog.subjects[uMeta.subjectId as Exclude<SubjectId, 'all'>];
   const canonicalUrl = `${cleanSiteUrl}${buildRoutePath(unitId)}`;
-  const unitFaqs = seoCatalog.unitFaqs[unitId] ?? [];
+  const unitFaqs = seoUnitsCatalog.unitFaqs[unitId] ?? [];
 
   return {
     path: uMeta.path,
@@ -244,10 +252,11 @@ export function buildRouteSeoData(
           learningResourceType: 'Interactive Simulation',
           educationalLevel: uMeta.educationalLevel,
           timeRequired: uMeta.timeRequired,
-          dateModified: seoCatalog.lastModified,
+          dateModified: seoHomeCatalog.lastModified,
           teaches: uMeta.learningObjectives,
           keywords: uMeta.keywords.join(', '),
           provider: { '@id': `${cleanSiteUrl}/#organization` },
+          isPartOf: { '@id': `${cleanSiteUrl}/#website` },
           about: {
             '@type': 'Thing',
             name: `${sMeta.name} (${sMeta.englishName})`,
@@ -347,5 +356,5 @@ export function applyRouteSeoToDocument(route: AppRoute, subject: SubjectId): vo
     ldScript.type = 'application/ld+json';
     document.head.appendChild(ldScript);
   }
-  ldScript.textContent = JSON.stringify(seo.jsonLd);
+  ldScript.textContent = toTrustedJsonLdScript(JSON.stringify(seo.jsonLd));
 }

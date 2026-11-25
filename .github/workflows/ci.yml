@@ -54,6 +54,8 @@ jobs:
             dist/llms.txt \
             dist/llms-full.txt \
             dist/og-image.png \
+            dist/favicon.ico \
+            dist/favicon.png \
             dist/favicon.svg \
             dist/icon-192.png \
             dist/icon-512.png \
@@ -87,11 +89,40 @@ jobs:
             const headersText = fs.readFileSync("dist/_headers", "utf8");
             const cspMatch = headersText.match(/^\s*Content-Security-Policy:\s*(.+)$/im);
             if (!cspMatch) throw new Error("Missing Content-Security-Policy in dist/_headers");
-            const scriptSrcMatch = cspMatch[1].match(/\bscript-src\s+([^;]+)/i);
+            const cspValue = cspMatch[1];
+            if (!/\bbase-uri\s+\x27none\x27/i.test(cspValue)) {
+              throw new Error("Missing base-uri none in CSP");
+            }
+            if (!/\brequire-trusted-types-for\s+\x27script\x27/i.test(cspValue)) {
+              throw new Error("Missing require-trusted-types-for script in CSP");
+            }
+            if (!/\btrusted-types\b[^;]*\bapp-jsonld\b[^;]*\bapp-sw\b/i.test(cspValue)) {
+              throw new Error("Missing trusted-types app-jsonld app-sw in CSP");
+            }
+            const scriptSrcMatch = cspValue.match(/\bscript-src\s+([^;]+)/i);
             if (!scriptSrcMatch) throw new Error("Missing script-src in CSP");
             const allowedHashes = new Set();
             for (const m of scriptSrcMatch[1].matchAll(/\x27(sha256-[A-Za-z0-9+/=]+)\x27/g)) {
               allowedHashes.add(m[1]);
+            }
+            const regSw = fs.readFileSync("dist/registerSW.js", "utf8");
+            if (!regSw.includes("app-sw") || !regSw.includes("createScriptURL")) {
+              throw new Error("dist/registerSW.js must enforce Trusted Types policy app-sw");
+            }
+            const swText = fs.readFileSync("dist/sw.js", "utf8");
+            if (
+              !swText.includes("skipWaiting") ||
+              !swText.includes("clientsClaim") ||
+              !swText.includes("NetworkFirst") ||
+              !swText.includes("html-pages-cache")
+            ) {
+              throw new Error("dist/sw.js must configure skipWaiting, clientsClaim, and NetworkFirst html-pages-cache");
+            }
+            if (
+              swText.includes("createHandlerBoundToURL(\"index.html\")") ||
+              swText.includes("createHandlerBoundToURL(\x27index.html\x27)")
+            ) {
+              throw new Error("dist/sw.js must not use Cache-First createHandlerBoundToURL(index.html)");
             }
             function walkHtml(dir) {
               const out = [];
@@ -133,6 +164,21 @@ jobs:
             const htmlFiles = walkHtml("dist");
             for (const file of htmlFiles) {
               const html = fs.readFileSync(file, "utf8");
+              const isGscFile = path.basename(file) === "googlee9c930fab0503349.html";
+              if (/<link\b[^>]*rel=["\x27]stylesheet["\x27]/i.test(html)) {
+                console.error("Render-blocking external stylesheet link remains in", file);
+                process.exit(1);
+              }
+              if (!isGscFile && !/<style\b[^>]*id=["\x27]app-styles["\x27]/i.test(html)) {
+                console.error("Missing inlined <style id=app-styles> in", file);
+                process.exit(1);
+              }
+              if (path.normalize(file) === path.normalize("dist/index.html")) {
+                if (!html.includes("data-ssr-path=\"/\"") || !html.includes("app-notice-banner")) {
+                  console.error("dist/index.html is missing SSR prerender markers");
+                  process.exit(1);
+                }
+              }
               for (const [rawUrl] of html.matchAll(/\bhttps?:\/\/[^\s"\x27<>]+/gi)) {
                 let parsedHost = "";
                 try {

@@ -104,7 +104,7 @@ export default function LegalPage({ onBackToPortal }: LegalPageProps) {
           「土木の学び舎」（以下「本サイト」といいます）をご利用いただくにあたり、法的・倫理的・アクセシビリティの観点から以下の事項をご確認ください。本サイトを利用した時点で、これらの内容に同意したものとみなします。
         </p>
         <p className="text-xs app-text-muted font-mono-num">
-          制定日：2026年11月16日 ／ 最終改定日：2026年11月24日
+          制定日：2026年11月16日 ／ 最終改定日：2026年11月25日
         </p>
       </header>
 
@@ -207,18 +207,8 @@ export default function LegalPage({ onBackToPortal }: LegalPageProps) {
             本サイトでは、学習の進捗状況（完了した単元・演習問題：キー <code className="px-1 py-0.5 rounded bg-[var(--surface-subtle)] text-xs">dobokunomanabiya-progress-v1</code> 等）および画面表示テーマ設定（ライト／ダークモード：キー <code className="px-1 py-0.5 rounded bg-[var(--surface-subtle)] text-xs">color-scheme</code>）を保持するために、お使いのブラウザの <code className="px-1 py-0.5 rounded bg-[var(--surface-subtle)] text-xs">localStorage</code> を使用しています。これらのデータはお客様の端末内にのみ保存され、外部サーバーへ送信されることはありません。ブラウザの設定からサイトデータを消去することでいつでも削除可能です。
           </li>
           <li>
-            <strong className="text-[var(--text-primary)]">外部サービスへの通信（Google Fonts）：</strong>
-            本サイトでは、数式・日本語の視認性向上のため Google LLC が提供する「Google Fonts」（<code className="px-1 py-0.5 rounded bg-[var(--surface-subtle)] text-xs">fonts.googleapis.com</code> / <code className="px-1 py-0.5 rounded bg-[var(--surface-subtle)] text-xs">fonts.gstatic.com</code>）を利用しています。初回アクセス時等にフォントファイルを取得するため、利用者の IP アドレスやブラウザ情報（User-Agent）が米国 Google LLC のサーバーへ送信されます。送信された情報の取り扱いは{' '}
-            <a
-              href="https://policies.google.com/privacy?hl=ja"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline inline-flex items-center gap-0.5 text-[var(--text-primary)] hover:text-blue-700 dark:hover:text-blue-400"
-            >
-              Google プライバシーポリシー
-              <ExternalLink className="h-3 w-3" aria-hidden="true" />
-            </a>{' '}
-            に従います。
+            <strong className="text-[var(--text-primary)]">フォント表示と外部フォント CDN 通信の不使用：</strong>
+            本サイトでは、お使いの端末に標準搭載されているシステムフォント（日本語ゴシック体・等幅フォント）および自己ホストした数式表示用フォント（KaTeX）のみを使用しており、Google Fonts 等の外部フォント CDN への通信（IP アドレスや User-Agent の外部送信）は行いません。
           </li>
           <li>
             <strong className="text-[var(--text-primary)]">Cookie・広告トラッキング：</strong>

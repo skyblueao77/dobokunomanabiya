@@ -1,14 +1,26 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const distDir = path.join(rootDir, 'dist');
 const publicDir = path.join(rootDir, 'public');
-const catalogPath = path.join(rootDir, 'src', 'data', 'seoCatalog.json');
+const ssrEntryPath = path.join(rootDir, '.ssr-tmp', 'entry-server.js');
+const homeCatalogPath = path.join(rootDir, 'src', 'data', 'seoHomeCatalog.json');
+const unitsCatalogPath = path.join(rootDir, 'src', 'data', 'seoUnitsCatalog.json');
 
-const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
+const homeCatalog = JSON.parse(fs.readFileSync(homeCatalogPath, 'utf8'));
+const unitsCatalog = JSON.parse(fs.readFileSync(unitsCatalogPath, 'utf8'));
+const catalog = {
+  ...homeCatalog,
+  routes: {
+    ...homeCatalog.routes,
+    ...unitsCatalog.routes,
+  },
+  units: unitsCatalog.units,
+  unitFaqs: unitsCatalog.unitFaqs,
+};
 const rawSiteUrl = process.env.SITE_URL || process.env.VITE_SITE_URL || catalog.defaultSiteUrl;
 const siteUrl = rawSiteUrl.replace(/\/+$/, '');
 const ogImageUrl = `${siteUrl}${catalog.ogImagePath}`;
@@ -52,6 +64,10 @@ const providerOrg = {
   '@id': `${siteUrl}/#organization`,
   name: catalog.siteName,
   url: `${siteUrl}/`,
+  logo: {
+    '@type': 'ImageObject',
+    url: `${siteUrl}/icon-512.png`,
+  },
   sameAs: [catalog.repositoryUrl],
 };
 
@@ -71,6 +87,7 @@ function buildAllRouteDescriptors() {
           '@type': 'WebSite',
           '@id': `${siteUrl}/#website`,
           name: catalog.siteName,
+          alternateName: [`${catalog.siteName}｜土木工学・数理計画インタラクティブ学習ポータル`],
           url: canonicalUrl,
           inLanguage: 'ja',
           description: meta.description,
@@ -88,6 +105,7 @@ function buildAllRouteDescriptors() {
           browserRequirements: 'Requires JavaScript',
           inLanguage: 'ja',
           isAccessibleForFree: true,
+          publisher: { '@id': `${siteUrl}/#organization` },
           offers: { '@type': 'Offer', price: '0', priceCurrency: 'JPY' },
           about: allSubjects.map(([, s]) => ({
             '@type': 'Thing',
@@ -177,6 +195,7 @@ function buildAllRouteDescriptors() {
       alternateMarkdownUrl: `${siteUrl}/llms-full.txt`,
       jsonLd,
       rootHtml,
+      useReactSsr: true,
     });
   }
 
@@ -268,6 +287,7 @@ function buildAllRouteDescriptors() {
       alternateMarkdownUrl: `${siteUrl}/llms-full.txt`,
       jsonLd,
       rootHtml,
+      useReactSsr: true,
     });
   }
 
@@ -296,6 +316,7 @@ function buildAllRouteDescriptors() {
           teaches: uMeta.learningObjectives,
           keywords: uMeta.keywords.join(', '),
           provider: { '@id': `${siteUrl}/#organization` },
+          isPartOf: { '@id': `${siteUrl}/#website` },
           about: { '@type': 'Thing', name: `${sMeta.name} (${sMeta.englishName})` },
           hasCourseInstance: { '@type': 'CourseInstance', courseMode: 'online', inLanguage: 'ja' },
           offers: { '@type': 'Offer', price: '0', priceCurrency: 'JPY', category: 'Free' },
@@ -315,7 +336,7 @@ function buildAllRouteDescriptors() {
     const formulaItems = uMeta.keyFormulas
       .map(
         (f) =>
-          `<div><dt>${escapeHtml(f.name)}</dt><dd><code>${escapeHtml(f.formula)}</code> — ${escapeHtml(f.meaning)}</dd></div>`
+          `<div class="app-surface-subtle rounded-lg p-3 space-y-1"><dt class="text-xs font-bold">${escapeHtml(f.name)}</dt><dd class="text-xs font-mono-num">${escapeHtml(f.formula)} — ${escapeHtml(f.meaning)}</dd></div>`
       )
       .join('\n        ');
     const objItems = uMeta.learningObjectives
@@ -324,36 +345,38 @@ function buildAllRouteDescriptors() {
     const faqItems = faqs
       .map(
         (faq) =>
-          `<article><h3>${escapeHtml(faq.question)}</h3><p>${escapeHtml(faq.answer)}</p></article>`
+          `<article class="app-surface-subtle rounded-lg p-3.5 space-y-1"><h3 class="text-sm font-bold">${escapeHtml(faq.question)}</h3><p class="text-xs sm:text-sm app-text-muted">${escapeHtml(faq.answer)}</p></article>`
       )
       .join('\n        ');
 
     const rootHtml = `
-      <header class="mx-auto max-w-7xl px-4 py-4 border-b">
-        <nav aria-label="パンくずリスト"><a href="/">ホーム</a> &gt; <a href="${escapeHtml(sMeta.path)}">${escapeHtml(sMeta.name)}</a> &gt; <span>${escapeHtml(uMeta.shortTitle)}</span></nav>
+      <header class="site-header border-b border-[var(--border-subtle)] bg-[var(--surface-card)]">
+        <div class="mx-auto max-w-7xl px-4 py-3 text-xs app-text-muted">
+          <nav aria-label="パンくずリスト"><a href="/">ホーム</a> &gt; <a href="${escapeHtml(sMeta.path)}">${escapeHtml(sMeta.name)}</a> &gt; <span>${escapeHtml(uMeta.shortTitle)}</span></nav>
+        </div>
       </header>
-      <main id="main-content" class="mx-auto max-w-7xl px-4 py-6 space-y-6">
-        <aside aria-label="開発中および内容の正確性に関する重要なお知らせ">
-          <p><strong>開発中（WIP）</strong>：掲載内容・計算結果には誤りが含まれる可能性があります。教育・学習補助限定とし、実務設計・施工・意思決定には使用しないでください。</p>
+      <main id="main-content" class="mx-auto max-w-7xl px-4 sm:px-6 py-6 space-y-6">
+        <aside aria-label="開発中および内容の正確性に関する重要なお知らせ" class="app-notice-banner rounded-xl px-4 py-3 text-xs sm:text-sm leading-relaxed">
+          <p><strong class="app-notice-accent">開発中（WIP）</strong>：掲載内容・計算結果には誤りが含まれる可能性があります。教育・学習補助限定とし、実務設計・施工・意思決定には使用しないでください。</p>
         </aside>
-        <article>
-          <h1>${escapeHtml(uMeta.h1)}</h1>
-          <p>${escapeHtml(uMeta.lead)}</p>
-          <p>対象水準：${escapeHtml(uMeta.educationalLevel)} ｜ Markdown版：<a href="${escapeHtml(uMeta.markdownPath)}">${escapeHtml(uMeta.markdownPath)}</a></p>
-          <section>
-            <h2>学習目標</h2>
-            <ul>
+        <article class="app-surface rounded-xl p-6 space-y-4">
+          <h1 class="text-xl sm:text-2xl font-bold">${escapeHtml(uMeta.h1)}</h1>
+          <p class="text-sm app-text-muted">${escapeHtml(uMeta.lead)}</p>
+          <p class="text-xs app-text-muted">対象水準：${escapeHtml(uMeta.educationalLevel)} ｜ Markdown版：<a href="${escapeHtml(uMeta.markdownPath)}">${escapeHtml(uMeta.markdownPath)}</a></p>
+          <section class="space-y-2">
+            <h2 class="text-base font-bold">学習目標</h2>
+            <ul class="list-disc pl-5 space-y-1 text-sm app-text-muted">
         ${objItems}
             </ul>
           </section>
-          <section>
-            <h2>主要公式と定義</h2>
-            <dl>
+          <section class="space-y-2">
+            <h2 class="text-base font-bold">主要公式と定義</h2>
+            <dl class="grid grid-cols-1 md:grid-cols-2 gap-3">
         ${formulaItems}
             </dl>
           </section>
-          <section>
-            <h2>よくある質問（FAQ）</h2>
+          <section class="space-y-2">
+            <h2 class="text-base font-bold">よくある質問（FAQ）</h2>
         ${faqItems}
           </section>
         </article>
@@ -371,6 +394,7 @@ function buildAllRouteDescriptors() {
       alternateMarkdownUrl: `${siteUrl}${uMeta.markdownPath}`,
       jsonLd,
       rootHtml,
+      useReactSsr: false,
     });
   }
 
@@ -411,17 +435,19 @@ function buildAllRouteDescriptors() {
       .map((obj) => `<li>${escapeHtml(obj)}</li>`)
       .join('\n        ');
     const rootHtml = `
-      <header class="mx-auto max-w-7xl px-4 py-4 border-b">
-        <nav aria-label="パンくずリスト"><a href="/">ホーム</a> &gt; <span>利用規約・免責事項・プライバシーポリシー</span></nav>
+      <header class="site-header border-b border-[var(--border-subtle)] bg-[var(--surface-card)]">
+        <div class="mx-auto max-w-7xl px-4 py-3 text-xs app-text-muted">
+          <nav aria-label="パンくずリスト"><a href="/">ホーム</a> &gt; <span>利用規約・免責事項・プライバシーポリシー</span></nav>
+        </div>
       </header>
-      <main id="main-content" class="mx-auto max-w-4xl px-4 py-6 space-y-6">
-        <article>
-          <h1>${escapeHtml(meta.h1)}</h1>
-          <p>${escapeHtml(meta.lead)}</p>
-          <ul>
+      <main id="main-content" class="mx-auto max-w-4xl px-4 sm:px-6 py-6 space-y-6">
+        <article class="app-surface rounded-xl p-6 space-y-4">
+          <h1 class="text-xl sm:text-2xl font-bold">${escapeHtml(meta.h1)}</h1>
+          <p class="text-sm app-text-muted">${escapeHtml(meta.lead)}</p>
+          <ul class="list-disc pl-5 space-y-1 text-sm app-text-muted">
         ${objItems}
           </ul>
-          <p><a href="/">ポータル一覧へ戻る</a></p>
+          <p class="text-sm"><a href="/" class="underline">ポータル一覧へ戻る</a></p>
         </article>
       </main>`;
 
@@ -437,6 +463,7 @@ function buildAllRouteDescriptors() {
       alternateMarkdownUrl: `${siteUrl}/llms-full.txt`,
       jsonLd,
       rootHtml,
+      useReactSsr: false,
     });
   }
 
@@ -507,7 +534,30 @@ function replaceTitleElement(html, newTitle) {
   );
 }
 
-function renderHtmlFromTemplate(template, descriptor) {
+function inlineAppStylesheet(html) {
+  const linkMatch =
+    html.match(
+      /<link\b[^>]*\brel=["']stylesheet["'][^>]*\bhref=["'](\/assets\/index-[^"']+\.css)["'][^>]*>/i
+    ) ||
+    html.match(
+      /<link\b[^>]*\bhref=["'](\/assets\/index-[^"']+\.css)["'][^>]*\brel=["']stylesheet["'][^>]*>/i
+    );
+  if (!linkMatch) {
+    throw new Error('Could not find entry stylesheet <link> in template index.html');
+  }
+  const relCssPath = linkMatch[1].replace(/^\/+/, '');
+  const cssFilePath = path.join(distDir, relCssPath);
+  if (!fs.existsSync(cssFilePath)) {
+    throw new Error(`Entry stylesheet not found at ${cssFilePath}`);
+  }
+  const cssText = fs.readFileSync(cssFilePath, 'utf8');
+  if (/<\/style/i.test(cssText)) {
+    throw new Error(`Unsafe </style sequence found inside ${cssFilePath}`);
+  }
+  return html.replace(linkMatch[0], () => `<style id="app-styles">${cssText}</style>`);
+}
+
+function renderHtmlFromTemplate(template, descriptor, renderRouteToHtml) {
   let html = replaceTitleElement(template, descriptor.title);
 
   html = html.replace(
@@ -573,10 +623,10 @@ function renderHtmlFromTemplate(template, descriptor) {
   if (rootIdx === -1) {
     throw new Error('Template index.html is missing <div id="root"></div>');
   }
-  html =
-    html.slice(0, rootIdx) +
-    `<div id="root">${descriptor.rootHtml}\n    </div>` +
-    html.slice(rootIdx + rootMarker.length);
+  const renderedRoot = descriptor.useReactSsr
+    ? `<div id="root" data-ssr-path="${escapeHtml(descriptor.path)}">${renderRouteToHtml(descriptor.path)}</div>`
+    : `<div id="root">${descriptor.rootHtml}\n    </div>`;
+  html = html.slice(0, rootIdx) + renderedRoot + html.slice(rootIdx + rootMarker.length);
 
   return html;
 }
@@ -709,6 +759,30 @@ ${portalFaqMd}
 ${unitSections}`;
 }
 
+function writeTrustedRegisterSw() {
+  const regSwPath = path.join(distDir, 'registerSW.js');
+  if (!fs.existsSync(regSwPath)) {
+    return;
+  }
+  const content =
+    "if('serviceWorker'in navigator){window.addEventListener('load',()=>{let u='/sw.js';const t=globalThis.trustedTypes;if(t&&typeof t.createPolicy==='function'){try{const p=t.createPolicy('app-sw',{createScriptURL:(v)=>{if(v!=='/sw.js')throw new TypeError('Disallowed SW URL');return v;}});u=p.createScriptURL('/sw.js');}catch{}}navigator.serviceWorker.register(u,{scope:'/'});});}\n";
+  writeUtf8Lf(regSwPath, content);
+
+  const swPath = path.join(distDir, 'sw.js');
+  if (fs.existsSync(swPath)) {
+    const md5 = crypto.createHash('md5').update(content, 'utf8').digest('hex');
+    const swContent = fs.readFileSync(swPath, 'utf8');
+    const updated = swContent.replace(
+      /(\{url:"registerSW\.js",revision:")[a-f0-9]+("\})/i,
+      `$1${md5}$2`
+    );
+    if (updated !== swContent) {
+      writeUtf8Lf(swPath, updated);
+      console.log(`[prerender-seo] Updated dist/sw.js registerSW.js precache revision => ${md5}`);
+    }
+  }
+}
+
 function updateServiceWorkerIndexRevision(indexHtmlContent) {
   const swPath = path.join(distDir, 'sw.js');
   if (!fs.existsSync(swPath)) {
@@ -726,7 +800,7 @@ function updateServiceWorkerIndexRevision(indexHtmlContent) {
   }
 }
 
-function getAllowedInlineScriptSha256Set() {
+function getCspHeaderLine() {
   const headersPath = fs.existsSync(path.join(distDir, '_headers'))
     ? path.join(distDir, '_headers')
     : path.join(publicDir, '_headers');
@@ -735,7 +809,12 @@ function getAllowedInlineScriptSha256Set() {
   if (!cspMatch) {
     throw new Error(`Missing Content-Security-Policy in ${headersPath}`);
   }
-  const scriptSrcMatch = cspMatch[1].match(/\bscript-src\s+([^;]+)/i);
+  return cspMatch[1];
+}
+
+function getAllowedInlineScriptSha256Set() {
+  const cspValue = getCspHeaderLine();
+  const scriptSrcMatch = cspValue.match(/\bscript-src\s+([^;]+)/i);
   if (!scriptSrcMatch) {
     throw new Error('Missing script-src directive in Content-Security-Policy');
   }
@@ -749,10 +828,62 @@ function getAllowedInlineScriptSha256Set() {
 function verifyGeneratedOutputs(routes) {
   const seenTitles = new Set();
   const seenCanonicals = new Set();
+  const cspValue = getCspHeaderLine();
+  if (!/\bbase-uri\s+'none'/i.test(cspValue)) {
+    throw new Error("Missing base-uri 'none' in Content-Security-Policy");
+  }
+  if (!/\brequire-trusted-types-for\s+'script'/i.test(cspValue)) {
+    throw new Error("Missing require-trusted-types-for 'script' in Content-Security-Policy");
+  }
+  if (!/\btrusted-types\b[^;]*\bapp-jsonld\b[^;]*\bapp-sw\b/i.test(cspValue)) {
+    throw new Error('Missing trusted-types app-jsonld app-sw in Content-Security-Policy');
+  }
+  const regSwPath = path.join(distDir, 'registerSW.js');
+  if (fs.existsSync(regSwPath)) {
+    const regSw = fs.readFileSync(regSwPath, 'utf8');
+    if (!regSw.includes('app-sw') || !regSw.includes('createScriptURL')) {
+      throw new Error('dist/registerSW.js must enforce Trusted Types policy app-sw');
+    }
+  }
+  const swPath = path.join(distDir, 'sw.js');
+  if (fs.existsSync(swPath)) {
+    const swText = fs.readFileSync(swPath, 'utf8');
+    if (
+      !swText.includes('skipWaiting') ||
+      !swText.includes('clientsClaim') ||
+      !swText.includes('NetworkFirst') ||
+      !swText.includes('html-pages-cache')
+    ) {
+      throw new Error('dist/sw.js must configure skipWaiting, clientsClaim, and NetworkFirst html-pages-cache');
+    }
+    if (
+      swText.includes('createHandlerBoundToURL("index.html")') ||
+      swText.includes("createHandlerBoundToURL('index.html')")
+    ) {
+      throw new Error('dist/sw.js must not use Cache-First createHandlerBoundToURL("index.html")');
+    }
+  }
   const allowedScriptHashes = getAllowedInlineScriptSha256Set();
 
   for (const r of routes) {
     const html = fs.readFileSync(r.outputFile, 'utf8');
+    if (/<link\b[^>]*rel=["']stylesheet["']/i.test(html)) {
+      throw new Error(`Render-blocking external stylesheet link remains in ${r.outputFile}`);
+    }
+    if (!/<style\b[^>]*id=["']app-styles["']/i.test(html)) {
+      throw new Error(`Missing inlined <style id="app-styles"> in ${r.outputFile}`);
+    }
+    if (r.path === '/') {
+      if (!html.includes('data-ssr-path="/"') || !html.includes('app-notice-banner')) {
+        throw new Error(`Missing SSR prerender content in ${r.outputFile}`);
+      }
+      if (
+        !html.includes('href="/favicon.png" sizes="96x96" type="image/png"') ||
+        !html.includes('property="og:site_name" content="土木の学び舎"')
+      ) {
+        throw new Error(`Missing site name or 96x96 favicon signal in ${r.outputFile}`);
+      }
+    }
     for (const [rawUrl] of html.matchAll(/\bhttps?:\/\/[^\s"'<>]+/gi)) {
       let parsedHost = '';
       try {
@@ -781,7 +912,22 @@ function verifyGeneratedOutputs(routes) {
         }
       }
       if (isJsonLd) {
-        JSON.parse(body);
+        const parsedLd = JSON.parse(body);
+        const graph = Array.isArray(parsedLd['@graph']) ? parsedLd['@graph'] : [parsedLd];
+        const webSiteNodes = graph.filter((node) => node && node['@type'] === 'WebSite');
+        if (r.path === '/') {
+          if (
+            webSiteNodes.length !== 1 ||
+            webSiteNodes[0].name !== catalog.siteName ||
+            !Array.isArray(webSiteNodes[0].alternateName) ||
+            webSiteNodes[0].alternateName.length === 0 ||
+            webSiteNodes[0].url !== `${siteUrl}/`
+          ) {
+            throw new Error(`Invalid or missing WebSite JSON-LD on home route ${r.outputFile}`);
+          }
+        } else if (webSiteNodes.length > 0) {
+          throw new Error(`Unexpected WebSite JSON-LD on non-home route ${r.outputFile}`);
+        }
       }
     }
     if (seenTitles.has(r.title)) {
@@ -800,14 +946,21 @@ function verifyGeneratedOutputs(routes) {
 }
 
 // Main execution
-const templateHtml = fs.readFileSync(path.join(distDir, 'index.html'), 'utf8');
+if (!fs.existsSync(ssrEntryPath)) {
+  throw new Error(`SSR entry bundle not found: ${ssrEntryPath}`);
+}
+const { renderRouteToHtml } = await import(pathToFileURL(ssrEntryPath).href);
+
+const rawTemplateHtml = fs.readFileSync(path.join(distDir, 'index.html'), 'utf8');
+const templateHtml = inlineAppStylesheet(rawTemplateHtml);
 const routes = buildAllRouteDescriptors();
 
 for (const descriptor of routes) {
-  const rendered = renderHtmlFromTemplate(templateHtml, descriptor);
+  const rendered = renderHtmlFromTemplate(templateHtml, descriptor, renderRouteToHtml);
   writeUtf8Lf(descriptor.outputFile, rendered);
 }
 
+writeTrustedRegisterSw();
 const finalHomeHtml = fs.readFileSync(path.join(distDir, 'index.html'), 'utf8');
 updateServiceWorkerIndexRevision(finalHomeHtml);
 
@@ -832,5 +985,5 @@ for (const targetDir of [publicDir, distDir]) {
 
 verifyGeneratedOutputs(routes);
 console.log(
-  `[prerender-seo] Generated ${routes.length} HTML routes, ${Object.keys(catalog.units).length} unit .md guides, sitemap.xml, robots.txt, llms.txt, llms-full.txt for ${siteUrl}`
+  `[prerender-seo] Generated ${routes.length} HTML routes (with React SSR & inline CSS), ${Object.keys(catalog.units).length} unit .md guides, sitemap.xml, robots.txt, llms.txt, llms-full.txt for ${siteUrl}`
 );

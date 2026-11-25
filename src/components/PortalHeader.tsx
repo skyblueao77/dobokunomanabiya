@@ -1,5 +1,14 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
-import { ChevronDown, Compass, Menu, Monitor, Moon, SlidersHorizontal, Sun } from 'lucide-react';
+import {
+  ChevronDown,
+  Compass,
+  Menu,
+  Monitor,
+  Moon,
+  RefreshCw,
+  SlidersHorizontal,
+  Sun,
+} from 'lucide-react';
 import {
   SUBJECTS,
   getUnitsBySubject,
@@ -18,6 +27,7 @@ interface PortalHeaderProps {
   onNavigate: (route: AppRoute, subjectOverride?: SubjectId) => void;
   themePref: ThemePreference;
   onChangeTheme: (pref: ThemePreference) => void;
+  onRefreshApp: () => Promise<{ status: 'reloading' | 'offline' }>;
 }
 
 function isPopoverOpen(el: HTMLElement | null): boolean {
@@ -91,15 +101,31 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
   onNavigate,
   themePref,
   onChangeTheme,
+  onRefreshApp,
 }) => {
   const baseId = useId();
   const menuId = `${baseId}-site-menu`;
   const settingsId = `${baseId}-settings`;
 
-  const [isWide, setIsWide] = useState<boolean>(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return false;
-    return window.matchMedia(WIDE_HEADER_MEDIA_QUERY).matches;
-  });
+  const [isWide, setIsWide] = useState<boolean>(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshNotice, setRefreshNotice] = useState('');
+
+  const handleRefreshClick = async () => {
+    if (isRefreshing) return;
+    setIsRefreshing(true);
+    setRefreshNotice('');
+    try {
+      const res = await onRefreshApp();
+      if (res.status === 'offline') {
+        setRefreshNotice('現在オフラインのため更新できません。通信環境を確認してください。');
+        setIsRefreshing(false);
+      }
+    } catch {
+      setRefreshNotice('更新の確認に失敗しました。ページを再読み込みしてください。');
+      setIsRefreshing(false);
+    }
+  };
 
   const menuRef = useRef<HTMLUListElement | null>(null);
   const settingsBtnRef = useRef<HTMLButtonElement | null>(null);
@@ -508,6 +534,28 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
                   </label>
                 ))}
               </fieldset>
+
+              <div className="border-t border-[var(--border-subtle)] pt-3 space-y-2">
+                <p className="text-xs font-bold">アプリ更新・キャッシュ管理</p>
+                <button
+                  type="button"
+                  disabled={isRefreshing}
+                  onClick={() => void handleRefreshClick()}
+                  className="interactive-btn app-surface w-full inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <RefreshCw
+                    className={`h-3.5 w-3.5 shrink-0${isRefreshing ? ' animate-spin' : ''}`}
+                    aria-hidden="true"
+                  />
+                  <span>{isRefreshing ? '確認・更新中…' : '最新バージョンを確認・キャッシュ更新'}</span>
+                </button>
+                <p className="text-xs app-text-muted">学習進捗やテーマ設定は消えません。</p>
+                {refreshNotice && (
+                  <p role="status" aria-live="polite" className="text-xs app-notice-accent font-medium">
+                    {refreshNotice}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>

@@ -45,26 +45,42 @@
       content="土質力学・構造力学・水理学・数理計画を図解シミュレーターと計算途中式で学べる無料・ブラウザ完結型ポータル。"
     />
     <meta name="twitter:image" content="https://dobokunomanabiya.skyblueao77.workers.dev/og-image.png" />
+    <meta name="application-name" content="土木の学び舎" />
     <meta name="apple-mobile-web-app-title" content="土木の学び舎" />
     <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.png" sizes="96x96" type="image/png" />
+    <link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icon-192.png" sizes="192x192" />
     <script id="route-jsonld" type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "WebApplication",
-        "name": "土木の学び舎",
-        "url": "https://dobokunomanabiya.skyblueao77.workers.dev/",
-        "description": "日本の大学・高専の土木系カリキュラムに準拠したブラウザ完結型の土木工学・数理計画インタラクティブ学習ポータル（土質力学・構造力学・水理学・数理計画）。",
-        "applicationCategory": "EducationalApplication",
-        "operatingSystem": "Web",
-        "inLanguage": "ja",
-        "isAccessibleForFree": true,
-        "about": [
-          { "@type": "Thing", "name": "土質力学（モールの応力円・地盤連続体・ランキン土圧）" },
-          { "@type": "Thing", "name": "構造力学（単純梁のSFD・BMD解析）" },
-          { "@type": "Thing", "name": "水理学（開水路等流・マニングの公式）" },
-          { "@type": "Thing", "name": "数理計画（線形計画法・非線形計画法）" }
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://dobokunomanabiya.skyblueao77.workers.dev/#website",
+            "name": "土木の学び舎",
+            "alternateName": ["土木の学び舎｜土木工学・数理計画インタラクティブ学習ポータル"],
+            "url": "https://dobokunomanabiya.skyblueao77.workers.dev/",
+            "inLanguage": "ja"
+          },
+          {
+            "@type": "WebApplication",
+            "name": "土木の学び舎",
+            "url": "https://dobokunomanabiya.skyblueao77.workers.dev/",
+            "description": "日本の大学・高専の土木系カリキュラムに準拠したブラウザ完結型の土木工学・数理計画インタラクティブ学習ポータル（土質力学・構造力学・水理学・数理計画）。",
+            "applicationCategory": "EducationalApplication",
+            "operatingSystem": "Web",
+            "inLanguage": "ja",
+            "isAccessibleForFree": true,
+            "about": [
+              { "@type": "Thing", "name": "土質力学（モールの応力円・地盤連続体・ランキン土圧）" },
+              { "@type": "Thing", "name": "構造力学（単純梁のSFD・BMD解析）" },
+              { "@type": "Thing", "name": "水理学（開水路等流・マニングの公式）" },
+              { "@type": "Thing", "name": "数理計画（線形計画法・非線形計画法）" }
+            ]
+          }
         ]
       }
     </script>

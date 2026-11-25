@@ -1,10 +1,11 @@
-import { Suspense, lazy, useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import {
   LEARNING_UNITS,
   type SubjectId,
   type UnitId,
 } from './data/curriculum';
 import {
+  DEFAULT_PROGRESS,
   applyThemePreference,
   getThemePreference,
   loadStudyProgress,
@@ -18,14 +19,21 @@ import {
   parseLocation,
   type AppRoute,
 } from './utils/router';
-import { applyRouteSeoToDocument } from './utils/seoHead';
 import { PortalHeader } from './components/PortalHeader';
 import { PortalHome } from './components/PortalHome';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { WipNoticeBanner } from './components/WipNoticeBanner';
-import { UnitBreadcrumb } from './components/UnitBreadcrumb';
-import { UnitFaqSection } from './components/UnitFaqSection';
+import { UpdateAvailableBanner } from './components/UpdateAvailableBanner';
+import { initPwaUpdateWatcher, refreshAppAndClearCaches } from './utils/pwaUpdater';
 
+const emptySubscribe = () => () => {};
+
+const UnitBreadcrumb = lazy(() =>
+  import('./components/UnitBreadcrumb').then((m) => ({ default: m.UnitBreadcrumb }))
+);
+const UnitFaqSection = lazy(() =>
+  import('./components/UnitFaqSection').then((m) => ({ default: m.UnitFaqSection }))
+);
 const GeomechanicsCourseModule = lazy(
   () => import('./components/modules/GeomechanicsCourseModule')
 );
@@ -41,14 +49,55 @@ const NonlinearProgrammingCourseModule = lazy(
 );
 const LegalPage = lazy(() => import('./components/LegalPage'));
 
-export function App() {
-  const [initialParsed] = useState(() =>
-    parseLocation(window.location.pathname, window.location.search, window.location.hash)
+export interface AppProps {
+  initialLocation?: {
+    pathname: string;
+    search: string;
+    hash: string;
+  };
+}
+
+export function App({ initialLocation }: AppProps = {}) {
+  const [initialParsed] = useState(() => {
+    if (initialLocation) {
+      return parseLocation(
+        initialLocation.pathname,
+        initialLocation.search,
+        initialLocation.hash
+      );
+    }
+    if (typeof window !== 'undefined') {
+      return parseLocation(
+        window.location.pathname,
+        window.location.search,
+        window.location.hash
+      );
+    }
+    return parseLocation('/', '', '');
+  });
+  const isHydrated = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
+  const storedProgress = useMemo(
+    () => (isHydrated ? loadStudyProgress() : DEFAULT_PROGRESS),
+    [isHydrated]
+  );
+  const storedTheme = useMemo(
+    () => (isHydrated ? getThemePreference() : 'system'),
+    [isHydrated]
   );
   const [route, setRoute] = useState<AppRoute>(initialParsed.route);
   const [selectedSubject, setSelectedSubject] = useState<SubjectId>(initialParsed.subject);
-  const [progress, setProgress] = useState<StudyProgress>(() => loadStudyProgress());
-  const [themePref, setThemePref] = useState<ThemePreference>(() => getThemePreference());
+  const [progressOverride, setProgressOverride] = useState<StudyProgress | null>(null);
+  const [themeOverride, setThemeOverride] = useState<ThemePreference | null>(null);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const progress = progressOverride ?? storedProgress;
+  const themePref = themeOverride ?? storedTheme;
+  const hasMountedSeoRef = useRef(false);
+
+  useEffect(() => initPwaUpdateWatcher(() => setUpdateAvailable(true)), []);
 
   useEffect(() => {
     if (initialParsed.legacyHashRedirectPath) {
@@ -89,7 +138,7 @@ export function App() {
     const onStorage = (e: StorageEvent) => {
       if (e.key === 'color-scheme') {
         const next = getThemePreference();
-        setThemePref(next);
+        setThemeOverride(next);
         applyThemePreference(next);
       }
     };
@@ -97,10 +146,27 @@ export function App() {
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
-  // Dynamic title, canonical, OGP and JSON-LD update on route change
+  // Dynamic title, canonical, OGP and JSON-LD update on route change (skip initial SSR-matched render)
   useEffect(() => {
-    applyRouteSeoToDocument(route, selectedSubject);
-  }, [route, selectedSubject]);
+    if (!hasMountedSeoRef.current) {
+      hasMountedSeoRef.current = true;
+      if (!initialParsed.legacyHashRedirectPath) {
+        return;
+      }
+    }
+    void import('./utils/seoHead').then((m) => m.applyRouteSeoToDocument(route, selectedSubject));
+  }, [route, selectedSubject, initialParsed.legacyHashRedirectPath]);
+
+  const updateProgress = (updater: (current: StudyProgress) => StudyProgress) => {
+    setProgressOverride((prev) => {
+      const current = prev ?? storedProgress;
+      const updated = updater(current);
+      if (updated !== current) {
+        saveStudyProgress(updated);
+      }
+      return updated;
+    });
+  };
 
   const navigate = (nextRoute: AppRoute, subjectOverride?: SubjectId, search = '') => {
     setRoute(nextRoute);
@@ -126,11 +192,7 @@ export function App() {
       if (window.location.pathname + window.location.search !== nextPath) {
         window.history.pushState(null, '', nextPath);
       }
-      setProgress((prev) => {
-        const updated: StudyProgress = { ...prev, lastVisitedUnit: nextRoute };
-        saveStudyProgress(updated);
-        return updated;
-      });
+      updateProgress((prev) => ({ ...prev, lastVisitedUnit: nextRoute }));
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
     window.requestAnimationFrame(() => {
@@ -147,79 +209,67 @@ export function App() {
   };
 
   const handleChangeTheme = (pref: ThemePreference) => {
-    setThemePref(pref);
+    setThemeOverride(pref);
     applyThemePreference(pref);
   };
 
   const toggleUnitComplete = (unitId: UnitId) => {
-    setProgress((prev) => {
+    updateProgress((prev) => {
       const exists = prev.completedUnits.includes(unitId);
       const completedUnits = exists
         ? prev.completedUnits.filter((id) => id !== unitId)
         : [...prev.completedUnits, unitId];
-      const updated = { ...prev, completedUnits };
-      saveStudyProgress(updated);
-      return updated;
+      return { ...prev, completedUnits };
     });
   };
 
   const toggleProblemDone = (problemId: number) => {
-    setProgress((prev) => {
+    updateProgress((prev) => {
       const exists = prev.completedProblemIds.includes(problemId);
       const completedProblemIds = exists
         ? prev.completedProblemIds.filter((id) => id !== problemId)
         : [...prev.completedProblemIds, problemId];
-      const updated = { ...prev, completedProblemIds };
-      saveStudyProgress(updated);
-      return updated;
+      return { ...prev, completedProblemIds };
     });
   };
 
   const toggleContinuumExerciseDone = (exerciseId: string) => {
-    setProgress((prev) => {
+    updateProgress((prev) => {
       const exists = prev.completedContinuumExerciseIds.includes(exerciseId);
       const completedContinuumExerciseIds = exists
         ? prev.completedContinuumExerciseIds.filter((id) => id !== exerciseId)
         : [...prev.completedContinuumExerciseIds, exerciseId];
-      const updated = { ...prev, completedContinuumExerciseIds };
-      saveStudyProgress(updated);
-      return updated;
+      return { ...prev, completedContinuumExerciseIds };
     });
   };
 
   const markContinuumExerciseDone = (exerciseId: string) => {
-    setProgress((prev) => {
+    updateProgress((prev) => {
       if (prev.completedContinuumExerciseIds.includes(exerciseId)) return prev;
-      const updated = {
+      return {
         ...prev,
         completedContinuumExerciseIds: [...prev.completedContinuumExerciseIds, exerciseId],
       };
-      saveStudyProgress(updated);
-      return updated;
     });
   };
 
   const toggleMathProgExerciseDone = (exerciseId: string) => {
-    setProgress((prev) => {
+    updateProgress((prev) => {
       const exists = prev.completedMathProgExerciseIds.includes(exerciseId);
       const completedMathProgExerciseIds = exists
         ? prev.completedMathProgExerciseIds.filter((id) => id !== exerciseId)
         : [...prev.completedMathProgExerciseIds, exerciseId];
-      const updated = { ...prev, completedMathProgExerciseIds };
-      saveStudyProgress(updated);
-      return updated;
+      return { ...prev, completedMathProgExerciseIds };
     });
   };
 
   const markMathProgExerciseDone = (exerciseId: string) => {
-    setProgress((prev) => {
+    updateProgress((prev) => {
       if (prev.completedMathProgExerciseIds.includes(exerciseId)) return prev;
-      const updated = {
+      return {
         ...prev,
         completedMathProgExerciseIds: [...prev.completedMathProgExerciseIds, exerciseId],
       };
-      saveStudyProgress(updated);
-      return updated;
     });
   };
 
@@ -236,20 +286,29 @@ export function App() {
         onNavigate={navigate}
         themePref={themePref}
         onChangeTheme={handleChangeTheme}
+        onRefreshApp={refreshAppAndClearCaches}
       />
 
       <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 py-6">
+        {updateAvailable && (
+          <UpdateAvailableBanner
+            onReload={() => window.location.reload()}
+            onDismiss={() => setUpdateAvailable(false)}
+          />
+        )}
         <WipNoticeBanner
           showDisclaimerLink={route !== 'legal'}
           onOpenDisclaimer={() => navigate('legal')}
         />
         {activeUnit && (
           <div className="mb-4">
-            <UnitBreadcrumb
-              subjectId={activeUnit.subjectId}
-              unitTitle={activeUnit.title}
-              onNavigate={navigate}
-            />
+            <Suspense fallback={null}>
+              <UnitBreadcrumb
+                subjectId={activeUnit.subjectId}
+                unitTitle={activeUnit.title}
+                onNavigate={navigate}
+              />
+            </Suspense>
           </div>
         )}
         <ErrorBoundary onReset={() => navigate('home')}>
@@ -336,7 +395,9 @@ export function App() {
         </ErrorBoundary>
         {activeUnit && (
           <div className="mt-6">
-            <UnitFaqSection unitId={activeUnit.id} />
+            <Suspense fallback={null}>
+              <UnitFaqSection unitId={activeUnit.id} />
+            </Suspense>
           </div>
         )}
       </main>
