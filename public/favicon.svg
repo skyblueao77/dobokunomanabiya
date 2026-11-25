@@ -1,6 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#1d4ed8" />
-  <circle cx="256" cy="256" r="136" fill="none" stroke="#ffffff" stroke-width="36" />
-  <line x1="80" y1="256" x2="432" y2="256" stroke="#ffffff" stroke-width="28" stroke-linecap="round" />
-  <circle cx="256" cy="256" r="18" fill="#ffffff" />
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1d4ed8" />
+      <stop offset="100%" stop-color="#1e3a8a" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)" />
+  <!-- Geometric Mohr / structural circle backdrop -->
+  <circle cx="256" cy="240" r="144" fill="none" stroke="#38bdf8" stroke-opacity="0.45" stroke-width="20" />
+  <!-- Arch bridge deck -->
+  <line x1="88" y1="252" x2="424" y2="252" stroke="#ffffff" stroke-width="30" stroke-linecap="round" />
+  <!-- Main structural arch -->
+  <path d="M 112 314 Q 256 124 400 314" fill="none" stroke="#ffffff" stroke-width="34" stroke-linecap="round" />
+  <!-- Vertical structural hangers -->
+  <line x1="184" y1="224" x2="184" y2="252" stroke="#ffffff" stroke-width="18" stroke-linecap="round" />
+  <line x1="256" y1="196" x2="256" y2="252" stroke="#ffffff" stroke-width="18" stroke-linecap="round" />
+  <line x1="328" y1="224" x2="328" y2="252" stroke="#ffffff" stroke-width="18" stroke-linecap="round" />
+  <!-- Principal point accent -->
+  <circle cx="256" cy="196" r="20" fill="#fbbf24" />
+  <!-- Hydraulic wave line -->
+  <path d="M 96 362 Q 176 330 256 362 T 416 362" fill="none" stroke="#38bdf8" stroke-width="26" stroke-linecap="round" />
 </svg>

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import seoCatalog from '../data/seoCatalog.json';
+import seoHomeCatalog from '../data/seoHomeCatalog.json';
+import seoUnitsCatalog from '../data/seoUnitsCatalog.json';
 import { LEARNING_UNITS, SUBJECTS, type SubjectId } from '../data/curriculum';
 import { buildRoutePath, normalizePathname, parseLocation, type AppRoute } from './router';
 import { buildRouteSeoData } from './seoHead';
@@ -132,6 +133,29 @@ describe('SEO & AEO metadata / JSON-LD parity', () => {
     expect(canonicals.size).toBe(13);
   });
 
+  it('includes WebSite JSON-LD with alternateName only on the home route (/)', () => {
+    const homeSeo = buildRouteSeoData('home', 'all');
+    const homeGraph = homeSeo.jsonLd['@graph'] as Array<Record<string, unknown>>;
+    const homeWebSite = homeGraph.find((node) => node['@type'] === 'WebSite');
+    expect(homeWebSite).toBeDefined();
+    expect(homeWebSite!.name).toBe('土木の学び舎');
+    expect(homeWebSite!.alternateName).toEqual([
+      '土木の学び舎｜土木工学・数理計画インタラクティブ学習ポータル',
+    ]);
+    expect(homeWebSite!.url).toBe('https://dobokunomanabiya.skyblueao77.workers.dev/');
+
+    const subRoutes: Array<{ route: AppRoute; subject: SubjectId }> = [
+      ...SUBJECTS.map((s) => ({ route: 'home' as const, subject: s.id })),
+      ...LEARNING_UNITS.map((u) => ({ route: u.id, subject: u.subjectId })),
+      { route: 'legal', subject: 'all' },
+    ];
+    for (const item of subRoutes) {
+      const seo = buildRouteSeoData(item.route, item.subject);
+      const graph = seo.jsonLd['@graph'] as Array<Record<string, unknown>>;
+      expect(graph.some((node) => node['@type'] === 'WebSite')).toBe(false);
+    }
+  });
+
   it('keeps FAQPage JSON-LD 100% identical to visible catalog FAQs', () => {
     const homeSeo = buildRouteSeoData('home', 'all');
     const homeGraph = homeSeo.jsonLd['@graph'] as Array<Record<string, unknown>>;
@@ -141,7 +165,7 @@ describe('SEO & AEO metadata / JSON-LD parity', () => {
       question: q.name,
       answer: (q.acceptedAnswer as Record<string, unknown>).text,
     }));
-    expect(homeQuestions).toEqual(seoCatalog.portalFaqs);
+    expect(homeQuestions).toEqual(seoHomeCatalog.portalFaqs);
 
     for (const unit of LEARNING_UNITS) {
       const unitSeo = buildRouteSeoData(unit.id, unit.subjectId);
@@ -152,7 +176,7 @@ describe('SEO & AEO metadata / JSON-LD parity', () => {
         question: q.name,
         answer: (q.acceptedAnswer as Record<string, unknown>).text,
       }));
-      expect(unitQuestions).toEqual(seoCatalog.unitFaqs[unit.id]);
+      expect(unitQuestions).toEqual(seoUnitsCatalog.unitFaqs[unit.id]);
     }
   });
 });

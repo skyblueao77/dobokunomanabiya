@@ -16,6 +16,19 @@ function runNodeScript(relativeScriptPath, args = []) {
   });
 }
 
-runNodeScript('node_modules/typescript/bin/tsc', ['-b']);
-runNodeScript('node_modules/vite/bin/vite.js', ['build']);
-runNodeScript('scripts/prerender-seo.mjs');
+const ssrTmpDir = path.join(rootDir, '.ssr-tmp');
+
+try {
+  runNodeScript('node_modules/typescript/bin/tsc', ['-b']);
+  runNodeScript('node_modules/vite/bin/vite.js', ['build']);
+  runNodeScript('node_modules/vite/bin/vite.js', [
+    'build',
+    '--ssr',
+    'src/entry-server.tsx',
+    '--outDir',
+    '.ssr-tmp',
+  ]);
+  runNodeScript('scripts/prerender-seo.mjs');
+} finally {
+  fs.rmSync(ssrTmpDir, { recursive: true, force: true });
+}

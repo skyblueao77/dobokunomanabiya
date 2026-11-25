@@ -12,11 +12,55 @@ export default defineConfig({
       registerType: 'autoUpdate',
       injectRegister: 'script-defer',
       manifest: false,
-      includeAssets: ['favicon.svg', 'icon-192.png', 'icon-512.png', 'og-image.png'],
+      includeAssets: ['favicon.ico', 'favicon.png', 'favicon.svg', 'icon-192.png', 'icon-512.png', 'og-image.png'],
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,woff2,woff,ttf,webmanifest}'],
-        navigateFallback: 'index.html',
-        navigateFallbackDenylist: [/^\/api\//, /\/[^/?]+\.[^/]+$/],
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
+        globPatterns: ['**/*.{js,css,svg,png,woff2,webmanifest}'],
+        globIgnores: ['assets/index-*.css'],
+        navigateFallback: null,
+        runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'html-pages-cache',
+              networkTimeoutSeconds: 4,
+              expiration: {
+                maxEntries: 20,
+                maxAgeSeconds: 60 * 60 * 24 * 7,
+              },
+              cacheableResponse: {
+                statuses: [200],
+              },
+              plugins: [
+                {
+                  handlerDidError: async () =>
+                    (await (
+                      globalThis as unknown as {
+                        caches?: { match(request: string): Promise<Response | undefined> };
+                      }
+                    ).caches?.match('/')) ?? Response.error(),
+                },
+              ],
+            },
+          },
+          {
+            urlPattern: /\.(?:woff|ttf)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'legacy-fonts-cache',
+              expiration: {
+                maxEntries: 60,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+        ],
       },
     }),
   ],

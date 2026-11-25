@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { ArrowRight, BookOpen, CheckCircle2, Clock, HelpCircle, Search } from 'lucide-react';
-import seoCatalog from '../data/seoCatalog.json';
+import seoHomeCatalog from '../data/seoHomeCatalog.json';
 import {
   LEARNING_UNITS,
   SUBJECTS,
@@ -53,7 +53,7 @@ export const PortalHome: React.FC<PortalHomeProps> = ({
   ];
 
   const activeSubjectMeta =
-    selectedSubject === 'all' ? null : seoCatalog.subjects[selectedSubject];
+    selectedSubject === 'all' ? null : seoHomeCatalog.subjects[selectedSubject];
 
   return (
     <div className="space-y-8">
@@ -63,14 +63,14 @@ export const PortalHome: React.FC<PortalHomeProps> = ({
           <div className="space-y-2 max-w-2xl">
             <p className="text-xs font-semibold tracking-wider text-blue-700 dark:text-blue-400">
               {activeSubjectMeta
-                ? `${activeSubjectMeta.name}（${activeSubjectMeta.englishName}）｜${seoCatalog.siteName}`
+                ? `${activeSubjectMeta.name}（${activeSubjectMeta.englishName}）｜${seoHomeCatalog.siteName}`
                 : '土木工学・数理計画 インタラクティブ学習ポータル'}
             </p>
             <h1 id="main-content" tabIndex={-1} className="portal-h1 font-bold tracking-tight">
-              {activeSubjectMeta ? activeSubjectMeta.h1 : seoCatalog.routes.home.h1}
+              {activeSubjectMeta ? activeSubjectMeta.h1 : seoHomeCatalog.routes.home.h1}
             </h1>
             <p className="text-sm sm:text-base app-text-muted leading-relaxed">
-              {activeSubjectMeta ? activeSubjectMeta.lead : seoCatalog.routes.home.lead}
+              {activeSubjectMeta ? activeSubjectMeta.lead : seoHomeCatalog.routes.home.lead}
             </p>
           </div>
 
@@ -267,7 +267,7 @@ export const PortalHome: React.FC<PortalHomeProps> = ({
             </thead>
             <tbody className="divide-y divide-[var(--border-subtle)]">
               {SUBJECTS.map((subject) => {
-                const sSeo = seoCatalog.subjects[subject.id];
+                const sSeo = seoHomeCatalog.subjects[subject.id];
                 const units = LEARNING_UNITS.filter((u) => u.subjectId === subject.id);
                 return (
                   <tr key={subject.id} className="align-top">
@@ -334,7 +334,7 @@ export const PortalHome: React.FC<PortalHomeProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {seoCatalog.portalFaqs.map((faq) => (
+          {seoHomeCatalog.portalFaqs.map((faq) => (
             <article
               key={faq.question}
               className="app-surface-subtle rounded-xl p-4 space-y-1.5"

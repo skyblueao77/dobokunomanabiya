@@ -1,6 +1,6 @@
 import React from 'react';
 import { HelpCircle } from 'lucide-react';
-import seoCatalog from '../data/seoCatalog.json';
+import seoUnitsCatalog from '../data/seoUnitsCatalog.json';
 import { type UnitId } from '../data/curriculum';
 
 interface UnitFaqSectionProps {
@@ -8,8 +8,8 @@ interface UnitFaqSectionProps {
 }
 
 export const UnitFaqSection: React.FC<UnitFaqSectionProps> = ({ unitId }) => {
-  const unitMeta = seoCatalog.units[unitId];
-  const faqs = seoCatalog.unitFaqs[unitId] ?? [];
+  const unitMeta = seoUnitsCatalog.units[unitId];
+  const faqs = seoUnitsCatalog.unitFaqs[unitId] ?? [];
 
   if (faqs.length === 0 && unitMeta.keyFormulas.length === 0) {
     return null;

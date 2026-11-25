@@ -10,7 +10,7 @@ export interface StudyProgress {
   lastVisitedUnit: UnitId | null;
 }
 
-const DEFAULT_PROGRESS: StudyProgress = {
+export const DEFAULT_PROGRESS: StudyProgress = {
   completedUnits: [],
   completedProblemIds: [],
   completedContinuumExerciseIds: [],
