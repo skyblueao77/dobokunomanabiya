@@ -2,12 +2,15 @@ import React, { useEffect, useId, useRef, useState } from 'react';
 import {
   ChevronDown,
   Compass,
+  Download,
   Menu,
   Monitor,
   Moon,
   RefreshCw,
   SlidersHorizontal,
   Sun,
+  Trash2,
+  Upload,
 } from 'lucide-react';
 import {
   SUBJECTS,
@@ -15,7 +18,12 @@ import {
   type SubjectId,
 } from '../data/curriculum';
 import { buildRoutePath, isPlainLeftClick, type AppRoute } from '../utils/router';
-import { type ThemePreference } from '../utils/storage';
+import {
+  exportProgressJson,
+  validateAndNormalizeProgress,
+  type StudyProgress,
+  type ThemePreference,
+} from '../utils/storage';
 
 type NavSubjectId = Exclude<SubjectId, 'all'>;
 
@@ -28,6 +36,9 @@ interface PortalHeaderProps {
   themePref: ThemePreference;
   onChangeTheme: (pref: ThemePreference) => void;
   onRefreshApp: () => Promise<{ status: 'reloading' | 'offline' }>;
+  progress: StudyProgress;
+  onImportProgress: (next: StudyProgress) => void;
+  onResetProgress: () => void;
 }
 
 function isPopoverOpen(el: HTMLElement | null): boolean {
@@ -102,14 +113,81 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
   themePref,
   onChangeTheme,
   onRefreshApp,
+  progress,
+  onImportProgress,
+  onResetProgress,
 }) => {
   const baseId = useId();
   const menuId = `${baseId}-site-menu`;
   const settingsId = `${baseId}-settings`;
+  const resetDialogTitleId = `${baseId}-reset-dialog-title`;
 
   const [isWide, setIsWide] = useState<boolean>(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshNotice, setRefreshNotice] = useState('');
+  const [progressNotice, setProgressNotice] = useState<{ kind: 'ok' | 'err'; text: string } | null>(
+    null
+  );
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const resetDialogRef = useRef<HTMLDialogElement | null>(null);
+
+  const handleExportProgress = () => {
+    try {
+      const json = exportProgressJson(progress);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'dobokunomanabiya-progress.json';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      setProgressNotice({ kind: 'ok', text: '学習進捗を JSON ファイルとして保存しました。' });
+    } catch {
+      setProgressNotice({ kind: 'err', text: '進捗の書き出しに失敗しました。' });
+    }
+  };
+
+  const handleImportFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed: unknown = JSON.parse(text);
+      const normalized = validateAndNormalizeProgress(parsed);
+      if (!normalized) {
+        setProgressNotice({ kind: 'err', text: '進捗データの形式が正しくありません。' });
+        return;
+      }
+      onImportProgress(normalized);
+      setProgressNotice({ kind: 'ok', text: '学習進捗をファイルから復元しました。' });
+    } catch {
+      setProgressNotice({ kind: 'err', text: 'JSON ファイルの読み込みに失敗しました。' });
+    }
+  };
+
+  const handleOpenResetDialog = () => {
+    hidePopoverSafe(settingsPopRef.current);
+    const dialog = resetDialogRef.current;
+    if (dialog && !dialog.open) {
+      dialog.returnValue = '';
+      dialog.showModal();
+    }
+  };
+
+  const handleResetDialogClose = () => {
+    const dialog = resetDialogRef.current;
+    if (!dialog) return;
+    const choice = dialog.returnValue;
+    dialog.returnValue = '';
+    if (choice === 'reset') {
+      onResetProgress();
+      setProgressNotice({ kind: 'ok', text: '学習進捗を初期化しました。' });
+    }
+  };
 
   const handleRefreshClick = async () => {
     if (isRefreshing) return;
@@ -556,10 +634,94 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
                   </p>
                 )}
               </div>
+
+              <div className="border-t border-[var(--border-subtle)] pt-3 space-y-2">
+                <p className="text-xs font-bold">学習進捗データの管理（端末内保存）</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={handleExportProgress}
+                    className="interactive-btn app-surface inline-flex items-center justify-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-semibold cursor-pointer"
+                  >
+                    <Download className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                    <span>JSON保存</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="interactive-btn app-surface inline-flex items-center justify-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-semibold cursor-pointer"
+                  >
+                    <Upload className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                    <span>JSON復元</span>
+                  </button>
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="application/json,.json"
+                  onChange={(e) => void handleImportFileChange(e)}
+                  className="visually-hidden"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                />
+                <button
+                  type="button"
+                  onClick={handleOpenResetDialog}
+                  className="interactive-btn w-full inline-flex items-center justify-center gap-1.5 rounded-lg border border-red-500/45 bg-red-500/10 text-red-700 dark:text-red-300 px-3 py-2 text-xs font-semibold cursor-pointer"
+                >
+                  <Trash2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                  <span>学習進捗をリセット</span>
+                </button>
+                {progressNotice && (
+                  <p
+                    role="status"
+                    aria-live="polite"
+                    className={`text-xs font-medium ${
+                      progressNotice.kind === 'err'
+                        ? 'text-red-700 dark:text-red-400'
+                        : 'text-emerald-700 dark:text-emerald-400'
+                    }`}
+                  >
+                    {progressNotice.text}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Native modal <dialog> for destructive reset confirmation (no role="dialog"/aria-modal per HTML standard) */}
+      <dialog
+        ref={resetDialogRef}
+        aria-labelledby={resetDialogTitleId}
+        onClose={handleResetDialogClose}
+        className="rounded-2xl p-6 shadow-2xl w-[min(92dvw,24rem)] space-y-4"
+      >
+        <h2 id={resetDialogTitleId} className="text-base font-bold">
+          学習進捗をリセットしますか？
+        </h2>
+        <p className="text-xs sm:text-sm app-text-muted leading-relaxed">
+          完了済みの単元および全演習問題の記録がこのブラウザから消去されます。必要に応じて先に「JSON保存」でバックアップしてください（配色テーマ設定は保持されます）。
+        </p>
+        <form method="dialog" className="flex flex-wrap justify-end gap-2 pt-2">
+          <button
+            type="submit"
+            value="cancel"
+            autoFocus
+            className="interactive-btn app-surface rounded-lg px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer"
+          >
+            キャンセル
+          </button>
+          <button
+            type="submit"
+            value="reset"
+            className="interactive-btn rounded-lg bg-red-700 text-white px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer"
+          >
+            進捗をリセットする
+          </button>
+        </form>
+      </dialog>
     </header>
   );
 };

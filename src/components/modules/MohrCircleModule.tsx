@@ -55,6 +55,7 @@ interface MohrCircleModuleProps {
   onToggleUnitComplete: () => void;
   completedProblemIds: number[];
   onToggleProblemDone: (id: number) => void;
+  onMarkProblemDone: (id: number) => void;
   onBackToPortal: () => void;
   onOpenContinuumCourse?: () => void;
 }
@@ -64,6 +65,7 @@ export const MohrCircleModule: React.FC<MohrCircleModuleProps> = ({
   onToggleUnitComplete,
   completedProblemIds,
   onToggleProblemDone,
+  onMarkProblemDone,
   onBackToPortal,
   onOpenContinuumCourse,
 }) => {
@@ -362,6 +364,7 @@ export const MohrCircleModule: React.FC<MohrCircleModuleProps> = ({
         onLoadPreset={handleLoadPreset}
         completedIds={completedProblemIds}
         onToggleProblemDone={onToggleProblemDone}
+        onMarkProblemDone={onMarkProblemDone}
       />
     </div>
   );

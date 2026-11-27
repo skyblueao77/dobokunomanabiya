@@ -34,6 +34,8 @@ export interface ContinuumExercise {
 
 interface ChapterExercisePanelProps {
   chapterTitle: string;
+  heading?: string;
+  progressLabel?: string;
   exercises: ContinuumExercise[];
   completedIds: string[];
   onToggleDone: (id: string) => void;
@@ -47,6 +49,8 @@ interface SubmissionState {
 
 export const ChapterExercisePanel: React.FC<ChapterExercisePanelProps> = ({
   chapterTitle,
+  heading,
+  progressLabel = 'この章の達成',
   exercises,
   completedIds,
   onToggleDone,
@@ -129,14 +133,14 @@ export const ChapterExercisePanel: React.FC<ChapterExercisePanelProps> = ({
       <div className="app-surface-subtle border-x-0 border-t-0 px-4 py-3 flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 className="text-base font-bold">
-            3. 演習問題（{chapterTitle}）
+            {heading ?? `3. 演習問題（${chapterTitle}）`}
           </h2>
           <p className="text-xs app-text-muted mt-0.5">
             自分で計算・考察して解答を判定できます。条件をシミュレーターへ読み込んで視覚的に検算もできます。
           </p>
         </div>
         <span className="text-xs font-semibold font-mono-num app-surface rounded-md px-2.5 py-1">
-          この章の達成: {solvedCount} / {exercises.length}
+          {progressLabel}: {solvedCount} / {exercises.length}
         </span>
       </div>
 

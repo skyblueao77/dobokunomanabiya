@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   LEARNING_UNITS,
   SUBJECTS,
+  UNIT_EXERCISE_IDS,
   getSubjectMeta,
+  getTotalExerciseProgress,
+  getUnitExerciseProgress,
   getUnitsBySubject,
 } from './curriculum';
 
@@ -35,5 +38,21 @@ describe('curriculum', () => {
     for (const s of SUBJECTS) {
       expect(getSubjectMeta(s.id)).toEqual(s);
     }
+  });
+
+  it('enables practice sets on all 7 units and aggregates 40 total exercises accurately', () => {
+    for (const unit of LEARNING_UNITS) {
+      expect(unit.hasPracticeSet).toBe(true);
+      expect(unit.exerciseCount).toBe(UNIT_EXERCISE_IDS[unit.id].length);
+    }
+    const snapshot = {
+      completedProblemIds: [1, 3],
+      completedContinuumExerciseIds: ['ch1-q1', 'ch2-q2'],
+      completedMathProgExerciseIds: ['lp-ch1-q1', 'nlp-ch1-q1'],
+      completedBasicExerciseIds: ['beam-q1', 'channel-q1', 'rankine-q1'],
+    };
+    expect(getUnitExerciseProgress('beam-sfd-bmd', snapshot)).toEqual({ solved: 1, total: 3 });
+    expect(getUnitExerciseProgress('mohr-circle', snapshot)).toEqual({ solved: 2, total: 3 });
+    expect(getTotalExerciseProgress(snapshot)).toEqual({ solved: 9, total: 40 });
   });
 });
