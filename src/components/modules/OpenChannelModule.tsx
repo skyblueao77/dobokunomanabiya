@@ -27,14 +27,37 @@ export const OpenChannelModule: React.FC<OpenChannelModuleProps> = ({
   const [inputs, setInputs] = useState<ChannelInputs>(DEFAULT_CHANNEL);
   const res = useMemo(() => calculateOpenChannelFlow(inputs), [inputs]);
 
-  const cx = 240;
+  const svgW = 480;
+  const svgH = 250;
+  const cx = svgW / 2;
   const bottomY = 200;
-  const scale = 32;
+  const maxDrawW = svgW - 64; // 左右 32px 余白
+  const maxDrawH = 148; // 上部ラベル用の余白を確保
+
+  const wallHeightM = Math.max(inputs.depth * 1.25, inputs.depth + 0.35, 1.2);
+  const totalTopWallM = inputs.bottomWidth + 2 * inputs.sideSlope * wallHeightM;
+  const scale = Math.min(maxDrawW / Math.max(totalTopWallM, 1), maxDrawH / wallHeightM);
+
   const bPx = inputs.bottomWidth * scale;
   const hPx = inputs.depth * scale;
   const sidePx = inputs.sideSlope * inputs.depth * scale;
-  const wallH = Math.max(hPx + 24, 90);
-  const wallSide = inputs.sideSlope * (wallH / scale) * scale;
+  const wallH = wallHeightM * scale;
+  const wallSide = inputs.sideSlope * wallHeightM * scale;
+  const waterSurfaceY = bottomY - hPx;
+  const labelFitsInsideWater = hPx >= 28;
+
+  const regimeBadgeClass =
+    res.regime === '射流 (Supercritical)'
+      ? 'bg-red-500/15 text-red-700 dark:text-red-300 border-red-500/35'
+      : res.regime === '限界流 (Critical)'
+        ? 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/40'
+        : 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/30';
+  const regimeDotColor =
+    res.regime === '射流 (Supercritical)'
+      ? 'var(--diagram-red)'
+      : res.regime === '限界流 (Critical)'
+        ? 'var(--diagram-amber)'
+        : 'var(--diagram-blue)';
 
   return (
     <div className="space-y-6">
@@ -146,26 +169,38 @@ export const OpenChannelModule: React.FC<OpenChannelModuleProps> = ({
         <div className="lg:col-span-8 space-y-6">
           <div className="app-surface rounded-xl overflow-hidden">
             <div className="app-surface-subtle border-x-0 border-t-0 px-4 py-2.5 flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-sm font-semibold">水路横断面図</h2>
-              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30">
+              <h2 className="text-sm font-semibold">水路横断面図（自動縮尺）</h2>
+              <span
+                className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-0.5 rounded-full border ${regimeBadgeClass}`}
+              >
+                <span
+                  className="h-2 w-2 rounded-full shrink-0"
+                  style={{ backgroundColor: regimeDotColor }}
+                  aria-hidden="true"
+                />
                 {res.regime} (Fr = {res.froudeNumber})
               </span>
             </div>
 
             <svg
-              viewBox="0 0 480 240"
+              viewBox={`0 0 ${svgW} ${svgH}`}
               className="w-full h-auto block select-none"
               role="img"
-              aria-label="開水路断面の可視化"
+              aria-label={`底幅 ${inputs.bottomWidth} m、水深 ${inputs.depth} m、法面勾配 1:${inputs.sideSlope} の開水路断面。通水断面積 A=${res.area} m²、平均流速 v=${res.velocity} m/s、流量 Q=${res.discharge} m³/s、${res.regime}（Fr=${res.froudeNumber}）。`}
             >
               {/* 水域 */}
               <polygon
-                points={`${cx - bPx / 2 - sidePx},${bottomY - hPx} ${cx + bPx / 2 + sidePx},${
-                  bottomY - hPx
-                } ${cx + bPx / 2},${bottomY} ${cx - bPx / 2},${bottomY}`}
+                points={`${cx - bPx / 2 - sidePx},${waterSurfaceY} ${cx + bPx / 2 + sidePx},${waterSurfaceY} ${cx + bPx / 2},${bottomY} ${cx - bPx / 2},${bottomY}`}
                 fill="var(--diagram-blue-fill)"
                 stroke="var(--diagram-blue)"
                 strokeWidth="2"
+              />
+              {/* 水面マーク（▽） */}
+              <polygon
+                points={`${cx},${waterSurfaceY} ${cx - 5},${waterSurfaceY - 7} ${cx + 5},${waterSurfaceY - 7}`}
+                fill="none"
+                stroke="var(--diagram-blue)"
+                strokeWidth="1.5"
               />
               {/* 水路枠 */}
               <polyline
@@ -176,17 +211,37 @@ export const OpenChannelModule: React.FC<OpenChannelModuleProps> = ({
                 stroke="currentColor"
                 strokeWidth="3"
               />
+              {/* 水面幅 T 寸法線 */}
+              <line
+                x1={cx - bPx / 2 - sidePx}
+                y1={Math.max(24, waterSurfaceY - 16)}
+                x2={cx + bPx / 2 + sidePx}
+                y2={Math.max(24, waterSurfaceY - 16)}
+                stroke="var(--diagram-muted)"
+                strokeDasharray="3 3"
+                strokeWidth="1"
+              />
               <text
                 x={cx}
-                y={bottomY + 20}
+                y={Math.max(18, waterSurfaceY - 21)}
+                textAnchor="middle"
+                className="text-xs font-semibold fill-[var(--diagram-muted)] font-mono-num"
+              >
+                水面幅 T = {res.topWidth} m{inputs.sideSlope > 0 ? `（法面 1:${inputs.sideSlope}）` : '（長方形）'}
+              </text>
+              {/* 底幅 B ラベル */}
+              <text
+                x={cx}
+                y={bottomY + 22}
                 textAnchor="middle"
                 className="text-xs font-bold fill-current font-mono-num"
               >
-                底幅 B = {inputs.bottomWidth} m / 水面幅 T = {res.topWidth} m
+                底幅 B = {inputs.bottomWidth} m ／ 潤辺 P = {res.wettedPerimeter} m
               </text>
+              {/* 水深・断面積ラベル（浅水深時は底線との重なりを回避） */}
               <text
                 x={cx}
-                y={bottomY - hPx / 2 + 4}
+                y={labelFitsInsideWater ? bottomY - hPx / 2 + 4 : bottomY + 40}
                 textAnchor="middle"
                 className="text-xs font-bold fill-[var(--diagram-blue)] font-mono-num"
               >

@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useRef, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useId, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
 import {
   buildRoutePath,
@@ -7,11 +7,24 @@ import {
   normalizePathname,
 } from '../../utils/router';
 import { CopyShareButton } from '../CopyShareButton';
-import { LpCh1Graphical } from '../mathprog/LpCh1Graphical';
-import { LpCh2Simplex } from '../mathprog/LpCh2Simplex';
-import { LpCh3Duality } from '../mathprog/LpCh3Duality';
-import { LpCh4Sensitivity } from '../mathprog/LpCh4Sensitivity';
-import { LpCh5TransportAssign } from '../mathprog/LpCh5TransportAssign';
+
+const LpCh1Graphical = lazy(() =>
+  import('../mathprog/LpCh1Graphical').then((m) => ({ default: m.LpCh1Graphical }))
+);
+const LpCh2Simplex = lazy(() =>
+  import('../mathprog/LpCh2Simplex').then((m) => ({ default: m.LpCh2Simplex }))
+);
+const LpCh3Duality = lazy(() =>
+  import('../mathprog/LpCh3Duality').then((m) => ({ default: m.LpCh3Duality }))
+);
+const LpCh4Sensitivity = lazy(() =>
+  import('../mathprog/LpCh4Sensitivity').then((m) => ({ default: m.LpCh4Sensitivity }))
+);
+const LpCh5TransportAssign = lazy(() =>
+  import('../mathprog/LpCh5TransportAssign').then((m) => ({
+    default: m.LpCh5TransportAssign,
+  }))
+);
 
 export type LpChapterIndex = 1 | 2 | 3 | 4 | 5;
 
@@ -219,41 +232,50 @@ export const LinearProgrammingCourseModule: React.FC<LinearProgrammingCourseModu
             >
               {isCurrent && (
                 <div className="space-y-6">
-                  {ch.id === 1 && (
-                    <LpCh1Graphical
-                      completedIds={completedExerciseIds}
-                      onToggleDone={onToggleExerciseDone}
-                      onMarkDone={onMarkExerciseDone}
-                    />
-                  )}
-                  {ch.id === 2 && (
-                    <LpCh2Simplex
-                      completedIds={completedExerciseIds}
-                      onToggleDone={onToggleExerciseDone}
-                      onMarkDone={onMarkExerciseDone}
-                    />
-                  )}
-                  {ch.id === 3 && (
-                    <LpCh3Duality
-                      completedIds={completedExerciseIds}
-                      onToggleDone={onToggleExerciseDone}
-                      onMarkDone={onMarkExerciseDone}
-                    />
-                  )}
-                  {ch.id === 4 && (
-                    <LpCh4Sensitivity
-                      completedIds={completedExerciseIds}
-                      onToggleDone={onToggleExerciseDone}
-                      onMarkDone={onMarkExerciseDone}
-                    />
-                  )}
-                  {ch.id === 5 && (
-                    <LpCh5TransportAssign
-                      completedIds={completedExerciseIds}
-                      onToggleDone={onToggleExerciseDone}
-                      onMarkDone={onMarkExerciseDone}
-                    />
-                  )}
+                  <Suspense
+                    fallback={
+                      <div className="app-surface rounded-xl p-6 text-center text-sm app-text-muted">
+                        <progress aria-label="章コンテンツを読み込み中" className="w-40 mb-2" />
+                        <p>章コンテンツを読み込んでいます…</p>
+                      </div>
+                    }
+                  >
+                    {ch.id === 1 && (
+                      <LpCh1Graphical
+                        completedIds={completedExerciseIds}
+                        onToggleDone={onToggleExerciseDone}
+                        onMarkDone={onMarkExerciseDone}
+                      />
+                    )}
+                    {ch.id === 2 && (
+                      <LpCh2Simplex
+                        completedIds={completedExerciseIds}
+                        onToggleDone={onToggleExerciseDone}
+                        onMarkDone={onMarkExerciseDone}
+                      />
+                    )}
+                    {ch.id === 3 && (
+                      <LpCh3Duality
+                        completedIds={completedExerciseIds}
+                        onToggleDone={onToggleExerciseDone}
+                        onMarkDone={onMarkExerciseDone}
+                      />
+                    )}
+                    {ch.id === 4 && (
+                      <LpCh4Sensitivity
+                        completedIds={completedExerciseIds}
+                        onToggleDone={onToggleExerciseDone}
+                        onMarkDone={onMarkExerciseDone}
+                      />
+                    )}
+                    {ch.id === 5 && (
+                      <LpCh5TransportAssign
+                        completedIds={completedExerciseIds}
+                        onToggleDone={onToggleExerciseDone}
+                        onMarkDone={onMarkExerciseDone}
+                      />
+                    )}
+                  </Suspense>
 
                   <div className="app-surface rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
                     {ch.id > 1 ? (

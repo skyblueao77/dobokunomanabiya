@@ -564,6 +564,12 @@ function renderHtmlFromTemplate(template, descriptor, renderRouteToHtml) {
     /(<meta\s+name="description"\s+content=")[^"]*(")/i,
     `$1${escapeHtml(descriptor.description)}$2`
   );
+  if (descriptor.robots) {
+    html = html.replace(
+      /(<meta\s+name="robots"\s+content=")[^"]*(")/i,
+      `$1${escapeHtml(descriptor.robots)}$2`
+    );
+  }
   html = html.replace(
     /(<link\s+rel="canonical"\s+href=")[^"]*(")/i,
     `$1${escapeHtml(descriptor.canonicalUrl)}$2`
@@ -945,6 +951,53 @@ function verifyGeneratedOutputs(routes) {
   }
 }
 
+function buildNotFoundDescriptor() {
+  const canonicalUrl = `${siteUrl}/`;
+  const title = `ページが見つかりません（404）｜${catalog.siteName}`;
+  const description =
+    'お探しのページが見つかりませんでした。ポータル一覧または各科目ページから学習単元をお選びください。';
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      providerOrg,
+      {
+        '@type': 'WebPage',
+        name: 'ページが見つかりません（404）',
+        inLanguage: 'ja',
+        isPartOf: { '@id': `${siteUrl}/#website` },
+      },
+    ],
+  };
+  const rootHtml = `
+      <header class="site-header border-b border-[var(--border-subtle)] bg-[var(--surface-card)]">
+        <div class="mx-auto max-w-7xl px-4 py-3 text-xs app-text-muted">
+          <nav aria-label="主要ナビゲーション"><a href="/"><strong>${escapeHtml(catalog.siteName)}</strong></a></nav>
+        </div>
+      </header>
+      <main id="main-content" class="mx-auto max-w-2xl px-4 sm:px-6 py-10 space-y-4">
+        <section class="app-surface rounded-2xl p-6 space-y-3">
+          <p class="text-xs font-mono-num app-text-muted">404 Not Found</p>
+          <h1 class="text-xl sm:text-2xl font-bold">お探しのページが見つかりませんでした</h1>
+          <p class="text-sm app-text-muted">${escapeHtml(description)}</p>
+          <p class="text-sm"><a href="/" class="underline font-semibold">ポータル一覧へ戻る</a></p>
+        </section>
+      </main>`;
+
+  return {
+    path: '/404',
+    outputFile: path.join(distDir, '404.html'),
+    title,
+    description,
+    canonicalUrl,
+    ogType: 'website',
+    alternateMarkdownUrl: `${siteUrl}/llms-full.txt`,
+    robots: 'noindex, nofollow',
+    jsonLd,
+    rootHtml,
+    useReactSsr: false,
+  };
+}
+
 // Main execution
 if (!fs.existsSync(ssrEntryPath)) {
   throw new Error(`SSR entry bundle not found: ${ssrEntryPath}`);
@@ -954,11 +1007,16 @@ const { renderRouteToHtml } = await import(pathToFileURL(ssrEntryPath).href);
 const rawTemplateHtml = fs.readFileSync(path.join(distDir, 'index.html'), 'utf8');
 const templateHtml = inlineAppStylesheet(rawTemplateHtml);
 const routes = buildAllRouteDescriptors();
+const notFoundDescriptor = buildNotFoundDescriptor();
 
 for (const descriptor of routes) {
   const rendered = renderHtmlFromTemplate(templateHtml, descriptor, renderRouteToHtml);
   writeUtf8Lf(descriptor.outputFile, rendered);
 }
+writeUtf8Lf(
+  notFoundDescriptor.outputFile,
+  renderHtmlFromTemplate(templateHtml, notFoundDescriptor, renderRouteToHtml)
+);
 
 writeTrustedRegisterSw();
 const finalHomeHtml = fs.readFileSync(path.join(distDir, 'index.html'), 'utf8');
@@ -984,6 +1042,10 @@ for (const targetDir of [publicDir, distDir]) {
 }
 
 verifyGeneratedOutputs(routes);
+const notFoundHtml = fs.readFileSync(notFoundDescriptor.outputFile, 'utf8');
+if (!notFoundHtml.includes('content="noindex, nofollow"')) {
+  throw new Error('dist/404.html must include meta robots noindex, nofollow');
+}
 console.log(
-  `[prerender-seo] Generated ${routes.length} HTML routes (with React SSR & inline CSS), ${Object.keys(catalog.units).length} unit .md guides, sitemap.xml, robots.txt, llms.txt, llms-full.txt for ${siteUrl}`
+  `[prerender-seo] Generated ${routes.length} HTML routes + 404.html (with React SSR & inline CSS), ${Object.keys(catalog.units).length} unit .md guides, sitemap.xml, robots.txt, llms.txt, llms-full.txt for ${siteUrl}`
 );

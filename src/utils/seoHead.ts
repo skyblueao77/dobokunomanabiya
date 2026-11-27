@@ -12,8 +12,11 @@ export interface RouteSeoData {
   ogImageUrl: string;
   ogType: 'website' | 'article';
   alternateMarkdownUrl: string;
+  robots: string;
   jsonLd: Record<string, unknown>;
 }
+
+const DEFAULT_ROBOTS = 'index, follow, max-image-preview:large, max-snippet:-1';
 
 interface FaqItem {
   question: string;
@@ -61,6 +64,32 @@ export function buildRouteSeoData(
     sameAs: [seoHomeCatalog.repositoryUrl],
   };
 
+  if (route === 'not-found') {
+    const canonicalUrl = `${cleanSiteUrl}/`;
+    return {
+      path: '/404',
+      title: `ページが見つかりません（404）｜${seoHomeCatalog.siteName}`,
+      description: 'お探しのページが見つかりませんでした。ポータル一覧から学習単元をお選びください。',
+      canonicalUrl,
+      ogImageUrl,
+      ogType: 'website',
+      alternateMarkdownUrl: `${cleanSiteUrl}/llms-full.txt`,
+      robots: 'noindex, nofollow',
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@graph': [
+          providerOrg,
+          {
+            '@type': 'WebPage',
+            name: 'ページが見つかりません（404）',
+            inLanguage: 'ja',
+            isPartOf: { '@id': `${cleanSiteUrl}/#website` },
+          },
+        ],
+      },
+    };
+  }
+
   if (route === 'legal') {
     const meta = seoUnitsCatalog.routes.legal;
     const canonicalUrl = `${cleanSiteUrl}${meta.path}`;
@@ -72,6 +101,7 @@ export function buildRouteSeoData(
       ogImageUrl,
       ogType: 'article',
       alternateMarkdownUrl: `${cleanSiteUrl}/llms-full.txt`,
+      robots: DEFAULT_ROBOTS,
       jsonLd: {
         '@context': 'https://schema.org',
         '@graph': [
@@ -120,6 +150,7 @@ export function buildRouteSeoData(
         ogImageUrl,
         ogType: 'website',
         alternateMarkdownUrl: `${cleanSiteUrl}/llms-full.txt`,
+        robots: DEFAULT_ROBOTS,
         jsonLd: {
           '@context': 'https://schema.org',
           '@graph': [
@@ -167,6 +198,7 @@ export function buildRouteSeoData(
       ogImageUrl,
       ogType: 'website',
       alternateMarkdownUrl: `${cleanSiteUrl}/llms-full.txt`,
+      robots: DEFAULT_ROBOTS,
       jsonLd: {
         '@context': 'https://schema.org',
         '@graph': [
@@ -236,6 +268,7 @@ export function buildRouteSeoData(
     ogImageUrl,
     ogType: 'article',
     alternateMarkdownUrl: `${cleanSiteUrl}${uMeta.markdownPath}`,
+    robots: DEFAULT_ROBOTS,
     jsonLd: {
       '@context': 'https://schema.org',
       '@graph': [
@@ -337,6 +370,7 @@ export function applyRouteSeoToDocument(route: AppRoute, subject: SubjectId): vo
 
   document.title = seo.title;
   upsertMetaByName('description', seo.description);
+  upsertMetaByName('robots', seo.robots);
   upsertMetaByProperty('og:type', seo.ogType);
   upsertMetaByProperty('og:title', seo.title);
   upsertMetaByProperty('og:description', seo.description);

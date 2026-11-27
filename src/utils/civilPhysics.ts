@@ -16,9 +16,13 @@ export interface RankineResult {
   paBottom: number; // 壁底主働土圧強度 (kPa)
   ppTop: number; // 壁頂受働土圧強度 (kPa)
   ppBottom: number; // 壁底受働土圧強度 (kPa)
-  tensionCrackDepth: number; // 引張亀裂深さ z0 (m)
+  tensionCrackDepth: number; // 壁内における引張亀裂深さ z0 (m, 0〜H にクランプ)
+  theoreticalTensionCrackDepth: number; // 理論上の引張亀裂深さ z0_th (m, クランプ前)
+  isFullHeightTension: boolean; // 壁全高にわたり主働土圧が引張域 (z0_th >= H) か
   totalActiveForce: number; // 主働土圧合力 Pa (kN/m)（引張領域無視・正値のみ積分）
   totalPassiveForce: number; // 受働土圧合力 Pp (kN/m)
+  activeForceHeight: number | null; // 主働土圧合力の作用位置（壁底からの高さ ya, m）
+  passiveForceHeight: number; // 受働土圧合力の作用位置（壁底からの高さ yp, m）
 }
 
 export function calculateRankineEarthPressure(inputs: RankineInputs): RankineResult {
@@ -39,16 +43,27 @@ export function calculateRankineEarthPressure(inputs: RankineInputs): RankineRes
   const ppBottom = (q + gamma * H) * kp + 2 * c * sqrtKp;
 
   // 引張亀裂深さ z0（pa(z) <= 0 の範囲）
+  let theoreticalZ0 = 0;
   let z0 = 0;
   if (paTopRaw < 0) {
-    z0 = Math.min(H, (2 * c * sqrtKa - q * ka) / (gamma * ka));
+    theoreticalZ0 = (2 * c * sqrtKa - q * ka) / (gamma * ka);
+    z0 = Math.min(H, theoreticalZ0);
   }
+  const isFullHeightTension = paBottomRaw <= 1e-9;
 
   const effectiveH = Math.max(0, H - z0);
   const paAtZ0 = Math.max(0, paTopRaw);
   const paAtBottomPos = Math.max(0, paBottomRaw);
   const totalActiveForce = 0.5 * (paAtZ0 + paAtBottomPos) * effectiveH;
   const totalPassiveForce = 0.5 * (ppTop + ppBottom) * H;
+
+  // 台形分布の図心（壁底からの高さ）: y = (h_eff / 3) * (2 * p_top + p_bot) / (p_top + p_bot)
+  const activeForceHeight =
+    totalActiveForce > 1e-9 && paAtZ0 + paAtBottomPos > 1e-9
+      ? (effectiveH / 3) * ((2 * paAtZ0 + paAtBottomPos) / (paAtZ0 + paAtBottomPos))
+      : null;
+  const passiveForceHeight =
+    ppTop + ppBottom > 1e-9 ? (H / 3) * ((2 * ppTop + ppBottom) / (ppTop + ppBottom)) : H / 3;
 
   return {
     ka: Math.round(ka * 1000) / 1000,
@@ -58,8 +73,12 @@ export function calculateRankineEarthPressure(inputs: RankineInputs): RankineRes
     ppTop: round2(ppTop),
     ppBottom: round2(ppBottom),
     tensionCrackDepth: round2(z0),
+    theoreticalTensionCrackDepth: round2(theoreticalZ0),
+    isFullHeightTension,
     totalActiveForce: round2(totalActiveForce),
     totalPassiveForce: round2(totalPassiveForce),
+    activeForceHeight: activeForceHeight !== null ? round2(activeForceHeight) : null,
+    passiveForceHeight: round2(passiveForceHeight),
   };
 }
 
@@ -77,6 +96,8 @@ export interface BeamResult {
   maxMoment: number; // 最大曲げモーメント M_max (kN·m)
   maxMomentPos: number; // M_max の位置 (m)
   maxShear: number; // 最大せん断力絶対値 |V|_max (kN)
+  shearAtLoadLeft: number; // x = a^- のせん断力 V(a^-) (kN)
+  shearAtLoadRight: number; // x = a^+ のせん断力 V(a^+) (kN)
   samples: { x: number; v: number; m: number }[];
 }
 
@@ -117,18 +138,54 @@ export function calculateSimplySupportedBeam(inputs: BeamInputs): BeamResult {
     }
   }
 
-  const samples: { x: number; v: number; m: number }[] = [];
+  // 等間隔グリッドに加えて特異点（x=a の左右極限・M_max 位置）を厳密に含める
   const steps = 40;
-  for (let i = 0; i <= steps; i++) {
-    const x = (L * i) / steps;
-    samples.push({
-      x: round2(x),
-      v: round2(evalShear(x, false)),
-      m: round2(evalMoment(x)),
-    });
+  const xPoints = new Set<number>([0, L, maxMomentPos]);
+  for (let i = 1; i < steps; i++) {
+    xPoints.add((L * i) / steps);
+  }
+  if (P > 0) {
+    xPoints.add(a);
+  }
+  const rawSortedX = Array.from(xPoints).sort((u, v) => u - v);
+  const sortedX: number[] = [];
+  for (const x of rawSortedX) {
+    if (sortedX.length === 0 || Math.abs(x - sortedX[sortedX.length - 1]) > 1e-9) {
+      sortedX.push(x);
+    }
+  }
+
+  const samples: { x: number; v: number; m: number }[] = [];
+  for (const x of sortedX) {
+    const isAtLoad = P > 0 && Math.abs(x - a) < 1e-9;
+    if (isAtLoad) {
+      // 集中荷重作用点の直前・直後を連続して記録し SFD の垂直段差を正確に表現
+      if (a > 1e-9) {
+        samples.push({
+          x: round2(a),
+          v: round2(evalShear(a, false)),
+          m: round2(evalMoment(a)),
+        });
+      }
+      if (a < L - 1e-9) {
+        samples.push({
+          x: round2(a),
+          v: round2(evalShear(a, true)),
+          m: round2(evalMoment(a)),
+        });
+      }
+    } else {
+      samples.push({
+        x: round2(x),
+        v: round2(evalShear(x, false)),
+        m: round2(evalMoment(x)),
+      });
+    }
   }
 
   const maxShear = Math.max(Math.abs(ra), Math.abs(rb));
+  const shearAtLoadLeft = evalShear(a, false);
+  const shearAtLoadRight = evalShear(a, P > 0);
 
   return {
     ra: round2(ra),
@@ -136,6 +193,8 @@ export function calculateSimplySupportedBeam(inputs: BeamInputs): BeamResult {
     maxMoment: round2(maxMoment),
     maxMomentPos: round2(maxMomentPos),
     maxShear: round2(maxShear),
+    shearAtLoadLeft: round2(shearAtLoadLeft),
+    shearAtLoadRight: round2(shearAtLoadRight),
     samples,
   };
 }

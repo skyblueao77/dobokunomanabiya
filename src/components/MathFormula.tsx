@@ -1,6 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
+
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 interface MathFormulaProps {
   math: string;
@@ -15,7 +17,7 @@ export const MathFormula: React.FC<MathFormulaProps> = ({
 }) => {
   const containerRef = useRef<HTMLSpanElement | null>(null);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     try {
@@ -34,7 +36,7 @@ export const MathFormula: React.FC<MathFormulaProps> = ({
       ref={containerRef}
       className={`${
         block
-          ? 'block my-2 max-w-full overflow-x-auto overflow-y-hidden text-[0.92rem]'
+          ? 'block my-2 min-h-[1.75rem] max-w-full overflow-x-auto overflow-y-hidden text-[0.92rem]'
           : 'inline align-baseline'
       } ${className}`}
     />

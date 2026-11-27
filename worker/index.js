@@ -30,6 +30,39 @@ export function buildStrictCsp(nonce) {
   ].join('; ');
 }
 
+export function normalizeTrailingSlashUrl(url) {
+  if (url.pathname.length > 1 && url.pathname.endsWith('/')) {
+    const normalized = new URL(url.toString());
+    normalized.pathname = url.pathname.replace(/\/+$/, '') || '/';
+    return normalized;
+  }
+  return null;
+}
+
+function rewriteHtmlWithNonce(response, statusOverride) {
+  const nonce = generateNonce();
+  const headers = new Headers(response.headers);
+  headers.set('Content-Type', 'text/html; charset=utf-8');
+  headers.set('Content-Security-Policy', buildStrictCsp(nonce));
+  headers.set('Cache-Control', 'private, no-cache, must-revalidate');
+
+  const rewritten = new HTMLRewriter()
+    .on('script', {
+      element(element) {
+        if (element.getAttribute('type') !== 'application/ld+json') {
+          element.setAttribute('nonce', nonce);
+        }
+      },
+    })
+    .transform(response);
+
+  return new Response(rewritten.body, {
+    status: statusOverride ?? response.status,
+    statusText: statusOverride === 404 ? 'Not Found' : response.statusText,
+    headers,
+  });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -54,31 +87,42 @@ export default {
       });
     }
 
+    const redirectUrl = normalizeTrailingSlashUrl(url);
+    if (redirectUrl) {
+      return new Response(null, {
+        status: 308,
+        headers: {
+          Location: redirectUrl.pathname + redirectUrl.search,
+          'Cache-Control': 'public, max-age=3600',
+        },
+      });
+    }
+
     const assetRes = await env.ASSETS.fetch(request);
+    if (assetRes.status === 404) {
+      const notFoundReq = new Request(new URL('/404.html', url.origin), {
+        method: request.method === 'HEAD' ? 'HEAD' : 'GET',
+        headers: request.headers,
+      });
+      const notFoundRes = await env.ASSETS.fetch(notFoundReq);
+      if (notFoundRes.ok) {
+        return rewriteHtmlWithNonce(notFoundRes, 404);
+      }
+      return new Response('Not Found', {
+        status: 404,
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'no-store',
+          'X-Content-Type-Options': 'nosniff',
+        },
+      });
+    }
+
     const contentType = assetRes.headers.get('Content-Type') || '';
     if (!contentType.toLowerCase().includes('text/html')) {
       return assetRes;
     }
 
-    const nonce = generateNonce();
-    const headers = new Headers(assetRes.headers);
-    headers.set('Content-Security-Policy', buildStrictCsp(nonce));
-    headers.set('Cache-Control', 'private, no-cache, no-store, must-revalidate');
-
-    const rewritten = new HTMLRewriter()
-      .on('script', {
-        element(element) {
-          if (element.getAttribute('type') !== 'application/ld+json') {
-            element.setAttribute('nonce', nonce);
-          }
-        },
-      })
-      .transform(assetRes);
-
-    return new Response(rewritten.body, {
-      status: assetRes.status,
-      statusText: assetRes.statusText,
-      headers,
-    });
+    return rewriteHtmlWithNonce(assetRes);
   },
 };

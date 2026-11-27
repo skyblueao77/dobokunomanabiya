@@ -323,17 +323,27 @@ export const MohrCircleModule: React.FC<MohrCircleModuleProps> = ({
                       : 'text-emerald-700 dark:text-emerald-300'
                   }`}
                 >
-                  {result.isFailure ? '破壊状態（Failure）' : '安定状態（Safe）'}
+                  {result.isTensionLoss
+                    ? '有効応力喪失・引張破壊域（液状化等）'
+                    : result.isFailure
+                      ? '破壊状態（Failure）'
+                      : '安定状態（Safe）'}
                 </div>
                 <p>
                   理論上のせん断面角度:{' '}
                   <span className="font-bold font-mono-num">θ_f = {result.thetaF}°</span>
                 </p>
-                {result.safetyFactor !== null && (
-                  <p>
-                    破壊に対する余裕度 (R_f / R):{' '}
-                    <span className="font-bold font-mono-num">{result.safetyFactor}</span>
+                {result.isTensionLoss ? (
+                  <p className="text-red-700 dark:text-red-300">
+                    C sinφ + c cosφ ≤ 0 のためせん断強さを喪失しています（R_f = 0 kPa）。
                   </p>
+                ) : (
+                  result.safetyFactor !== null && (
+                    <p>
+                      破壊に対する余裕度 (R_f / R):{' '}
+                      <span className="font-bold font-mono-num">{result.safetyFactor}</span>
+                    </p>
+                  )
                 )}
               </div>
             </div>

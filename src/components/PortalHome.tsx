@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useId, useMemo, useRef, useState } from 'react';
 import { ArrowRight, BookOpen, CheckCircle2, Clock, HelpCircle, Search } from 'lucide-react';
 import seoHomeCatalog from '../data/seoHomeCatalog.json';
 import {
@@ -25,6 +25,8 @@ export const PortalHome: React.FC<PortalHomeProps> = ({
   onOpenUnit,
 }) => {
   const [query, setQuery] = useState('');
+  const tabBaseId = useId();
+  const tabRefs = useRef<Partial<Record<SubjectId, HTMLButtonElement | null>>>({});
 
   const filteredUnits = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -51,6 +53,36 @@ export const PortalHome: React.FC<PortalHomeProps> = ({
       label: `${s.name} (${LEARNING_UNITS.filter((u) => u.subjectId === s.id).length})`,
     })),
   ];
+
+  const handleSubjectTabKeyDown = (
+    e: React.KeyboardEvent<HTMLButtonElement>,
+    index: number
+  ) => {
+    let nextIndex: number | null = null;
+    if (e.key === 'ArrowRight') {
+      nextIndex = (index + 1) % tabs.length;
+    } else if (e.key === 'ArrowLeft') {
+      nextIndex = (index - 1 + tabs.length) % tabs.length;
+    } else if (e.key === 'Home') {
+      nextIndex = 0;
+    } else if (e.key === 'End') {
+      nextIndex = tabs.length - 1;
+    }
+    if (nextIndex !== null) {
+      e.preventDefault();
+      const nextTab = tabs[nextIndex];
+      const el = tabRefs.current[nextTab.id];
+      if (el) {
+        el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        el.focus();
+      }
+    }
+  };
+
+  const handleTabClick = (tabId: SubjectId) => {
+    onSelectSubject(tabId);
+    tabRefs.current[tabId]?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  };
 
   const activeSubjectMeta =
     selectedSubject === 'all' ? null : seoHomeCatalog.subjects[selectedSubject];
@@ -114,15 +146,21 @@ export const PortalHome: React.FC<PortalHomeProps> = ({
             aria-label="土木科目フィルター"
             className="tab-scroller"
           >
-            {tabs.map((tab) => {
+            {tabs.map((tab, idx) => {
               const isSelected = selectedSubject === tab.id;
               return (
                 <button
                   key={tab.id}
+                  ref={(el) => {
+                    tabRefs.current[tab.id] = el;
+                  }}
+                  id={`${tabBaseId}-tab-${tab.id}`}
                   type="button"
                   role="tab"
                   aria-selected={isSelected}
-                  onClick={() => onSelectSubject(tab.id)}
+                  tabIndex={isSelected ? 0 : -1}
+                  onClick={() => handleTabClick(tab.id)}
+                  onKeyDown={(e) => handleSubjectTabKeyDown(e, idx)}
                   className="tab-item px-4 py-2 text-xs sm:text-sm whitespace-nowrap cursor-pointer hover:bg-[var(--surface-subtle)] rounded-t-lg transition-colors"
                 >
                   {tab.label}
@@ -156,6 +194,7 @@ export const PortalHome: React.FC<PortalHomeProps> = ({
         </p>
 
         {/* 単元カードグリッド */}
+        <div role="tabpanel" aria-labelledby={`${tabBaseId}-tab-${selectedSubject}`}>
         {filteredUnits.length === 0 ? (
           <div className="app-surface rounded-xl p-8 text-center text-sm app-text-muted">
             一致する学習単元が見つかりませんでした。検索条件を変更してください。
@@ -240,6 +279,7 @@ export const PortalHome: React.FC<PortalHomeProps> = ({
             })}
           </div>
         )}
+        </div>
       </section>
 
       {/* AEO セクション1：収録4科目・主要公式リファレンス */}

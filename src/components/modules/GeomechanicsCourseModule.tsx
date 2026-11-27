@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useRef, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useId, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { type UnitId } from '../../data/curriculum';
 import {
@@ -8,12 +8,31 @@ import {
   normalizePathname,
 } from '../../utils/router';
 import { CopyShareButton } from '../CopyShareButton';
-import { Ch1StressTensor } from '../continuum/Ch1StressTensor';
-import { Ch2CauchyTransform } from '../continuum/Ch2CauchyTransform';
-import { Ch3PrincipalInvariants } from '../continuum/Ch3PrincipalInvariants';
-import { Ch4MohrPole } from '../continuum/Ch4MohrPole';
-import { Ch5ElasticGroundStress } from '../continuum/Ch5ElasticGroundStress';
-import { Ch6ElasticDeformation } from '../continuum/Ch6ElasticDeformation';
+
+const Ch1StressTensor = lazy(() =>
+  import('../continuum/Ch1StressTensor').then((m) => ({ default: m.Ch1StressTensor }))
+);
+const Ch2CauchyTransform = lazy(() =>
+  import('../continuum/Ch2CauchyTransform').then((m) => ({ default: m.Ch2CauchyTransform }))
+);
+const Ch3PrincipalInvariants = lazy(() =>
+  import('../continuum/Ch3PrincipalInvariants').then((m) => ({
+    default: m.Ch3PrincipalInvariants,
+  }))
+);
+const Ch4MohrPole = lazy(() =>
+  import('../continuum/Ch4MohrPole').then((m) => ({ default: m.Ch4MohrPole }))
+);
+const Ch5ElasticGroundStress = lazy(() =>
+  import('../continuum/Ch5ElasticGroundStress').then((m) => ({
+    default: m.Ch5ElasticGroundStress,
+  }))
+);
+const Ch6ElasticDeformation = lazy(() =>
+  import('../continuum/Ch6ElasticDeformation').then((m) => ({
+    default: m.Ch6ElasticDeformation,
+  }))
+);
 
 export type ChapterIndex = 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -256,49 +275,58 @@ export const GeomechanicsCourseModule: React.FC<GeomechanicsCourseModuleProps> =
             >
               {isCurrent && (
                 <div className="space-y-6">
-                  {ch.id === 1 && (
-                    <Ch1StressTensor
-                      completedIds={completedExerciseIds}
-                      onToggleDone={onToggleExerciseDone}
-                      onMarkDone={onMarkExerciseDone}
-                    />
-                  )}
-                  {ch.id === 2 && (
-                    <Ch2CauchyTransform
-                      completedIds={completedExerciseIds}
-                      onToggleDone={onToggleExerciseDone}
-                      onMarkDone={onMarkExerciseDone}
-                    />
-                  )}
-                  {ch.id === 3 && (
-                    <Ch3PrincipalInvariants
-                      completedIds={completedExerciseIds}
-                      onToggleDone={onToggleExerciseDone}
-                      onMarkDone={onMarkExerciseDone}
-                    />
-                  )}
-                  {ch.id === 4 && (
-                    <Ch4MohrPole
-                      completedIds={completedExerciseIds}
-                      onToggleDone={onToggleExerciseDone}
-                      onMarkDone={onMarkExerciseDone}
-                      onOpenUnit={onOpenUnit}
-                    />
-                  )}
-                  {ch.id === 5 && (
-                    <Ch5ElasticGroundStress
-                      completedIds={completedExerciseIds}
-                      onToggleDone={onToggleExerciseDone}
-                      onMarkDone={onMarkExerciseDone}
-                    />
-                  )}
-                  {ch.id === 6 && (
-                    <Ch6ElasticDeformation
-                      completedIds={completedExerciseIds}
-                      onToggleDone={onToggleExerciseDone}
-                      onMarkDone={onMarkExerciseDone}
-                    />
-                  )}
+                  <Suspense
+                    fallback={
+                      <div className="app-surface rounded-xl p-6 text-center text-sm app-text-muted">
+                        <progress aria-label="章コンテンツを読み込み中" className="w-40 mb-2" />
+                        <p>章コンテンツを読み込んでいます…</p>
+                      </div>
+                    }
+                  >
+                    {ch.id === 1 && (
+                      <Ch1StressTensor
+                        completedIds={completedExerciseIds}
+                        onToggleDone={onToggleExerciseDone}
+                        onMarkDone={onMarkExerciseDone}
+                      />
+                    )}
+                    {ch.id === 2 && (
+                      <Ch2CauchyTransform
+                        completedIds={completedExerciseIds}
+                        onToggleDone={onToggleExerciseDone}
+                        onMarkDone={onMarkExerciseDone}
+                      />
+                    )}
+                    {ch.id === 3 && (
+                      <Ch3PrincipalInvariants
+                        completedIds={completedExerciseIds}
+                        onToggleDone={onToggleExerciseDone}
+                        onMarkDone={onMarkExerciseDone}
+                      />
+                    )}
+                    {ch.id === 4 && (
+                      <Ch4MohrPole
+                        completedIds={completedExerciseIds}
+                        onToggleDone={onToggleExerciseDone}
+                        onMarkDone={onMarkExerciseDone}
+                        onOpenUnit={onOpenUnit}
+                      />
+                    )}
+                    {ch.id === 5 && (
+                      <Ch5ElasticGroundStress
+                        completedIds={completedExerciseIds}
+                        onToggleDone={onToggleExerciseDone}
+                        onMarkDone={onMarkExerciseDone}
+                      />
+                    )}
+                    {ch.id === 6 && (
+                      <Ch6ElasticDeformation
+                        completedIds={completedExerciseIds}
+                        onToggleDone={onToggleExerciseDone}
+                        onMarkDone={onMarkExerciseDone}
+                      />
+                    )}
+                  </Suspense>
 
                   {/* 前後章ナビゲーション */}
                   <div className="app-surface rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">

@@ -48,6 +48,7 @@ const NonlinearProgrammingCourseModule = lazy(
   () => import('./components/modules/NonlinearProgrammingCourseModule')
 );
 const LegalPage = lazy(() => import('./components/LegalPage'));
+const NotFoundPage = lazy(() => import('./components/NotFoundPage'));
 
 export interface AppProps {
   initialLocation?: {
@@ -96,8 +97,34 @@ export function App({ initialLocation }: AppProps = {}) {
   const progress = progressOverride ?? storedProgress;
   const themePref = themeOverride ?? storedTheme;
   const hasMountedSeoRef = useRef(false);
+  const mainRef = useRef<HTMLElement | null>(null);
+  const pendingFocusRef = useRef(false);
 
   useEffect(() => initPwaUpdateWatcher(() => setUpdateAvailable(true)), []);
+
+  // Ensure #main-content receives focus even when target route resolves asynchronously via Suspense
+  useEffect(() => {
+    if (!pendingFocusRef.current) return;
+
+    const focusTarget = (): boolean => {
+      const target = document.getElementById('main-content');
+      if (!target) return false;
+      pendingFocusRef.current = false;
+      target.focus({ preventScroll: true });
+      return true;
+    };
+
+    if (focusTarget()) return;
+
+    const container = mainRef.current ?? document.body;
+    const observer = new MutationObserver(() => {
+      if (focusTarget()) {
+        observer.disconnect();
+      }
+    });
+    observer.observe(container, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [route, selectedSubject]);
 
   useEffect(() => {
     if (initialParsed.legacyHashRedirectPath) {
@@ -169,9 +196,10 @@ export function App({ initialLocation }: AppProps = {}) {
   };
 
   const navigate = (nextRoute: AppRoute, subjectOverride?: SubjectId, search = '') => {
+    pendingFocusRef.current = true;
     setRoute(nextRoute);
-    if (nextRoute === 'home') {
-      const nextSubject = subjectOverride ?? 'all';
+    if (nextRoute === 'home' || nextRoute === 'not-found') {
+      const nextSubject = nextRoute === 'home' ? (subjectOverride ?? 'all') : 'all';
       setSelectedSubject(nextSubject);
       const nextPath = buildRoutePath('home', nextSubject);
       if (window.location.pathname + window.location.search !== nextPath) {
@@ -195,9 +223,6 @@ export function App({ initialLocation }: AppProps = {}) {
       updateProgress((prev) => ({ ...prev, lastVisitedUnit: nextRoute }));
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    window.requestAnimationFrame(() => {
-      document.getElementById('main-content')?.focus({ preventScroll: true });
-    });
   };
 
   const handleSelectSubjectOnHome = (subject: SubjectId) => {
@@ -274,7 +299,7 @@ export function App({ initialLocation }: AppProps = {}) {
   };
 
   const activeUnit =
-    route !== 'home' && route !== 'legal'
+    route !== 'home' && route !== 'legal' && route !== 'not-found'
       ? LEARNING_UNITS.find((u) => u.id === route)
       : undefined;
 
@@ -289,7 +314,7 @@ export function App({ initialLocation }: AppProps = {}) {
         onRefreshApp={refreshAppAndClearCaches}
       />
 
-      <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 py-6">
+      <main ref={mainRef} className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 py-6">
         {updateAvailable && (
           <UpdateAvailableBanner
             onReload={() => window.location.reload()}
@@ -391,6 +416,7 @@ export function App({ initialLocation }: AppProps = {}) {
               />
             )}
             {route === 'legal' && <LegalPage onBackToPortal={() => navigate('home')} />}
+            {route === 'not-found' && <NotFoundPage onNavigate={navigate} />}
           </Suspense>
         </ErrorBoundary>
         {activeUnit && (

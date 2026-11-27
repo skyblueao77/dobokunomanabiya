@@ -30,6 +30,8 @@
   Cache-Control: no-cache
 
 /robots.txt
+  ! Content-Type
+  Content-Type: text/plain; charset=utf-8
   Cache-Control: public, max-age=3600
 
 /sitemap.xml
@@ -38,9 +40,18 @@
   Cache-Control: public, max-age=3600
 
 /llms.txt
+  ! Content-Type
+  Content-Type: text/plain; charset=utf-8
   Cache-Control: public, max-age=3600
 
 /llms-full.txt
+  ! Content-Type
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=3600
+
+/unit/*.md
+  ! Content-Type
+  Content-Type: text/markdown; charset=utf-8
   Cache-Control: public, max-age=3600
 
 /favicon.ico

@@ -9,10 +9,11 @@
     "directory": "./dist",
     "binding": "ASSETS",
     "html_handling": "drop-trailing-slash",
-    "not_found_handling": "single-page-application",
+    "not_found_handling": "none",
     "run_worker_first": [
       "/",
       "/index.html",
+      "/404.html",
       "/legal",
       "/subject/*",
       "/unit/*",

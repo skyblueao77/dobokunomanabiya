@@ -45,6 +45,7 @@ jobs:
           set -euo pipefail
           for f in \
             dist/index.html \
+            dist/404.html \
             dist/_headers \
             dist/manifest.webmanifest \
             dist/sw.js \

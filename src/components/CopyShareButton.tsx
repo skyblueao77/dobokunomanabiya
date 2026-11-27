@@ -23,7 +23,7 @@ function legacyCopy(text: string): boolean {
 export const CopyShareButton: React.FC<CopyShareButtonProps> = ({
   getTextToCopy,
   label = '条件リンクをコピー',
-  ariaLabel = '現在の計算条件を含むURLをクリップボードにコピー',
+  ariaLabel,
 }) => {
   const [status, setStatus] = useState<'idle' | 'copied' | 'failed'>('idle');
   const [liveMessage, setLiveMessage] = useState('');
@@ -67,18 +67,27 @@ export const CopyShareButton: React.FC<CopyShareButtonProps> = ({
         type="button"
         onClick={handleCopy}
         aria-label={ariaLabel}
+        data-copied={status === 'copied' ? '' : undefined}
+        data-failed={status === 'failed' ? '' : undefined}
         className="interactive-btn app-surface inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer"
       >
         {status === 'copied' ? (
           <Check className="h-3.5 w-3.5 text-emerald-700 dark:text-emerald-400" aria-hidden="true" />
         ) : status === 'failed' ? (
-          <AlertCircle className="h-3.5 w-3.5 text-red-600 dark:text-red-400" aria-hidden="true" />
+          <AlertCircle className="h-3.5 w-3.5 text-red-700 dark:text-red-400" aria-hidden="true" />
         ) : (
           <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
         )}
         <span>{status === 'copied' ? 'コピー完了' : label}</span>
       </button>
-      <span role="status" className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
+      <span
+        role="status"
+        className={`text-xs font-medium ${
+          status === 'failed'
+            ? 'text-red-700 dark:text-red-400'
+            : 'text-emerald-700 dark:text-emerald-400'
+        }`}
+      >
         {liveMessage}
       </span>
     </span>

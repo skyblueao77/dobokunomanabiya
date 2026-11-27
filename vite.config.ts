@@ -12,13 +12,14 @@ export default defineConfig({
       registerType: 'autoUpdate',
       injectRegister: 'script-defer',
       manifest: false,
-      includeAssets: ['favicon.ico', 'favicon.png', 'favicon.svg', 'icon-192.png', 'icon-512.png', 'og-image.png'],
+      includeAssets: ['favicon.ico', 'favicon.png', 'favicon.svg', 'icon-192.png'],
       workbox: {
         skipWaiting: true,
         clientsClaim: true,
         cleanupOutdatedCaches: true,
-        globPatterns: ['**/*.{js,css,svg,png,woff2,webmanifest}'],
-        globIgnores: ['assets/index-*.css'],
+        // Precache only lightweight core shell assets; lazy route chunks & KaTeX fonts cache on demand
+        globPatterns: ['assets/index-*.js', 'registerSW.js', 'manifest.webmanifest', 'favicon.{ico,png,svg}', 'icon-192.png'],
+        globIgnores: ['assets/index-*.css', 'og-image.png'],
         navigateFallback: null,
         runtimeCaching: [
           {
@@ -36,14 +37,45 @@ export default defineConfig({
               },
               plugins: [
                 {
-                  handlerDidError: async () =>
-                    (await (
+                  handlerDidError: async () => {
+                    const cacheApi = (
                       globalThis as unknown as {
-                        caches?: { match(request: string): Promise<Response | undefined> };
+                        caches?: {
+                          match(request: string): Promise<Response | undefined>;
+                          open(name: string): Promise<{
+                            match(request: string): Promise<Response | undefined>;
+                            keys(): Promise<readonly Request[]>;
+                          }>;
+                        };
                       }
-                    ).caches?.match('/')) ?? Response.error(),
+                    ).caches;
+                    if (!cacheApi) return Response.error();
+                    const rootCached = await cacheApi.match('/');
+                    if (rootCached) return rootCached;
+                    const pageCache = await cacheApi.open('html-pages-cache');
+                    const keys = await pageCache.keys();
+                    if (keys.length > 0) {
+                      const anyCached = await pageCache.match(keys[0].url);
+                      if (anyCached) return anyCached;
+                    }
+                    return Response.error();
+                  },
                 },
               ],
+            },
+          },
+          {
+            urlPattern: /\/assets\/.*\.(?:js|css|woff2)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'hashed-assets-cache',
+              expiration: {
+                maxEntries: 120,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+              cacheableResponse: {
+                statuses: [200],
+              },
             },
           },
           {
