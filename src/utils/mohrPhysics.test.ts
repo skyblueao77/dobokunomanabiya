@@ -63,6 +63,23 @@ describe('calculateMohrCircle', () => {
     // R = 50 >= c = 40 -> Failure, θ_f = 45°
     expect(res.maxAllowableRadius).toBe(40);
     expect(res.isFailure).toBe(true);
+    expect(res.isTensionLoss).toBe(false);
     expect(res.thetaF).toBe(45);
+  });
+
+  it('flags effective stress loss (liquefaction/tension zone) without negative R_f or safetyFactor', () => {
+    const res = calculateMohrCircle({
+      sigma1: 100,
+      sigma3: 80,
+      theta: 30,
+      c: 0,
+      phi: 30,
+      u: 150,
+      useEffectiveStress: true,
+    });
+    expect(res.isTensionLoss).toBe(true);
+    expect(res.isFailure).toBe(true);
+    expect(res.maxAllowableRadius).toBe(0);
+    expect(res.safetyFactor).toBe(0);
   });
 });

@@ -82,14 +82,22 @@ export const CalculationSteps: React.FC<CalculationStepsProps> = ({ inputs, resu
                   : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
               }`}
             >
-              {result.isFailure ? 'R ≥ R_f（破壊条件を満たす）' : 'R < R_f（破壊しない）'}
+              {result.isTensionLoss
+                ? 'C sinφ + c cosφ ≤ 0（有効応力喪失・引張破壊域）'
+                : result.isFailure
+                  ? 'R ≥ R_f（破壊条件を満たす）'
+                  : 'R < R_f（破壊しない）'}
             </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 items-center">
             <MathFormula
               block
-              math={`\\begin{aligned} R_f &= ${cSym}\\sin\\phi + c\\cos\\phi \\\\ &= ${center}\\sin(${inputs.phi}^\\circ) + ${inputs.c}\\cos(${inputs.phi}^\\circ) = ${result.maxAllowableRadius}\\text{ kPa} \\end{aligned}`}
+              math={
+                result.isTensionLoss
+                  ? `\\begin{aligned} R_f &= \\max\\left(0,\\ ${cSym}\\sin\\phi + c\\cos\\phi\\right) \\\\ &= 0\\text{ kPa} \\end{aligned}`
+                  : `\\begin{aligned} R_f &= ${cSym}\\sin\\phi + c\\cos\\phi \\\\ &= ${center}\\sin(${inputs.phi}^\\circ) + ${inputs.c}\\cos(${inputs.phi}^\\circ) = ${result.maxAllowableRadius}\\text{ kPa} \\end{aligned}`
+              }
             />
             <MathFormula
               block

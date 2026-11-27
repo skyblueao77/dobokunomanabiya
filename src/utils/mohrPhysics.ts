@@ -26,10 +26,11 @@ export interface MohrResult {
   activeSigma1: number;
   activeSigma3: number;
   activeSigmaTheta: number;
-  maxAllowableRadius: number; // 破壊包絡線に接する限界半径 R_f
-  isFailure: boolean; // R >= R_f
+  maxAllowableRadius: number; // 破壊包絡線に接する限界半径 R_f（非負）
+  isFailure: boolean; // R >= R_f または有効応力喪失
+  isTensionLoss: boolean; // C sinφ + c cosφ <= 0（有効応力喪失・引張破壊域）
   thetaF: number; // 理論上のせん断面角度 θ_f = 45 + φ/2 (deg)
-  safetyFactor: number | null; // R_f / R (R > 0 の場合)
+  safetyFactor: number | null; // R_f / R (R > 0 の場合、下限 0)
 }
 
 /**
@@ -77,12 +78,18 @@ export function calculateMohrCircle(inputs: MohrInputs): MohrResult {
   // 破壊包絡線 τ_f = c + σ tan(φ) に接する限界半径:
   // (C + c cotφ) sinφ = C sinφ + c cosφ （φ=0° でもゼロ除算を回避）
   const phiRad = degToRad(phi);
-  const maxAllowableRadius = activeCenter * Math.sin(phiRad) + c * Math.cos(phiRad);
+  const rawAllowableRadius = activeCenter * Math.sin(phiRad) + c * Math.cos(phiRad);
+  const isTensionLoss = rawAllowableRadius <= 1e-6;
+  const maxAllowableRadius = Math.max(0, rawAllowableRadius);
 
-  // 浮動小数点誤差を考慮して判定
-  const isFailure = radius >= maxAllowableRadius - 1e-6;
+  // 浮動小数点誤差を考慮して判定（有効応力喪失・引張破壊域では無条件で破壊状態）
+  const isFailure = isTensionLoss || radius >= maxAllowableRadius - 1e-6;
   const thetaF = 45 + phi / 2;
-  const safetyFactor = radius > 1e-6 ? maxAllowableRadius / radius : null;
+  const safetyFactor = isTensionLoss
+    ? 0
+    : radius > 1e-6
+      ? maxAllowableRadius / radius
+      : null;
 
   return {
     centerTotal: round2(centerTotal),
@@ -99,6 +106,7 @@ export function calculateMohrCircle(inputs: MohrInputs): MohrResult {
     activeSigmaTheta: round2(activeSigmaTheta),
     maxAllowableRadius: round2(maxAllowableRadius),
     isFailure,
+    isTensionLoss,
     thetaF: round2(thetaF),
     safetyFactor: safetyFactor !== null ? round2(safetyFactor) : null,
   };

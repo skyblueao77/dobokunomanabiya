@@ -1,7 +1,7 @@
 import type React from 'react';
 import { LEARNING_UNITS, SUBJECTS, type SubjectId, type UnitId } from '../data/curriculum';
 
-export type AppRoute = 'home' | 'legal' | UnitId;
+export type AppRoute = 'home' | 'legal' | 'not-found' | UnitId;
 
 export interface ParsedLocation {
   route: AppRoute;
@@ -32,8 +32,8 @@ export function buildRoutePath(
   if (route === 'legal') {
     return '/legal';
   }
-  if (route === 'home') {
-    if (subject !== 'all') {
+  if (route === 'home' || route === 'not-found') {
+    if (route === 'home' && subject !== 'all') {
       return `/subject/${subject}`;
     }
     return '/';
@@ -52,6 +52,10 @@ function parseRawPathAndQuery(
       : `?${rawQuery}`
     : '';
 
+  if (cleanPath === '/' || cleanPath === '/index.html') {
+    return { route: 'home', subject: 'all', search: '' };
+  }
+
   if (cleanPath === '/legal') {
     return { route: 'legal', subject: 'all', search: '' };
   }
@@ -61,6 +65,7 @@ function parseRawPathAndQuery(
     if (SUBJECTS.some((s) => s.id === rawSubject)) {
       return { route: 'home', subject: rawSubject, search: '' };
     }
+    return { route: 'not-found', subject: 'all', search: '' };
   }
 
   if (cleanPath.startsWith('/unit/')) {
@@ -69,9 +74,10 @@ function parseRawPathAndQuery(
     if (matched) {
       return { route: rawId, subject: matched.subjectId, search: normalizedSearch };
     }
+    return { route: 'not-found', subject: 'all', search: '' };
   }
 
-  return { route: 'home', subject: 'all', search: '' };
+  return { route: 'not-found', subject: 'all', search: '' };
 }
 
 /**

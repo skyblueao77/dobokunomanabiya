@@ -97,6 +97,30 @@ describe('HTML5 History API router & legacy hash compatibility', () => {
     expect(buildRoutePath('lp-optimization', 'all', '?ch=4')).toBe('/unit/lp-optimization?ch=4');
     expect(buildRoutePath('legal')).toBe('/legal');
   });
+
+  it('resolves unknown paths to not-found with noindex SEO metadata', () => {
+    expect(parseLocation('/does-not-exist', '', '')).toEqual({
+      route: 'not-found',
+      subject: 'all',
+      search: '',
+      legacyHashRedirectPath: null,
+    });
+    expect(parseLocation('/unit/nonexistent-unit', '', '')).toEqual({
+      route: 'not-found',
+      subject: 'all',
+      search: '',
+      legacyHashRedirectPath: null,
+    });
+    expect(parseLocation('/subject/nonexistent-subject', '', '')).toEqual({
+      route: 'not-found',
+      subject: 'all',
+      search: '',
+      legacyHashRedirectPath: null,
+    });
+    const seo404 = buildRouteSeoData('not-found', 'all');
+    expect(seo404.robots).toBe('noindex, nofollow');
+    expect(seo404.title).toContain('404');
+  });
 });
 
 describe('SEO & AEO metadata / JSON-LD parity', () => {

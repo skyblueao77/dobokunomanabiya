@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useRef, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useId, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
 import {
   buildRoutePath,
@@ -7,9 +7,18 @@ import {
   normalizePathname,
 } from '../../utils/router';
 import { CopyShareButton } from '../CopyShareButton';
-import { NlpCh1Optimality } from '../mathprog/NlpCh1Optimality';
-import { NlpCh2ConvexSensitivity } from '../mathprog/NlpCh2ConvexSensitivity';
-import { NlpCh3Newton } from '../mathprog/NlpCh3Newton';
+
+const NlpCh1Optimality = lazy(() =>
+  import('../mathprog/NlpCh1Optimality').then((m) => ({ default: m.NlpCh1Optimality }))
+);
+const NlpCh2ConvexSensitivity = lazy(() =>
+  import('../mathprog/NlpCh2ConvexSensitivity').then((m) => ({
+    default: m.NlpCh2ConvexSensitivity,
+  }))
+);
+const NlpCh3Newton = lazy(() =>
+  import('../mathprog/NlpCh3Newton').then((m) => ({ default: m.NlpCh3Newton }))
+);
 
 export type NlpChapterIndex = 1 | 2 | 3;
 
@@ -215,27 +224,36 @@ export const NonlinearProgrammingCourseModule: React.FC<NonlinearProgrammingCour
             >
               {isCurrent && (
                 <div className="space-y-6">
-                  {ch.id === 1 && (
-                    <NlpCh1Optimality
-                      completedIds={completedExerciseIds}
-                      onToggleDone={onToggleExerciseDone}
-                      onMarkDone={onMarkExerciseDone}
-                    />
-                  )}
-                  {ch.id === 2 && (
-                    <NlpCh2ConvexSensitivity
-                      completedIds={completedExerciseIds}
-                      onToggleDone={onToggleExerciseDone}
-                      onMarkDone={onMarkExerciseDone}
-                    />
-                  )}
-                  {ch.id === 3 && (
-                    <NlpCh3Newton
-                      completedIds={completedExerciseIds}
-                      onToggleDone={onToggleExerciseDone}
-                      onMarkDone={onMarkExerciseDone}
-                    />
-                  )}
+                  <Suspense
+                    fallback={
+                      <div className="app-surface rounded-xl p-6 text-center text-sm app-text-muted">
+                        <progress aria-label="章コンテンツを読み込み中" className="w-40 mb-2" />
+                        <p>章コンテンツを読み込んでいます…</p>
+                      </div>
+                    }
+                  >
+                    {ch.id === 1 && (
+                      <NlpCh1Optimality
+                        completedIds={completedExerciseIds}
+                        onToggleDone={onToggleExerciseDone}
+                        onMarkDone={onMarkExerciseDone}
+                      />
+                    )}
+                    {ch.id === 2 && (
+                      <NlpCh2ConvexSensitivity
+                        completedIds={completedExerciseIds}
+                        onToggleDone={onToggleExerciseDone}
+                        onMarkDone={onMarkExerciseDone}
+                      />
+                    )}
+                    {ch.id === 3 && (
+                      <NlpCh3Newton
+                        completedIds={completedExerciseIds}
+                        onToggleDone={onToggleExerciseDone}
+                        onMarkDone={onMarkExerciseDone}
+                      />
+                    )}
+                  </Suspense>
 
                   <div className="app-surface rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
                     {ch.id > 1 ? (
