@@ -5,6 +5,8 @@ import {
   LEARNING_UNITS,
   SUBJECTS,
   getSubjectMeta,
+  getTotalExerciseProgress,
+  getUnitExerciseProgress,
   type SubjectId,
   type UnitId,
 } from '../data/curriculum';
@@ -45,6 +47,11 @@ export const PortalHome: React.FC<PortalHomeProps> = ({
   const completionRatio = Math.round(
     (progress.completedUnits.length / LEARNING_UNITS.length) * 100
   );
+  const totalExercises = useMemo(() => getTotalExerciseProgress(progress), [progress]);
+  const exerciseRatio =
+    totalExercises.total > 0
+      ? Math.round((totalExercises.solved / totalExercises.total) * 100)
+      : 0;
 
   const tabs: { id: SubjectId; label: string }[] = [
     { id: 'all', label: `すべて (${LEARNING_UNITS.length})` },
@@ -106,19 +113,35 @@ export const PortalHome: React.FC<PortalHomeProps> = ({
             </p>
           </div>
 
-          <div className="app-surface-subtle rounded-xl p-4 min-w-[240px] space-y-2">
-            <div className="flex items-center justify-between text-xs font-semibold">
-              <span>単元マスター進捗</span>
-              <span className="font-mono-num">
-                {progress.completedUnits.length} / {LEARNING_UNITS.length} ({completionRatio}%)
-              </span>
+          <div className="app-surface-subtle rounded-xl p-4 min-w-[260px] space-y-3">
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-xs font-semibold">
+                <span>単元マスター進捗</span>
+                <span className="font-mono-num">
+                  {progress.completedUnits.length} / {LEARNING_UNITS.length} ({completionRatio}%)
+                </span>
+              </div>
+              <progress
+                value={progress.completedUnits.length}
+                max={LEARNING_UNITS.length}
+                aria-label="単元マスター進捗"
+                className="w-full h-2 rounded-full overflow-hidden"
+              />
             </div>
-            <progress
-              value={progress.completedUnits.length}
-              max={LEARNING_UNITS.length}
-              aria-label="学習進捗"
-              className="w-full h-2.5 rounded-full overflow-hidden"
-            />
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-xs font-semibold">
+                <span>演習問題達成</span>
+                <span className="font-mono-num">
+                  {totalExercises.solved} / {totalExercises.total} 問 ({exerciseRatio}%)
+                </span>
+              </div>
+              <progress
+                value={totalExercises.solved}
+                max={totalExercises.total}
+                aria-label="全演習問題の達成進捗"
+                className="w-full h-2 rounded-full overflow-hidden"
+              />
+            </div>
             {progress.lastVisitedUnit && (
               <a
                 href={buildRoutePath(progress.lastVisitedUnit)}
@@ -204,6 +227,8 @@ export const PortalHome: React.FC<PortalHomeProps> = ({
             {filteredUnits.map((unit) => {
               const subject = getSubjectMeta(unit.subjectId);
               const isDone = progress.completedUnits.includes(unit.id);
+              const unitEx = getUnitExerciseProgress(unit.id, progress);
+              const allExSolved = unitEx.total > 0 && unitEx.solved === unitEx.total;
               const unitHref = buildRoutePath(unit.id);
 
               return (
@@ -226,9 +251,18 @@ export const PortalHome: React.FC<PortalHomeProps> = ({
                         {subject.name}（{subject.englishName}）
                       </a>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <span className="app-surface-subtle rounded-md px-2 py-0.5 text-xs font-medium">
                           {unit.level}
+                        </span>
+                        <span
+                          className={`rounded-md px-2 py-0.5 text-xs font-mono-num font-semibold ${
+                            allExSolved
+                              ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/35'
+                              : 'app-surface-subtle app-text-muted'
+                          }`}
+                        >
+                          演習 {unitEx.solved}/{unitEx.total}
                         </span>
                         {isDone && (
                           <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400 font-semibold">

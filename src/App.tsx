@@ -258,6 +258,46 @@ export function App({ initialLocation }: AppProps = {}) {
     });
   };
 
+  const markProblemDone = (problemId: number) => {
+    updateProgress((prev) => {
+      if (prev.completedProblemIds.includes(problemId)) return prev;
+      return {
+        ...prev,
+        completedProblemIds: [...prev.completedProblemIds, problemId],
+      };
+    });
+  };
+
+  const toggleBasicExerciseDone = (exerciseId: string) => {
+    updateProgress((prev) => {
+      const exists = prev.completedBasicExerciseIds.includes(exerciseId);
+      const completedBasicExerciseIds = exists
+        ? prev.completedBasicExerciseIds.filter((id) => id !== exerciseId)
+        : [...prev.completedBasicExerciseIds, exerciseId];
+      return { ...prev, completedBasicExerciseIds };
+    });
+  };
+
+  const markBasicExerciseDone = (exerciseId: string) => {
+    updateProgress((prev) => {
+      if (prev.completedBasicExerciseIds.includes(exerciseId)) return prev;
+      return {
+        ...prev,
+        completedBasicExerciseIds: [...prev.completedBasicExerciseIds, exerciseId],
+      };
+    });
+  };
+
+  const handleImportProgress = (next: StudyProgress) => {
+    saveStudyProgress(next);
+    setProgressOverride(next);
+  };
+
+  const handleResetProgress = () => {
+    saveStudyProgress(DEFAULT_PROGRESS);
+    setProgressOverride(DEFAULT_PROGRESS);
+  };
+
   const toggleContinuumExerciseDone = (exerciseId: string) => {
     updateProgress((prev) => {
       const exists = prev.completedContinuumExerciseIds.includes(exerciseId);
@@ -312,6 +352,9 @@ export function App({ initialLocation }: AppProps = {}) {
         themePref={themePref}
         onChangeTheme={handleChangeTheme}
         onRefreshApp={refreshAppAndClearCaches}
+        progress={progress}
+        onImportProgress={handleImportProgress}
+        onResetProgress={handleResetProgress}
       />
 
       <main ref={mainRef} className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 py-6">
@@ -370,6 +413,7 @@ export function App({ initialLocation }: AppProps = {}) {
                 onToggleUnitComplete={() => toggleUnitComplete('mohr-circle')}
                 completedProblemIds={progress.completedProblemIds}
                 onToggleProblemDone={toggleProblemDone}
+                onMarkProblemDone={markProblemDone}
                 onBackToPortal={() => navigate('home')}
                 onOpenContinuumCourse={() => navigate('geomechanics-continuum', undefined, '?ch=4')}
               />
@@ -378,6 +422,9 @@ export function App({ initialLocation }: AppProps = {}) {
               <RankineEarthModule
                 isCompleted={progress.completedUnits.includes('rankine-earth-pressure')}
                 onToggleUnitComplete={() => toggleUnitComplete('rankine-earth-pressure')}
+                completedExerciseIds={progress.completedBasicExerciseIds}
+                onToggleExerciseDone={toggleBasicExerciseDone}
+                onMarkExerciseDone={markBasicExerciseDone}
                 onBackToPortal={() => navigate('home')}
               />
             )}
@@ -385,6 +432,9 @@ export function App({ initialLocation }: AppProps = {}) {
               <BeamDiagramModule
                 isCompleted={progress.completedUnits.includes('beam-sfd-bmd')}
                 onToggleUnitComplete={() => toggleUnitComplete('beam-sfd-bmd')}
+                completedExerciseIds={progress.completedBasicExerciseIds}
+                onToggleExerciseDone={toggleBasicExerciseDone}
+                onMarkExerciseDone={markBasicExerciseDone}
                 onBackToPortal={() => navigate('home')}
               />
             )}
@@ -392,6 +442,9 @@ export function App({ initialLocation }: AppProps = {}) {
               <OpenChannelModule
                 isCompleted={progress.completedUnits.includes('open-channel-flow')}
                 onToggleUnitComplete={() => toggleUnitComplete('open-channel-flow')}
+                completedExerciseIds={progress.completedBasicExerciseIds}
+                onToggleExerciseDone={toggleBasicExerciseDone}
+                onMarkExerciseDone={markBasicExerciseDone}
                 onBackToPortal={() => navigate('home')}
               />
             )}

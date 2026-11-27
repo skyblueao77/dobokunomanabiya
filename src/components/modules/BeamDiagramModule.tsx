@@ -1,9 +1,21 @@
-import React, { useId, useMemo, useState } from 'react';
-import { ArrowLeft, CheckCircle2, RotateCcw } from 'lucide-react';
+import React, { useEffect, useId, useMemo, useState } from 'react';
+import { ArrowLeft, CheckCircle2, ChevronDown, RotateCcw } from 'lucide-react';
 import { calculateSimplySupportedBeam, type BeamInputs } from '../../utils/civilPhysics';
-import { buildRoutePath, isPlainLeftClick } from '../../utils/router';
+import {
+  buildRoutePath,
+  getSearchParamFromLocation,
+  isPlainLeftClick,
+  normalizePathname,
+} from '../../utils/router';
 import { SliderInput } from '../SliderInput';
 import { MathFormula } from '../MathFormula';
+import { CopyShareButton } from '../CopyShareButton';
+import {
+  ChapterExercisePanel,
+  type ContinuumExercise,
+} from '../continuum/ChapterExercisePanel';
+
+const UNIT_PATH = buildRoutePath('beam-sfd-bmd');
 
 const DEFAULT_BEAM: BeamInputs = {
   span: 6,
@@ -12,23 +24,168 @@ const DEFAULT_BEAM: BeamInputs = {
   udl: 4,
 };
 
+const BEAM_PRESETS: { label: string; inputs: BeamInputs }[] = [
+  { label: '中央集中荷重のみ', inputs: { span: 6, pointLoad: 20, loadPos: 3, udl: 0 } },
+  { label: '等分布荷重のみ', inputs: { span: 6, pointLoad: 0, loadPos: 3, udl: 10 } },
+  { label: '偏心載荷＋等分布', inputs: { span: 8, pointLoad: 30, loadPos: 2, udl: 5 } },
+];
+
+function parseInitialBeamInputs(): BeamInputs {
+  try {
+    const num = (key: string, fallback: number) => {
+      const val = getSearchParamFromLocation(key);
+      if (val === null) return fallback;
+      const parsed = Number(val);
+      return Number.isFinite(parsed) ? parsed : fallback;
+    };
+    const span = Math.max(2, Math.min(12, num('L', DEFAULT_BEAM.span)));
+    return {
+      span,
+      pointLoad: Math.max(0, Math.min(100, num('P', DEFAULT_BEAM.pointLoad))),
+      loadPos: Math.max(0, Math.min(span, num('a', DEFAULT_BEAM.loadPos))),
+      udl: Math.max(0, Math.min(30, num('w', DEFAULT_BEAM.udl))),
+    };
+  } catch {
+    return DEFAULT_BEAM;
+  }
+}
+
 interface BeamDiagramModuleProps {
   isCompleted: boolean;
   onToggleUnitComplete: () => void;
+  completedExerciseIds: string[];
+  onToggleExerciseDone: (id: string) => void;
+  onMarkExerciseDone: (id: string) => void;
   onBackToPortal: () => void;
 }
 
 export const BeamDiagramModule: React.FC<BeamDiagramModuleProps> = ({
   isCompleted,
   onToggleUnitComplete,
+  completedExerciseIds,
+  onToggleExerciseDone,
+  onMarkExerciseDone,
   onBackToPortal,
 }) => {
-  const [inputs, setInputs] = useState<BeamInputs>(DEFAULT_BEAM);
+  const [inputs, setInputs] = useState<BeamInputs>(() => parseInitialBeamInputs());
   const res = useMemo(() => calculateSimplySupportedBeam(inputs), [inputs]);
   const svgUid = useId();
   const arrowRedId = `${svgUid}-arrow-red`;
   const arrowAmberId = `${svgUid}-arrow-amber`;
   const arrowEmeraldId = `${svgUid}-arrow-emerald`;
+
+  useEffect(() => {
+    if (normalizePathname(window.location.pathname) !== UNIT_PATH) {
+      return;
+    }
+    const isDefault =
+      inputs.span === DEFAULT_BEAM.span &&
+      inputs.pointLoad === DEFAULT_BEAM.pointLoad &&
+      inputs.loadPos === DEFAULT_BEAM.loadPos &&
+      inputs.udl === DEFAULT_BEAM.udl;
+    if (isDefault) {
+      if (window.location.pathname + window.location.search !== UNIT_PATH) {
+        window.history.replaceState(null, '', UNIT_PATH);
+      }
+      return;
+    }
+    const params = new URLSearchParams({
+      L: String(inputs.span),
+      P: String(inputs.pointLoad),
+      a: String(inputs.loadPos),
+      w: String(inputs.udl),
+    });
+    const nextUrl = `${UNIT_PATH}?${params.toString()}`;
+    if (window.location.pathname + window.location.search !== nextUrl) {
+      window.history.replaceState(null, '', nextUrl);
+    }
+  }, [inputs]);
+
+  const applyPresetAndScroll = (preset: BeamInputs) => {
+    setInputs(preset);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const exercises = useMemo<ContinuumExercise[]>(
+    () => [
+      {
+        id: 'beam-q1',
+        category: '集中荷重の基本',
+        title: '問1：中央集中荷重を受ける単純梁の最大曲げモーメント',
+        statement:
+          'スパン L = 6 m の単純梁の中央（a = 3 m）に集中荷重 P = 40 kN（等分布荷重 w = 0）が作用している。最大曲げモーメント M_max（kN·m）を求めよ。',
+        kind: 'numeric',
+        expectedValue: 60,
+        tolerance: 0.5,
+        unit: 'kN·m',
+        inputHint: '例: 60',
+        hint: '対称載荷なので支点反力は R_A = R_B = P/2 となり、中央断面での曲げモーメントは M_max = PL/4 です。',
+        steps: [
+          {
+            label: '支点反力を求める',
+            math: 'R_A = R_B = \\frac{P}{2} = \\frac{40}{2} = 20\\text{ kN}',
+          },
+          {
+            label: '中央断面 x = 3 m の曲げモーメントを計算する',
+            math: 'M_{\\max} = R_A \\cdot \\frac{L}{2} = \\frac{PL}{4} = \\frac{40 \\times 6}{4} = 60\\text{ kN}\\cdot\\text{m}',
+          },
+        ],
+        answerSummary: 'M_max = 60 kN·m',
+        onApplyPreset: () => applyPresetAndScroll({ span: 6, pointLoad: 40, loadPos: 3, udl: 0 }),
+      },
+      {
+        id: 'beam-q2',
+        category: '等分布荷重',
+        title: '問2：全スパン等分布荷重を受ける単純梁の最大曲げモーメント',
+        statement:
+          'スパン L = 8 m の単純梁に全スパン等分布荷重 w = 6 kN/m（集中荷重 P = 0）が作用している。最大曲げモーメント M_max（kN·m）を求めよ。',
+        kind: 'numeric',
+        expectedValue: 48,
+        tolerance: 0.5,
+        unit: 'kN·m',
+        inputHint: '例: 48',
+        hint: '等分布荷重のみの単純梁では中央（x = L/2）で V = 0 となり、M_max = wL²/8 となります。',
+        steps: [
+          {
+            label: '支点反力を求める',
+            math: 'R_A = R_B = \\frac{wL}{2} = \\frac{6 \\times 8}{2} = 24\\text{ kN}',
+          },
+          {
+            label: '中央断面 x = 4 m の曲げモーメントを求める',
+            math: 'M_{\\max} = \\frac{wL^2}{8} = \\frac{6 \\times 8^2}{8} = 48\\text{ kN}\\cdot\\text{m}',
+          },
+        ],
+        answerSummary: 'M_max = 48 kN·m',
+        onApplyPreset: () => applyPresetAndScroll({ span: 8, pointLoad: 0, loadPos: 4, udl: 6 }),
+      },
+      {
+        id: 'beam-q3',
+        category: '複合荷重・支点反力',
+        title: '問3：偏心集中荷重と等分布荷重が同時作用するときの左支点反力',
+        statement:
+          'スパン L = 6 m の単純梁において、左端から a = 2 m の位置に集中荷重 P = 30 kN、全スパンに等分布荷重 w = 4 kN/m が同時に作用している。左支点反力 R_A（kN）を求めよ。',
+        kind: 'numeric',
+        expectedValue: 32,
+        tolerance: 0.2,
+        unit: 'kN',
+        inputHint: '例: 32',
+        hint: '右支点 B まわりのモーメントのつり合い ΣM_B = 0 から R_A = P(L−a)/L + wL/2 を計算します。',
+        steps: [
+          {
+            label: '支点 B まわりのモーメントのつり合い式を立てる',
+            math: 'R_A \\cdot L - P(L - a) - wL \\cdot \\frac{L}{2} = 0',
+          },
+          {
+            label: '数値を代入して R_A を求める',
+            math: 'R_A = \\frac{30 \\times (6 - 2)}{6} + \\frac{4 \\times 6}{2} = 20 + 12 = 32\\text{ kN}',
+          },
+        ],
+        answerSummary: 'R_A = 32 kN',
+        onApplyPreset: () => applyPresetAndScroll({ span: 6, pointLoad: 30, loadPos: 2, udl: 4 }),
+      },
+    ],
+    []
+  );
 
   const svgW = 560;
   const xStart = 60;
@@ -92,6 +249,7 @@ export const BeamDiagramModule: React.FC<BeamDiagramModuleProps> = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <CopyShareButton getTextToCopy={() => window.location.href} />
           <button
             type="button"
             onClick={() => setInputs(DEFAULT_BEAM)}
@@ -121,6 +279,21 @@ export const BeamDiagramModule: React.FC<BeamDiagramModuleProps> = ({
           <h2 className="text-sm font-bold border-b border-[var(--border-subtle)] pb-2">
             スパン・荷重条件
           </h2>
+          <div className="space-y-1.5">
+            <p className="text-xs font-semibold app-text-muted">典型ケース（ワンクリック読込）</p>
+            <div className="flex flex-wrap gap-1.5">
+              {BEAM_PRESETS.map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  onClick={() => setInputs(preset.inputs)}
+                  className="interactive-btn app-surface-subtle rounded-md px-2.5 py-1 text-xs font-medium cursor-pointer"
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </div>
           <SliderInput
             label="スパン長"
             symbol="L"
@@ -466,32 +639,62 @@ export const BeamDiagramModule: React.FC<BeamDiagramModuleProps> = ({
                 </g>
               )}
             </svg>
+
+            <details className="border-t border-[var(--border-subtle)] px-4 py-2 text-xs group">
+              <summary className="diagram-summary flex items-center justify-between cursor-pointer font-semibold app-text-muted py-1 list-none">
+                <span>図解の数値サマリー（スクリーンリーダー・検算用）</span>
+                <ChevronDown className="h-3.5 w-3.5 transition-transform duration-150 group-open:rotate-180" aria-hidden="true" />
+              </summary>
+              <dl className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-2 pb-1 font-mono-num">
+                <div><dt className="app-text-muted">左支点反力 R_A</dt><dd className="font-bold">{res.ra} kN</dd></div>
+                <div><dt className="app-text-muted">右支点反力 R_B</dt><dd className="font-bold">{res.rb} kN</dd></div>
+                <div><dt className="app-text-muted">最大せん断力 |V|_max</dt><dd className="font-bold">{res.maxShear} kN</dd></div>
+                <div><dt className="app-text-muted">載荷点直前 V(a⁻)</dt><dd className="font-bold">{res.shearAtLoadLeft} kN</dd></div>
+                <div><dt className="app-text-muted">載荷点直後 V(a⁺)</dt><dd className="font-bold">{res.shearAtLoadRight} kN</dd></div>
+                <div><dt className="app-text-muted">最大モーメント M_max</dt><dd className="font-bold">{res.maxMoment} kN·m (x={res.maxMomentPos}m)</dd></div>
+              </dl>
+            </details>
           </div>
 
           <section className="app-surface rounded-xl p-4 space-y-3">
-            <h2 className="text-sm font-semibold">支点反力と最大曲げモーメント</h2>
+            <h2 className="text-sm font-semibold">途中計算ステップ（リアルタイム検算）</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-              <div className="app-surface-subtle rounded-lg p-3">
+              <div className="app-surface-subtle rounded-lg p-3 space-y-1">
+                <h3 className="text-xs font-semibold app-text-muted">1. モーメントのつり合いと支点反力</h3>
                 <MathFormula
                   block
-                  math={`R_A = \\frac{P(L-a)}{L} + \\frac{wL}{2} = ${res.ra}\\text{ kN}`}
+                  math={`R_A = \\frac{P(L-a)}{L} + \\frac{wL}{2} = \\frac{${inputs.pointLoad}(${inputs.span}-${inputs.loadPos})}{${inputs.span}} + \\frac{${inputs.udl}\\times${inputs.span}}{2} = ${res.ra}\\text{ kN}`}
                 />
                 <MathFormula
                   block
-                  math={`R_B = \\frac{Pa}{L} + \\frac{wL}{2} = ${res.rb}\\text{ kN}`}
+                  math={`R_B = \\frac{Pa}{L} + \\frac{wL}{2} = \\frac{${inputs.pointLoad}\\times${inputs.loadPos}}{${inputs.span}} + \\frac{${inputs.udl}\\times${inputs.span}}{2} = ${res.rb}\\text{ kN}`}
                 />
               </div>
-              <div className="app-surface-subtle rounded-lg p-3">
+              <div className="app-surface-subtle rounded-lg p-3 space-y-1">
+                <h3 className="text-xs font-semibold app-text-muted">2. せん断力段差と最大曲げモーメント</h3>
                 <MathFormula
                   block
-                  math={`M_{\\max} = ${res.maxMoment}\\text{ kN}\\cdot\\text{m}\\quad (x = ${res.maxMomentPos}\\text{ m})`}
+                  math={`V(a^-) = ${res.shearAtLoadLeft}\\text{ kN},\\quad V(a^+) = ${res.shearAtLoadRight}\\text{ kN}`}
                 />
-                <MathFormula block math={`|V|_{\\max} = ${res.maxShear}\\text{ kN}`} />
+                <MathFormula
+                  block
+                  math={`M_{\\max} = ${res.maxMoment}\\text{ kN}\\cdot\\text{m}\\quad (x = ${res.maxMomentPos}\\text{ m}),\\quad |V|_{\\max} = ${res.maxShear}\\text{ kN}`}
+                />
               </div>
             </div>
           </section>
         </div>
       </div>
+
+      <ChapterExercisePanel
+        chapterTitle="単純梁の SFD・BMD 解析"
+        heading="テスト対策・オリジナル演習問題（全3問）"
+        progressLabel="演習達成"
+        exercises={exercises}
+        completedIds={completedExerciseIds}
+        onToggleDone={onToggleExerciseDone}
+        onMarkDone={onMarkExerciseDone}
+      />
     </div>
   );
 };
