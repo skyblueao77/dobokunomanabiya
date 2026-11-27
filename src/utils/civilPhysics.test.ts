@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
+  calculateCantileverBeam,
   calculateOpenChannelFlow,
   calculateRankineEarthPressure,
   calculateSimplySupportedBeam,
+  calculateSpecificEnergyAndJump,
 } from './civilPhysics';
 
 describe('civilPhysics', () => {
@@ -107,5 +109,92 @@ describe('civilPhysics', () => {
     expect(res.velocity).toBe(1.33);
     expect(res.discharge).toBe(2.66);
     expect(res.regime).toBe('常流 (Subcritical)');
+  });
+
+  it('computes cantilever beam fixed-end reactions, SFD jump, and exact tip deflection PL^3/(3EI)', () => {
+    const res = calculateCantileverBeam({
+      span: 4,
+      pointLoad: 20,
+      loadPos: 4,
+      udl: 0,
+      endMoment: 0,
+      elasticModulusGPa: 25,
+      sectionWidth: 0.3,
+      sectionHeight: 0.5,
+    });
+    // I = 0.3 * 0.5^3 / 12 = 0.003125 m^4, EI = 78125 kN·m^2
+    // RA = 20 kN, MA = -80 kN·m, δ = 20 * 64 / (3 * 78125) * 1000 = 5.46 mm
+    expect(res.reactionForce).toBe(20);
+    expect(res.reactionMoment).toBe(-80);
+    expect(res.momentOfInertia).toBe(0.003125);
+    expect(res.flexuralRigidity).toBe(78125);
+    expect(res.tipDeflectionMm).toBe(5.46);
+  });
+
+  it('computes cantilever UDL + mid-span point load SFD jump and exact deflection wL^4/(8EI)', () => {
+    const udlOnly = calculateCantileverBeam({
+      span: 4,
+      pointLoad: 0,
+      loadPos: 2,
+      udl: 10,
+      endMoment: 0,
+      elasticModulusGPa: 25,
+      sectionWidth: 0.3,
+      sectionHeight: 0.5,
+    });
+    // MA = -10*16/2 = -80 kN·m, δ = 10*256/(8*78125)*1000 = 4.10 mm
+    expect(udlOnly.reactionForce).toBe(40);
+    expect(udlOnly.reactionMoment).toBe(-80);
+    expect(udlOnly.tipDeflectionMm).toBe(4.1);
+
+    const midLoad = calculateCantileverBeam({
+      span: 4,
+      pointLoad: 30,
+      loadPos: 2,
+      udl: 0,
+      endMoment: 15,
+      elasticModulusGPa: 25,
+      sectionWidth: 0.3,
+      sectionHeight: 0.5,
+    });
+    const atLoad = midLoad.samples.filter((s) => s.x === 2);
+    expect(atLoad).toHaveLength(2);
+    expect(atLoad[0].v).toBe(30);
+    expect(atLoad[1].v).toBe(0);
+    expect(midLoad.reactionMoment).toBe(-75);
+  });
+
+  it('computes specific energy, critical depth, alternate depth, and Belanger hydraulic jump', () => {
+    const res = calculateSpecificEnergyAndJump({
+      discharge: 6,
+      width: 3,
+      depth1: 0.4,
+    });
+    // q = 2 m^2/s, hc = (4/9.80665)^(1/3) ≈ 0.74 m, E_min = 1.5*hc ≈ 1.11 m
+    // v1 = 5 m/s, Fr1 = 5 / sqrt(9.80665*0.4) ≈ 2.52 -> 振動跳水
+    // h2 = 0.2 * (sqrt(1 + 8*Fr1^2) - 1) ≈ 1.24 m
+    expect(res.unitDischarge).toBe(2);
+    expect(res.criticalDepth).toBe(0.74);
+    expect(res.minSpecificEnergy).toBe(1.11);
+    expect(res.velocity1).toBe(5);
+    expect(res.froude1).toBe(2.52);
+    expect(res.regime1).toBe('射流 (Supercritical)');
+    expect(res.canJump).toBe(true);
+    expect(res.sequentDepth).toBe(1.24);
+    expect(res.alternateDepth).toBe(1.59);
+    expect(res.energyLoss).toBeGreaterThan(0.2);
+    expect(res.froude2).toBeLessThan(1);
+  });
+
+  it('reports no hydraulic jump when upstream flow is subcritical (Fr1 < 1)', () => {
+    const res = calculateSpecificEnergyAndJump({
+      discharge: 4,
+      width: 2,
+      depth1: 1.5,
+    });
+    expect(res.regime1).toBe('常流 (Subcritical)');
+    expect(res.canJump).toBe(false);
+    expect(res.sequentDepth).toBeNull();
+    expect(res.energyLoss).toBe(0);
   });
 });

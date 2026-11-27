@@ -5,7 +5,9 @@ export type UnitId =
   | 'mohr-circle'
   | 'rankine-earth-pressure'
   | 'beam-sfd-bmd'
+  | 'cantilever-beam'
   | 'open-channel-flow'
+  | 'specific-energy-jump'
   | 'lp-optimization'
   | 'nlp-optimization';
 
@@ -33,13 +35,13 @@ export const SUBJECTS: SubjectMeta[] = [
     id: 'structural',
     name: '構造力学',
     englishName: 'Structural Mechanics',
-    description: '静定ばりの反力・せん断力図 (SFD)・曲げモーメント図 (BMD)',
+    description: '静定ばり（単純梁・片持ち梁）の反力・SFD・BMD・弾性たわみ解析',
   },
   {
     id: 'hydraulics',
     name: '水理学',
     englishName: 'Hydraulics',
-    description: '開水路等流・マニングの公式・フルード数による流況判定',
+    description: '開水路等流・マニングの公式・比エネルギー曲線・限界水深・跳水解析',
   },
   {
     id: 'soil',
@@ -102,6 +104,17 @@ export const LEARNING_UNITS: LearningUnit[] = [
     exerciseCount: 3,
   },
   {
+    id: 'cantilever-beam',
+    subjectId: 'structural',
+    title: '片持ち梁の SFD・BMD とたわみ解析',
+    subtitle: '固定端反力・集中モーメント・断面二次モーメント EI・弾性曲線による自由端たわみ',
+    level: '応用',
+    estimatedMinutes: 20,
+    tags: ['片持ち梁', 'たわみ曲線', '断面二次モーメント', '演習3問'],
+    hasPracticeSet: true,
+    exerciseCount: 3,
+  },
+  {
     id: 'open-channel-flow',
     subjectId: 'hydraulics',
     title: '開水路等流・マニングの公式',
@@ -109,6 +122,17 @@ export const LEARNING_UNITS: LearningUnit[] = [
     level: '基礎',
     estimatedMinutes: 15,
     tags: ['マニング式', 'フルード数', '常流/射流', '演習3問'],
+    hasPracticeSet: true,
+    exerciseCount: 3,
+  },
+  {
+    id: 'specific-energy-jump',
+    subjectId: 'hydraulics',
+    title: '比エネルギー曲線・限界水深・跳水（Hydraulic Jump）',
+    subtitle: '比エネルギー E-h 曲線、限界水深 hc・交代水深、ベランジェ式による共役水深と減勢損失 ΔE',
+    level: '応用',
+    estimatedMinutes: 20,
+    tags: ['比エネルギー', '限界水深', '跳水', 'エネルギー損失', '演習3問'],
     hasPracticeSet: true,
     exerciseCount: 3,
   },
@@ -156,7 +180,9 @@ export const UNIT_EXERCISE_IDS: Record<UnitId, readonly string[]> = {
   'mohr-circle': ['1', '2', '3'],
   'rankine-earth-pressure': ['rankine-q1', 'rankine-q2', 'rankine-q3'],
   'beam-sfd-bmd': ['beam-q1', 'beam-q2', 'beam-q3'],
+  'cantilever-beam': ['cantilever-q1', 'cantilever-q2', 'cantilever-q3'],
   'open-channel-flow': ['channel-q1', 'channel-q2', 'channel-q3'],
+  'specific-energy-jump': ['energy-q1', 'energy-q2', 'energy-q3'],
   'lp-optimization': [
     'lp-ch1-q1',
     'lp-ch1-q2',

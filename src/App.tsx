@@ -40,7 +40,9 @@ const GeomechanicsCourseModule = lazy(
 const MohrCircleModule = lazy(() => import('./components/modules/MohrCircleModule'));
 const RankineEarthModule = lazy(() => import('./components/modules/RankineEarthModule'));
 const BeamDiagramModule = lazy(() => import('./components/modules/BeamDiagramModule'));
+const CantileverBeamModule = lazy(() => import('./components/modules/CantileverBeamModule'));
 const OpenChannelModule = lazy(() => import('./components/modules/OpenChannelModule'));
+const SpecificEnergyModule = lazy(() => import('./components/modules/SpecificEnergyModule'));
 const LinearProgrammingCourseModule = lazy(
   () => import('./components/modules/LinearProgrammingCourseModule')
 );
@@ -48,6 +50,7 @@ const NonlinearProgrammingCourseModule = lazy(
   () => import('./components/modules/NonlinearProgrammingCourseModule')
 );
 const LegalPage = lazy(() => import('./components/LegalPage'));
+const ReferencePage = lazy(() => import('./components/ReferencePage'));
 const NotFoundPage = lazy(() => import('./components/NotFoundPage'));
 
 export interface AppProps {
@@ -205,9 +208,9 @@ export function App({ initialLocation }: AppProps = {}) {
       if (window.location.pathname + window.location.search !== nextPath) {
         window.history.pushState(null, '', nextPath);
       }
-    } else if (nextRoute === 'legal') {
+    } else if (nextRoute === 'legal' || nextRoute === 'reference') {
       setSelectedSubject('all');
-      const nextPath = buildRoutePath('legal');
+      const nextPath = buildRoutePath(nextRoute);
       if (window.location.pathname + window.location.search !== nextPath) {
         window.history.pushState(null, '', nextPath);
       }
@@ -339,7 +342,7 @@ export function App({ initialLocation }: AppProps = {}) {
   };
 
   const activeUnit =
-    route !== 'home' && route !== 'legal' && route !== 'not-found'
+    route !== 'home' && route !== 'legal' && route !== 'reference' && route !== 'not-found'
       ? LEARNING_UNITS.find((u) => u.id === route)
       : undefined;
 
@@ -369,7 +372,7 @@ export function App({ initialLocation }: AppProps = {}) {
           onOpenDisclaimer={() => navigate('legal')}
         />
         {activeUnit && (
-          <div className="mb-4">
+          <div className="mb-4 no-print">
             <Suspense fallback={null}>
               <UnitBreadcrumb
                 subjectId={activeUnit.subjectId}
@@ -438,10 +441,30 @@ export function App({ initialLocation }: AppProps = {}) {
                 onBackToPortal={() => navigate('home')}
               />
             )}
+            {route === 'cantilever-beam' && (
+              <CantileverBeamModule
+                isCompleted={progress.completedUnits.includes('cantilever-beam')}
+                onToggleUnitComplete={() => toggleUnitComplete('cantilever-beam')}
+                completedExerciseIds={progress.completedBasicExerciseIds}
+                onToggleExerciseDone={toggleBasicExerciseDone}
+                onMarkExerciseDone={markBasicExerciseDone}
+                onBackToPortal={() => navigate('home')}
+              />
+            )}
             {route === 'open-channel-flow' && (
               <OpenChannelModule
                 isCompleted={progress.completedUnits.includes('open-channel-flow')}
                 onToggleUnitComplete={() => toggleUnitComplete('open-channel-flow')}
+                completedExerciseIds={progress.completedBasicExerciseIds}
+                onToggleExerciseDone={toggleBasicExerciseDone}
+                onMarkExerciseDone={markBasicExerciseDone}
+                onBackToPortal={() => navigate('home')}
+              />
+            )}
+            {route === 'specific-energy-jump' && (
+              <SpecificEnergyModule
+                isCompleted={progress.completedUnits.includes('specific-energy-jump')}
+                onToggleUnitComplete={() => toggleUnitComplete('specific-energy-jump')}
                 completedExerciseIds={progress.completedBasicExerciseIds}
                 onToggleExerciseDone={toggleBasicExerciseDone}
                 onMarkExerciseDone={markBasicExerciseDone}
@@ -468,6 +491,12 @@ export function App({ initialLocation }: AppProps = {}) {
                 onBackToPortal={() => navigate('home')}
               />
             )}
+            {route === 'reference' && (
+              <ReferencePage
+                onOpenUnit={(id) => navigate(id)}
+                onBackToPortal={() => navigate('home')}
+              />
+            )}
             {route === 'legal' && <LegalPage onBackToPortal={() => navigate('home')} />}
             {route === 'not-found' && <NotFoundPage onNavigate={navigate} />}
           </Suspense>
@@ -488,6 +517,18 @@ export function App({ initialLocation }: AppProps = {}) {
           </span>
           <div className="flex flex-wrap items-center gap-4">
             <span>日本の大学・高専 教科書準拠（土質力学：圧縮正）</span>
+            <a
+              href={buildRoutePath('reference')}
+              onClick={(e) => {
+                if (isPlainLeftClick(e)) {
+                  e.preventDefault();
+                  navigate('reference');
+                }
+              }}
+              className="underline hover:text-[var(--text-primary)] cursor-pointer"
+            >
+              公式チートシート・単位換算
+            </a>
             <a
               href={buildRoutePath('legal')}
               onClick={(e) => {

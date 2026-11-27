@@ -14,7 +14,7 @@ export function generateNonce() {
 export function buildStrictCsp(nonce) {
   return [
     "default-src 'self'",
-    `script-src 'nonce-${nonce}' 'strict-dynamic'`,
+    `script-src 'nonce-${nonce}' 'strict-dynamic' 'report-sample'`,
     "style-src 'self' 'unsafe-inline'",
     "font-src 'self' data:",
     "img-src 'self' data:",
@@ -39,17 +39,49 @@ export function normalizeTrailingSlashUrl(url) {
   return null;
 }
 
+const TRUSTED_SCRIPT_IDS = new Set(['theme-init', 'vite-plugin-pwa:register-sw']);
+
+export function isTrustedBuildScript(element) {
+  const type = element.getAttribute('type');
+  if (type === 'application/ld+json') return false;
+  const id = element.getAttribute('id');
+  if (id && TRUSTED_SCRIPT_IDS.has(id)) return true;
+  const src = element.getAttribute('src');
+  if (type === 'module' && typeof src === 'string' && src.startsWith('/assets/')) {
+    return true;
+  }
+  return false;
+}
+
+function stripConditionalRequestHeaders(request) {
+  if (!request.headers.has('If-None-Match') && !request.headers.has('If-Modified-Since')) {
+    return request;
+  }
+  const headers = new Headers(request.headers);
+  headers.delete('If-None-Match');
+  headers.delete('If-Modified-Since');
+  return new Request(request.url, {
+    method: request.method,
+    headers,
+    redirect: request.redirect,
+  });
+}
+
 function rewriteHtmlWithNonce(response, statusOverride) {
   const nonce = generateNonce();
   const headers = new Headers(response.headers);
   headers.set('Content-Type', 'text/html; charset=utf-8');
   headers.set('Content-Security-Policy', buildStrictCsp(nonce));
+  // Preserve BFCache (avoid no-store) while removing validators so browsers never
+  // receive a 304 Not Modified that pairs a fresh CSP header nonce with a stale HTML body.
   headers.set('Cache-Control', 'private, no-cache, must-revalidate');
+  headers.delete('ETag');
+  headers.delete('Last-Modified');
 
   const rewritten = new HTMLRewriter()
     .on('script', {
       element(element) {
-        if (element.getAttribute('type') !== 'application/ld+json') {
+        if (isTrustedBuildScript(element)) {
           element.setAttribute('nonce', nonce);
         }
       },
@@ -98,12 +130,19 @@ export default {
       });
     }
 
-    const assetRes = await env.ASSETS.fetch(request);
+    // Markdown guides allow conditional caching; HTML documents must bypass 304 so
+    // per-request CSP nonces in HTTP headers and <script> attributes always match.
+    const isMarkdownAsset = url.pathname.endsWith('.md');
+    const assetRequest = isMarkdownAsset ? request : stripConditionalRequestHeaders(request);
+    let assetRes = await env.ASSETS.fetch(assetRequest);
+
     if (assetRes.status === 404) {
-      const notFoundReq = new Request(new URL('/404.html', url.origin), {
-        method: request.method === 'HEAD' ? 'HEAD' : 'GET',
-        headers: request.headers,
-      });
+      const notFoundReq = stripConditionalRequestHeaders(
+        new Request(new URL('/404.html', url.origin), {
+          method: request.method === 'HEAD' ? 'HEAD' : 'GET',
+          headers: request.headers,
+        })
+      );
       const notFoundRes = await env.ASSETS.fetch(notFoundReq);
       if (notFoundRes.ok) {
         return rewriteHtmlWithNonce(notFoundRes, 404);
@@ -121,6 +160,13 @@ export default {
     const contentType = assetRes.headers.get('Content-Type') || '';
     if (!contentType.toLowerCase().includes('text/html')) {
       return assetRes;
+    }
+
+    // Defensive guard in case an upstream asset store still returns 304 for HTML
+    if (assetRes.status === 304) {
+      assetRes = await env.ASSETS.fetch(
+        new Request(request.url, { method: request.method === 'HEAD' ? 'HEAD' : 'GET' })
+      );
     }
 
     return rewriteHtmlWithNonce(assetRes);

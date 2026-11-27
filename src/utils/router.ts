@@ -1,7 +1,7 @@
 import type React from 'react';
 import { LEARNING_UNITS, SUBJECTS, type SubjectId, type UnitId } from '../data/curriculum';
 
-export type AppRoute = 'home' | 'legal' | 'not-found' | UnitId;
+export type AppRoute = 'home' | 'legal' | 'reference' | 'not-found' | UnitId;
 
 export interface ParsedLocation {
   route: AppRoute;
@@ -32,6 +32,9 @@ export function buildRoutePath(
   if (route === 'legal') {
     return '/legal';
   }
+  if (route === 'reference') {
+    return '/reference';
+  }
   if (route === 'home' || route === 'not-found') {
     if (route === 'home' && subject !== 'all') {
       return `/subject/${subject}`;
@@ -58,6 +61,10 @@ function parseRawPathAndQuery(
 
   if (cleanPath === '/legal') {
     return { route: 'legal', subject: 'all', search: '' };
+  }
+
+  if (cleanPath === '/reference') {
+    return { route: 'reference', subject: 'all', search: '' };
   }
 
   if (cleanPath.startsWith('/subject/')) {

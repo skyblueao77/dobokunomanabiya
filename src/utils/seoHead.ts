@@ -90,9 +90,11 @@ export function buildRouteSeoData(
     };
   }
 
-  if (route === 'legal') {
-    const meta = seoUnitsCatalog.routes.legal;
+  if (route === 'legal' || route === 'reference') {
+    const meta = seoUnitsCatalog.routes[route];
     const canonicalUrl = `${cleanSiteUrl}${meta.path}`;
+    const crumbName =
+      route === 'legal' ? '利用規約・免責事項・プライバシーポリシー' : '公式チートシート・単位換算';
     return {
       path: meta.path,
       title: meta.title,
@@ -123,7 +125,7 @@ export function buildRouteSeoData(
               {
                 '@type': 'ListItem',
                 position: 2,
-                name: '利用規約・免責事項・プライバシーポリシー',
+                name: crumbName,
                 item: canonicalUrl,
               },
             ],

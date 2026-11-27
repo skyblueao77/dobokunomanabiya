@@ -95,7 +95,14 @@ describe('HTML5 History API router & legacy hash compatibility', () => {
     expect(buildRoutePath('home', 'all')).toBe('/');
     expect(buildRoutePath('home', 'hydraulics')).toBe('/subject/hydraulics');
     expect(buildRoutePath('lp-optimization', 'all', '?ch=4')).toBe('/unit/lp-optimization?ch=4');
+    expect(buildRoutePath('reference')).toBe('/reference');
     expect(buildRoutePath('legal')).toBe('/legal');
+    expect(parseLocation('/reference', '', '')).toEqual({
+      route: 'reference',
+      subject: 'all',
+      search: '',
+      legacyHashRedirectPath: null,
+    });
   });
 
   it('resolves unknown paths to not-found with noindex SEO metadata', () => {
@@ -124,15 +131,16 @@ describe('HTML5 History API router & legacy hash compatibility', () => {
 });
 
 describe('SEO & AEO metadata / JSON-LD parity', () => {
-  it('generates unique titles, descriptions, valid live canonicals, and JSON-LD for all 13 routes', () => {
+  it('generates unique titles, descriptions, valid live canonicals, and JSON-LD for all 16 routes', () => {
     const routesToCheck: Array<{ route: AppRoute; subject: SubjectId }> = [
       { route: 'home', subject: 'all' },
       ...SUBJECTS.map((s) => ({ route: 'home' as const, subject: s.id })),
       ...LEARNING_UNITS.map((u) => ({ route: u.id, subject: u.subjectId })),
+      { route: 'reference', subject: 'all' },
       { route: 'legal', subject: 'all' },
     ];
 
-    expect(routesToCheck).toHaveLength(13);
+    expect(routesToCheck).toHaveLength(16);
 
     const titles = new Set<string>();
     const canonicals = new Set<string>();
@@ -153,8 +161,8 @@ describe('SEO & AEO metadata / JSON-LD parity', () => {
       expect((graph as unknown[]).length).toBeGreaterThanOrEqual(2);
     }
 
-    expect(titles.size).toBe(13);
-    expect(canonicals.size).toBe(13);
+    expect(titles.size).toBe(16);
+    expect(canonicals.size).toBe(16);
   });
 
   it('includes WebSite JSON-LD with alternateName only on the home route (/)', () => {
@@ -171,6 +179,7 @@ describe('SEO & AEO metadata / JSON-LD parity', () => {
     const subRoutes: Array<{ route: AppRoute; subject: SubjectId }> = [
       ...SUBJECTS.map((s) => ({ route: 'home' as const, subject: s.id })),
       ...LEARNING_UNITS.map((u) => ({ route: u.id, subject: u.subjectId })),
+      { route: 'reference', subject: 'all' },
       { route: 'legal', subject: 'all' },
     ];
     for (const item of subRoutes) {
