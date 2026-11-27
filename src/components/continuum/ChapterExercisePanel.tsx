@@ -173,7 +173,7 @@ export const ChapterExercisePanel: React.FC<ChapterExercisePanelProps> = ({
                     onClick={() => onToggleDone(ex.id)}
                     className={`interactive-btn inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold border cursor-pointer ${
                       isDone
-                        ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/35'
+                        ? 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border-emerald-500/35'
                         : 'app-surface'
                     }`}
                   >

@@ -214,6 +214,15 @@ jobs:
             console.log("Verified strict CSP & valid JSON-LD across", htmlFiles.length, "HTML files");
           '
 
+      - name: Check bundle & SW precache size budgets
+        run: npm run check:budgets
+
+      - name: Install Playwright Chromium for E2E & Accessibility checks
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright E2E & axe-core WCAG 2.2 AA tests
+        run: npm run test:e2e
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v7
         with:

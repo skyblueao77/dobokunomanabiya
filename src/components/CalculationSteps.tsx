@@ -78,8 +78,8 @@ export const CalculationSteps: React.FC<CalculationStepsProps> = ({ inputs, resu
             <span
               className={`text-xs font-bold px-2 py-0.5 rounded ${
                 result.isFailure
-                  ? 'bg-red-500/20 text-red-700 dark:text-red-300'
-                  : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
+                  ? 'bg-red-500/20 text-red-800 dark:text-red-300'
+                  : 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300'
               }`}
             >
               {result.isTensionLoss

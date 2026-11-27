@@ -7,9 +7,11 @@
   "scripts": {
     "dev": "vite",
     "build": "node scripts/build.mjs",
+    "check:budgets": "node scripts/check-budgets.mjs",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run src worker",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@oddbird/popover-polyfill": "^0.7.3",
@@ -19,6 +21,8 @@
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.1",
+    "@playwright/test": "^1.65.1",
     "@tailwindcss/vite": "^4.3.5",
     "@types/katex": "^0.16.8",
     "@types/node": "^24.19.2",
