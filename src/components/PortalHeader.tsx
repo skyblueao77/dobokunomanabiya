@@ -545,6 +545,22 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
                 </li>
               );
             })}
+            <li>
+              <a
+                href={buildRoutePath('reference')}
+                aria-current={activeRoute === 'reference' ? 'page' : undefined}
+                onClick={(e) => {
+                  if (isPlainLeftClick(e)) {
+                    e.preventDefault();
+                    onNavigate('reference');
+                    closeAllNavigationPopovers();
+                  }
+                }}
+                className="nav-link-item inline-flex items-center gap-1 rounded-lg px-2.5 py-2 text-xs sm:text-sm font-medium hover:bg-[var(--surface-subtle)] transition-colors"
+              >
+                公式・換算
+              </a>
+            </li>
           </ul>
         </nav>
 

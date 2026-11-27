@@ -10,15 +10,23 @@ const CORE_ROUTES = [
   '/unit/mohr-circle',
   '/unit/rankine-earth-pressure',
   '/unit/beam-sfd-bmd',
+  '/unit/cantilever-beam',
   '/unit/open-channel-flow',
+  '/unit/specific-energy-jump',
   '/unit/lp-optimization',
   '/unit/nlp-optimization',
+  '/reference',
   '/legal',
 ];
 
 test.describe('Core routes & interactive simulators E2E', () => {
-  test('all 13 routes render cleanly with zero console or page errors', async ({ page }) => {
+  test('all 16 routes render cleanly with zero console, page, or CSP errors', async ({ page }) => {
     const errors: string[] = [];
+    await page.addInitScript(() => {
+      window.addEventListener('securitypolicyviolation', (e) => {
+        console.error(`[csp] ${e.effectiveDirective} blocked ${e.blockedURI}`);
+      });
+    });
     page.on('console', (msg) => {
       if (msg.type() === 'error') errors.push(`[console] ${msg.text()}`);
     });
@@ -30,6 +38,10 @@ test.describe('Core routes & interactive simulators E2E', () => {
       await page.goto(route, { waitUntil: 'networkidle' });
       await expect(page.locator('h1#main-content')).toBeVisible();
     }
+    // Verify reload also runs cleanly with zero CSP/runtime errors
+    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.reload({ waitUntil: 'networkidle' });
+    await expect(page.locator('h1#main-content')).toBeVisible();
 
     expect(errors).toEqual([]);
   });
@@ -78,6 +90,17 @@ test.describe('Core routes & interactive simulators E2E', () => {
     await expect(page.locator('span.font-medium', { hasText: /正解です！ \(M_max = 60/ })).toBeVisible();
   });
 
+  test('CantileverBeamModule computes deflection and auto-grades exercises', async ({ page }) => {
+    await page.goto('/unit/cantilever-beam');
+    await expect(page.locator('h1#main-content')).toContainText('片持ち梁');
+    await expect(page.getByText('5.46 mm').first()).toBeVisible();
+
+    const q1Input = page.locator('#ans-cantilever-q1');
+    await q1Input.fill('80');
+    await q1Input.locator('xpath=ancestor::div[1]//button[contains(., "解答を判定")]').click();
+    await expect(page.locator('span.font-medium', { hasText: /正解です！ \(\|M_A\| = 20/ })).toBeVisible();
+  });
+
   test('OpenChannelModule SVG stays within viewBox even at extreme maximum dimensions', async ({
     page,
   }) => {
@@ -106,6 +129,27 @@ test.describe('Core routes & interactive simulators E2E', () => {
     expect(bounds!.xMax).toBeLessThanOrEqual(bounds!.vbWidth);
     expect(bounds!.yMin).toBeGreaterThanOrEqual(0);
     expect(bounds!.yMax).toBeLessThanOrEqual(bounds!.vbHeight);
+  });
+
+  test('SpecificEnergyModule computes Belanger hydraulic jump and auto-grades exercises', async ({
+    page,
+  }) => {
+    await page.goto('/unit/specific-energy-jump');
+    await expect(page.locator('h1#main-content')).toContainText('比エネルギー');
+    await expect(page.getByText('振動跳水 (Oscillating Jump)')).toBeVisible();
+
+    const q2Input = page.locator('#ans-energy-q2');
+    await q2Input.fill('1.24');
+    await q2Input.locator('xpath=ancestor::div[1]//button[contains(., "解答を判定")]').click();
+    await expect(page.locator('span.font-medium', { hasText: /正解です！ \(h_2 = 0\.20/ })).toBeVisible();
+  });
+
+  test('ReferencePage converts civil engineering units accurately', async ({ page }) => {
+    await page.goto('/reference');
+    await expect(page.locator('h1#main-content')).toContainText('公式チートシート');
+    const valInput = page.getByLabel('換算元の数値');
+    await valInput.fill('250');
+    await expect(page.getByText('0.25', { exact: true })).toBeVisible();
   });
 
   test('RankineEarthModule switches active/passive modes and auto-grades exercises', async ({

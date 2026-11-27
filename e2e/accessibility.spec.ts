@@ -4,12 +4,15 @@ import AxeBuilder from '@axe-core/playwright';
 const A11Y_ROUTES = [
   '/',
   '/unit/beam-sfd-bmd',
+  '/unit/cantilever-beam',
   '/unit/open-channel-flow',
+  '/unit/specific-energy-jump',
   '/unit/rankine-earth-pressure',
   '/unit/mohr-circle',
   '/unit/geomechanics-continuum',
   '/unit/lp-optimization',
   '/unit/nlp-optimization',
+  '/reference',
   '/legal',
 ];
 

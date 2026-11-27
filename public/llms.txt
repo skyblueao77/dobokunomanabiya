@@ -16,6 +16,8 @@
 - [開水路等流・マニングの公式](https://dobokunomanabiya.skyblueao77.workers.dev/unit/open-channel-flow): 台形および長方形断面の開水路における通水断面積 A、潤辺 P、径深 R、マニングの公式による平均流速 v、流量 Q、フルード数 Fr による常流・射流判定をリアルタイム断面図とともに学べます。
 - [線形計画法（図解法〜シンプレックス・双対・輸送計画）](https://dobokunomanabiya.skyblueao77.workers.dev/unit/lp-optimization): 土木計画・資源配分で使われる線形計画法を全5章（定式化と図解法・シンプレックス法と二段階法・双対理論と相補性・感度分析と許容範囲・輸送問題と割当問題）と演習10問で体感しながら学べます。
 - [非線形計画法（最適性条件・狭義凸性・ニュートン法）](https://dobokunomanabiya.skyblueao77.workers.dev/unit/nlp-optimization): 制約なし非線形最適化の理論と数値計算を全3章（1階・2階最適性条件とヘッセ行列、狭義凸性と陰関数定理・包絡線定理、多変数ニュートン法と最急降下法の比較）と演習6問で学べます。
+- [片持ち梁の SFD・BMD とたわみ解析](https://dobokunomanabiya.skyblueao77.workers.dev/unit/cantilever-beam): 集中荷重・等分布荷重・自由端集中モーメントを受ける片持ち梁の固定端反力・SFD・BMD（下側引張正）と、断面二次モーメント I=bh³/12・弾性曲線 EI y″=−M(x) による自由端たわみ・たわみ角をリアルタイムに図解・演習できます。
+- [比エネルギー曲線・限界水深・跳水（Hydraulic Jump）](https://dobokunomanabiya.skyblueao77.workers.dev/unit/specific-energy-jump): 長方形断面開水路の比エネルギー E=h+q²/(2gh²)、限界水深 hc・最小比エネルギー E_min・交代水深を E-h 曲線で可視化し、射流からの跳水（ベランジェ式）による共役水深 h2 とエネルギー損失 ΔE をリアルタイム計算・演習できます。
 
 ## 単元別 Markdown リファレンス
 - [地盤の応力と変形（連続体力学〜弾性地盤） (Markdown)](https://dobokunomanabiya.skyblueao77.workers.dev/unit/geomechanics-continuum.md): 主要公式・学習目標・FAQの要約
@@ -25,6 +27,8 @@
 - [開水路等流・マニングの公式 (Markdown)](https://dobokunomanabiya.skyblueao77.workers.dev/unit/open-channel-flow.md): 主要公式・学習目標・FAQの要約
 - [線形計画法（図解法〜シンプレックス・双対・輸送計画） (Markdown)](https://dobokunomanabiya.skyblueao77.workers.dev/unit/lp-optimization.md): 主要公式・学習目標・FAQの要約
 - [非線形計画法（最適性条件・狭義凸性・ニュートン法） (Markdown)](https://dobokunomanabiya.skyblueao77.workers.dev/unit/nlp-optimization.md): 主要公式・学習目標・FAQの要約
+- [片持ち梁の SFD・BMD とたわみ解析 (Markdown)](https://dobokunomanabiya.skyblueao77.workers.dev/unit/cantilever-beam.md): 主要公式・学習目標・FAQの要約
+- [比エネルギー曲線・限界水深・跳水（Hydraulic Jump） (Markdown)](https://dobokunomanabiya.skyblueao77.workers.dev/unit/specific-energy-jump.md): 主要公式・学習目標・FAQの要約
 
 ## 全単元統合ガイド
 - [llms-full.txt](https://dobokunomanabiya.skyblueao77.workers.dev/llms-full.txt): 全4科目・全7単元の主要公式、符号規約、学習目標、FAQ の統合ドキュメント

@@ -271,6 +271,41 @@ function buildAllRouteDescriptors(buildRouteSeoData) {
     });
   }
 
+  // 5. Reference page "/reference"
+  {
+    const meta = catalog.routes.reference;
+    const seo = buildRouteSeoData('reference', 'all', siteUrl);
+
+    const objItems = meta.learningObjectives
+      .map((obj) => `<li>${escapeHtml(obj)}</li>`)
+      .join('\n        ');
+    const rootHtml = `
+      <header class="site-header border-b border-[var(--border-subtle)] bg-[var(--surface-card)]">
+        <div class="mx-auto max-w-7xl px-4 py-3 text-xs app-text-muted">
+          <nav aria-label="パンくずリスト"><a href="/">ホーム</a> &gt; <span>公式チートシート・単位換算</span></nav>
+        </div>
+      </header>
+      <main id="main-content" class="mx-auto max-w-4xl px-4 sm:px-6 py-6 space-y-6">
+        <article class="app-surface rounded-xl p-6 space-y-4">
+          <h1 class="text-xl sm:text-2xl font-bold">${escapeHtml(meta.h1)}</h1>
+          <p class="text-sm app-text-muted">${escapeHtml(meta.lead)}</p>
+          <ul class="list-disc pl-5 space-y-1 text-sm app-text-muted">
+        ${objItems}
+          </ul>
+          <p class="text-sm"><a href="/" class="underline">ポータル一覧へ戻る</a></p>
+        </article>
+      </main>`;
+
+    routes.push({
+      ...seo,
+      outputFile: path.join(distDir, 'reference', 'index.html'),
+      priority: '0.7',
+      changefreq: 'monthly',
+      rootHtml,
+      useReactSsr: false,
+    });
+  }
+
   return routes;
 }
 

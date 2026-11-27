@@ -809,3 +809,52 @@ dialog::backdrop {
   background-color: rgb(15 23 42 / 0.55);
   backdrop-filter: blur(2px);
 }
+
+/* ==========================================================================
+   Print / PDF Worksheet Mode (@media print)
+   ========================================================================== */
+@media print {
+  :root {
+    color-scheme: light !important;
+    --surface-page: #ffffff !important;
+    --surface-card: #ffffff !important;
+    --surface-subtle: #f8fafc !important;
+    --text-primary: #0f172a !important;
+    --text-muted: #334155 !important;
+    --border-subtle: #94a3b8 !important;
+    --border-control: #64748b !important;
+    --accent-color: #1d4ed8 !important;
+  }
+
+  .site-header,
+  .no-print,
+  .skip-link,
+  footer {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 11pt;
+  }
+
+  main {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  .app-surface,
+  .app-surface-subtle {
+    box-shadow: none !important;
+    border-color: #cbd5e1 !important;
+  }
+
+  section,
+  article,
+  svg,
+  .print-break-avoid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
