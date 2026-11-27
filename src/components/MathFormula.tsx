@@ -34,9 +34,10 @@ export const MathFormula: React.FC<MathFormulaProps> = ({
   return (
     <span
       ref={containerRef}
+      tabIndex={block ? 0 : undefined}
       className={`${
         block
-          ? 'block my-2 min-h-[1.75rem] max-w-full overflow-x-auto overflow-y-hidden text-[0.92rem]'
+          ? 'block my-2 min-h-[1.75rem] max-w-full overflow-x-auto overflow-y-hidden rounded text-[0.92rem] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-color)]'
           : 'inline align-baseline'
       } ${className}`}
     />

@@ -18,7 +18,7 @@ export const SoilElementSVG: React.FC<SoilElementSVGProps> = ({ inputs, result }
     <div className="app-surface rounded-xl shadow-sm overflow-hidden">
       <div className="app-surface-subtle border-x-0 border-t-0 px-4 py-2.5 flex items-center justify-between gap-2 flex-wrap">
         <span className="text-sm font-semibold">実空間の微小土要素（傾き θ）</span>
-        <span className="text-xs font-medium text-teal-700 dark:text-teal-300 bg-teal-500/15 px-2 py-0.5 rounded border border-teal-500/30 font-mono-num">
+        <span className="text-xs font-medium text-teal-800 dark:text-teal-300 bg-teal-500/15 px-2 py-0.5 rounded border border-teal-500/30 font-mono-num">
           θ = {inputs.theta}° ⇔ 円上 2θ = {2 * inputs.theta}°
         </span>
       </div>

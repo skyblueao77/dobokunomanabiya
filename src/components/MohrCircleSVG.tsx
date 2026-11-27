@@ -89,18 +89,18 @@ export const MohrCircleSVG: React.FC<MohrCircleSVGProps> = ({ inputs, result }) 
             モールの応力円（圧縮正・1:1 縮尺）
           </span>
           {inputs.useEffectiveStress && (
-            <span className="rounded-full bg-indigo-500/15 px-2.5 py-0.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 border border-indigo-500/30">
+            <span className="rounded-full bg-indigo-500/15 px-2.5 py-0.5 text-xs font-medium text-indigo-800 dark:text-indigo-300 border border-indigo-500/30">
               有効応力モード (u = {inputs.u} kPa)
             </span>
           )}
         </div>
         {result.isFailure ? (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/15 px-3 py-0.5 text-xs font-bold text-red-700 dark:text-red-300 border border-red-500/40">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/15 px-3 py-0.5 text-xs font-bold text-red-800 dark:text-red-300 border border-red-500/40">
             <span className="h-2 w-2 rounded-full bg-[var(--diagram-red)]" aria-hidden="true" />
             破壊 (Failure)
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-0.5 text-xs font-semibold text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
             <span className="h-2 w-2 rounded-full bg-[var(--diagram-emerald)]" aria-hidden="true" />
             安定 (Safe)
           </span>

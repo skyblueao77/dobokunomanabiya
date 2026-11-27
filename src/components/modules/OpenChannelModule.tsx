@@ -235,10 +235,10 @@ export const OpenChannelModule: React.FC<OpenChannelModuleProps> = ({
 
   const regimeBadgeClass =
     res.regime === '射流 (Supercritical)'
-      ? 'bg-red-500/15 text-red-700 dark:text-red-300 border-red-500/35'
+      ? 'bg-red-500/15 text-red-800 dark:text-red-300 border-red-500/35'
       : res.regime === '限界流 (Critical)'
         ? 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/40'
-        : 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/30';
+        : 'bg-blue-500/15 text-blue-800 dark:text-blue-300 border-blue-500/30';
   const regimeDotColor =
     res.regime === '射流 (Supercritical)'
       ? 'var(--diagram-red)'

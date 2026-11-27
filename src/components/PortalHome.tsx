@@ -258,7 +258,7 @@ export const PortalHome: React.FC<PortalHomeProps> = ({
                         <span
                           className={`rounded-md px-2 py-0.5 text-xs font-mono-num font-semibold ${
                             allExSolved
-                              ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/35'
+                              ? 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/35'
                               : 'app-surface-subtle app-text-muted'
                           }`}
                         >

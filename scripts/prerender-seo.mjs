@@ -43,35 +43,7 @@ function writeUtf8Lf(filePath, content) {
   fs.writeFileSync(filePath, content.replace(/\r\n/g, '\n'), 'utf8');
 }
 
-function buildFaqSchema(faqId, faqs) {
-  return {
-    '@type': 'FAQPage',
-    '@id': faqId,
-    inLanguage: 'ja',
-    mainEntity: faqs.map((item) => ({
-      '@type': 'Question',
-      name: item.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: item.answer,
-      },
-    })),
-  };
-}
-
-const providerOrg = {
-  '@type': 'Organization',
-  '@id': `${siteUrl}/#organization`,
-  name: catalog.siteName,
-  url: `${siteUrl}/`,
-  logo: {
-    '@type': 'ImageObject',
-    url: `${siteUrl}/icon-512.png`,
-  },
-  sameAs: [catalog.repositoryUrl],
-};
-
-function buildAllRouteDescriptors() {
+function buildAllRouteDescriptors(buildRouteSeoData) {
   const routes = [];
   const allUnits = Object.entries(catalog.units);
   const allSubjects = Object.entries(catalog.subjects);
@@ -79,54 +51,7 @@ function buildAllRouteDescriptors() {
   // 1. Home "/"
   {
     const meta = catalog.routes.home;
-    const canonicalUrl = `${siteUrl}/`;
-    const jsonLd = {
-      '@context': 'https://schema.org',
-      '@graph': [
-        {
-          '@type': 'WebSite',
-          '@id': `${siteUrl}/#website`,
-          name: catalog.siteName,
-          alternateName: [`${catalog.siteName}｜土木工学・数理計画インタラクティブ学習ポータル`],
-          url: canonicalUrl,
-          inLanguage: 'ja',
-          description: meta.description,
-          publisher: { '@id': `${siteUrl}/#organization` },
-        },
-        providerOrg,
-        {
-          '@type': 'WebApplication',
-          '@id': `${siteUrl}/#webapp`,
-          name: catalog.siteName,
-          url: canonicalUrl,
-          description: meta.description,
-          applicationCategory: 'EducationalApplication',
-          operatingSystem: 'Web',
-          browserRequirements: 'Requires JavaScript',
-          inLanguage: 'ja',
-          isAccessibleForFree: true,
-          publisher: { '@id': `${siteUrl}/#organization` },
-          offers: { '@type': 'Offer', price: '0', priceCurrency: 'JPY' },
-          about: allSubjects.map(([, s]) => ({
-            '@type': 'Thing',
-            name: `${s.name}（${s.englishName}）`,
-          })),
-        },
-        {
-          '@type': 'ItemList',
-          '@id': `${siteUrl}/#unit-list`,
-          name: '土木の学び舎 収録単元一覧',
-          numberOfItems: allUnits.length,
-          itemListElement: allUnits.map(([, u], idx) => ({
-            '@type': 'ListItem',
-            position: idx + 1,
-            name: u.shortTitle,
-            url: `${siteUrl}${u.path}`,
-          })),
-        },
-        buildFaqSchema(`${siteUrl}/#faq`, catalog.portalFaqs),
-      ],
-    };
+    const seo = buildRouteSeoData('home', 'all', siteUrl);
 
     const navLinks = allSubjects
       .map(([, s]) => `<a href="${escapeHtml(s.path)}">${escapeHtml(s.name)}</a>`)
@@ -158,8 +83,7 @@ function buildAllRouteDescriptors() {
       </header>
       <main id="main-content" class="mx-auto max-w-7xl px-4 py-6 space-y-6">
         <aside aria-label="開発中および内容の正確性に関する重要なお知らせ">
-          <p><strong>開発中（WIP）</strong>：現在開発中のため、掲載内容・計算結果には多くの間違いが存在します</p>
-          <p class="text-xs sm:text-sm">本サイトは制作途上であり、解説文・数式・計算ロジック・図解・演習問題の解答に多くの誤りや未検証の記述が含まれています。学習の補助参考としてのみご利用いただき、必ず大学・高専の教科書や公的基準と照合してください（実務設計・施工・試験解答等への利用は厳禁です）。</p>
+          <p><strong>開発中（WIP）</strong>：教育・学習補助専用（実務設計への利用禁止・教科書との照合必須）</p>
         </aside>
         <section>
           <h1>${escapeHtml(meta.h1)}</h1>
@@ -184,16 +108,10 @@ function buildAllRouteDescriptors() {
       </main>`;
 
     routes.push({
-      path: '/',
+      ...seo,
       outputFile: path.join(distDir, 'index.html'),
       priority: '1.0',
       changefreq: 'weekly',
-      title: meta.title,
-      description: meta.description,
-      canonicalUrl,
-      ogType: 'website',
-      alternateMarkdownUrl: `${siteUrl}/llms-full.txt`,
-      jsonLd,
       rootHtml,
       useReactSsr: true,
     });
@@ -201,40 +119,8 @@ function buildAllRouteDescriptors() {
 
   // 2. Subject pages "/subject/<id>"
   for (const [subjectId, sMeta] of allSubjects) {
-    const canonicalUrl = `${siteUrl}${sMeta.path}`;
+    const seo = buildRouteSeoData('home', subjectId, siteUrl);
     const subjectUnits = allUnits.filter(([, u]) => u.subjectId === subjectId);
-    const jsonLd = {
-      '@context': 'https://schema.org',
-      '@graph': [
-        providerOrg,
-        {
-          '@type': 'CollectionPage',
-          '@id': canonicalUrl,
-          url: canonicalUrl,
-          name: sMeta.h1,
-          description: sMeta.description,
-          inLanguage: 'ja',
-          dateModified: catalog.lastModified,
-          about: { '@type': 'Thing', name: `${sMeta.name} (${sMeta.englishName})` },
-          mainEntity: {
-            '@type': 'ItemList',
-            itemListElement: subjectUnits.map(([, u], idx) => ({
-              '@type': 'ListItem',
-              position: idx + 1,
-              name: u.shortTitle,
-              url: `${siteUrl}${u.path}`,
-            })),
-          },
-        },
-        {
-          '@type': 'BreadcrumbList',
-          itemListElement: [
-            { '@type': 'ListItem', position: 1, name: 'ホーム', item: `${siteUrl}/` },
-            { '@type': 'ListItem', position: 2, name: sMeta.name, item: canonicalUrl },
-          ],
-        },
-      ],
-    };
 
     const unitItems = subjectUnits
       .map(
@@ -276,16 +162,10 @@ function buildAllRouteDescriptors() {
       </main>`;
 
     routes.push({
-      path: sMeta.path,
+      ...seo,
       outputFile: path.join(distDir, 'subject', subjectId, 'index.html'),
       priority: '0.8',
       changefreq: 'weekly',
-      title: sMeta.title,
-      description: sMeta.description,
-      canonicalUrl,
-      ogType: 'website',
-      alternateMarkdownUrl: `${siteUrl}/llms-full.txt`,
-      jsonLd,
       rootHtml,
       useReactSsr: true,
     });
@@ -294,44 +174,8 @@ function buildAllRouteDescriptors() {
   // 3. Unit pages "/unit/<id>"
   for (const [unitId, uMeta] of allUnits) {
     const sMeta = catalog.subjects[uMeta.subjectId];
-    const canonicalUrl = `${siteUrl}${uMeta.path}`;
     const faqs = catalog.unitFaqs[unitId] ?? [];
-    const jsonLd = {
-      '@context': 'https://schema.org',
-      '@graph': [
-        providerOrg,
-        {
-          '@type': ['LearningResource', 'Course'],
-          '@id': canonicalUrl,
-          url: canonicalUrl,
-          name: uMeta.shortTitle,
-          headline: uMeta.h1,
-          description: uMeta.description,
-          inLanguage: 'ja',
-          isAccessibleForFree: true,
-          learningResourceType: 'Interactive Simulation',
-          educationalLevel: uMeta.educationalLevel,
-          timeRequired: uMeta.timeRequired,
-          dateModified: catalog.lastModified,
-          teaches: uMeta.learningObjectives,
-          keywords: uMeta.keywords.join(', '),
-          provider: { '@id': `${siteUrl}/#organization` },
-          isPartOf: { '@id': `${siteUrl}/#website` },
-          about: { '@type': 'Thing', name: `${sMeta.name} (${sMeta.englishName})` },
-          hasCourseInstance: { '@type': 'CourseInstance', courseMode: 'online', inLanguage: 'ja' },
-          offers: { '@type': 'Offer', price: '0', priceCurrency: 'JPY', category: 'Free' },
-        },
-        {
-          '@type': 'BreadcrumbList',
-          itemListElement: [
-            { '@type': 'ListItem', position: 1, name: 'ホーム', item: `${siteUrl}/` },
-            { '@type': 'ListItem', position: 2, name: sMeta.name, item: `${siteUrl}${sMeta.path}` },
-            { '@type': 'ListItem', position: 3, name: uMeta.shortTitle, item: canonicalUrl },
-          ],
-        },
-        ...(faqs.length > 0 ? [buildFaqSchema(`${canonicalUrl}#faq`, faqs)] : []),
-      ],
-    };
+    const seo = buildRouteSeoData(unitId, uMeta.subjectId, siteUrl);
 
     const formulaItems = uMeta.keyFormulas
       .map(
@@ -383,16 +227,10 @@ function buildAllRouteDescriptors() {
       </main>`;
 
     routes.push({
-      path: uMeta.path,
+      ...seo,
       outputFile: path.join(distDir, 'unit', unitId, 'index.html'),
       priority: '0.9',
       changefreq: 'weekly',
-      title: uMeta.title,
-      description: uMeta.description,
-      canonicalUrl,
-      ogType: 'article',
-      alternateMarkdownUrl: `${siteUrl}${uMeta.markdownPath}`,
-      jsonLd,
       rootHtml,
       useReactSsr: false,
     });
@@ -401,35 +239,7 @@ function buildAllRouteDescriptors() {
   // 4. Legal page "/legal"
   {
     const meta = catalog.routes.legal;
-    const canonicalUrl = `${siteUrl}${meta.path}`;
-    const jsonLd = {
-      '@context': 'https://schema.org',
-      '@graph': [
-        providerOrg,
-        {
-          '@type': 'WebPage',
-          '@id': canonicalUrl,
-          url: canonicalUrl,
-          name: meta.h1,
-          description: meta.description,
-          inLanguage: 'ja',
-          dateModified: catalog.lastModified,
-          isPartOf: { '@id': `${siteUrl}/#website` },
-        },
-        {
-          '@type': 'BreadcrumbList',
-          itemListElement: [
-            { '@type': 'ListItem', position: 1, name: 'ホーム', item: `${siteUrl}/` },
-            {
-              '@type': 'ListItem',
-              position: 2,
-              name: '利用規約・免責事項・プライバシーポリシー',
-              item: canonicalUrl,
-            },
-          ],
-        },
-      ],
-    };
+    const seo = buildRouteSeoData('legal', 'all', siteUrl);
 
     const objItems = meta.learningObjectives
       .map((obj) => `<li>${escapeHtml(obj)}</li>`)
@@ -452,16 +262,10 @@ function buildAllRouteDescriptors() {
       </main>`;
 
     routes.push({
-      path: meta.path,
+      ...seo,
       outputFile: path.join(distDir, 'legal', 'index.html'),
       priority: '0.4',
       changefreq: 'monthly',
-      title: meta.title,
-      description: meta.description,
-      canonicalUrl,
-      ogType: 'article',
-      alternateMarkdownUrl: `${siteUrl}/llms-full.txt`,
-      jsonLd,
       rootHtml,
       useReactSsr: false,
     });
@@ -951,23 +755,8 @@ function verifyGeneratedOutputs(routes) {
   }
 }
 
-function buildNotFoundDescriptor() {
-  const canonicalUrl = `${siteUrl}/`;
-  const title = `ページが見つかりません（404）｜${catalog.siteName}`;
-  const description =
-    'お探しのページが見つかりませんでした。ポータル一覧または各科目ページから学習単元をお選びください。';
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@graph': [
-      providerOrg,
-      {
-        '@type': 'WebPage',
-        name: 'ページが見つかりません（404）',
-        inLanguage: 'ja',
-        isPartOf: { '@id': `${siteUrl}/#website` },
-      },
-    ],
-  };
+function buildNotFoundDescriptor(buildRouteSeoData) {
+  const seo = buildRouteSeoData('not-found', 'all', siteUrl);
   const rootHtml = `
       <header class="site-header border-b border-[var(--border-subtle)] bg-[var(--surface-card)]">
         <div class="mx-auto max-w-7xl px-4 py-3 text-xs app-text-muted">
@@ -978,21 +767,14 @@ function buildNotFoundDescriptor() {
         <section class="app-surface rounded-2xl p-6 space-y-3">
           <p class="text-xs font-mono-num app-text-muted">404 Not Found</p>
           <h1 class="text-xl sm:text-2xl font-bold">お探しのページが見つかりませんでした</h1>
-          <p class="text-sm app-text-muted">${escapeHtml(description)}</p>
+          <p class="text-sm app-text-muted">${escapeHtml(seo.description)}</p>
           <p class="text-sm"><a href="/" class="underline font-semibold">ポータル一覧へ戻る</a></p>
         </section>
       </main>`;
 
   return {
-    path: '/404',
+    ...seo,
     outputFile: path.join(distDir, '404.html'),
-    title,
-    description,
-    canonicalUrl,
-    ogType: 'website',
-    alternateMarkdownUrl: `${siteUrl}/llms-full.txt`,
-    robots: 'noindex, nofollow',
-    jsonLd,
     rootHtml,
     useReactSsr: false,
   };
@@ -1002,12 +784,12 @@ function buildNotFoundDescriptor() {
 if (!fs.existsSync(ssrEntryPath)) {
   throw new Error(`SSR entry bundle not found: ${ssrEntryPath}`);
 }
-const { renderRouteToHtml } = await import(pathToFileURL(ssrEntryPath).href);
+const { renderRouteToHtml, buildRouteSeoData } = await import(pathToFileURL(ssrEntryPath).href);
 
 const rawTemplateHtml = fs.readFileSync(path.join(distDir, 'index.html'), 'utf8');
 const templateHtml = inlineAppStylesheet(rawTemplateHtml);
-const routes = buildAllRouteDescriptors();
-const notFoundDescriptor = buildNotFoundDescriptor();
+const routes = buildAllRouteDescriptors(buildRouteSeoData);
+const notFoundDescriptor = buildNotFoundDescriptor(buildRouteSeoData);
 
 for (const descriptor of routes) {
   const rendered = renderHtmlFromTemplate(templateHtml, descriptor, renderRouteToHtml);
